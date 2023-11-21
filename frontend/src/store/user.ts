@@ -6,7 +6,7 @@ export const useAuthStore = defineStore('auth', {
     state: () => {
         return {
             isAuthenticated:ref(false), // 登录状态，默认为未登录
-            user: reactive({"username": '', "email":'', "avatar":'', "motto": '这个人很懒，什么也没有留下。。。'}) // 存储用户信息
+            user: reactive({"username": '', "personID": '', "avatar":'', "identity": '', "course": ''}) // 存储用户信息
         }
     },
 
@@ -19,27 +19,22 @@ export const useAuthStore = defineStore('auth', {
         loginSuccess() {
             this.isAuthenticated = true
         },
-        login(user:any) {
+        setUserinfo(user:any) {
             this.user['username'] = user['username']
-            this.user['email'] = user['email']
-            if (user['avatar'] != '') this.user['avatar'] = user['avatar']
-            if (user['motto'] != 'nothing') this.user['motto'] = user['motto']
+            this.user['personID'] = user['personID']
+            this.user['avatar'] = user['avatar']
+            this.user['identity'] = user['identity']
+            this.user['course'] = user['course']
         },
         logout() {
             this.isAuthenticated = false
-            this.user = {"username": '', "email":'', "avatar":'', "motto": '这个人很懒，什么也没有留下。。。'}
-        },
-        setEmail(email:string) {
-            this.user['email'] = email
-        },
-        setUsername(username:string) {
-            this.user['username'] = username
-        },
-        setMotto(motto:string) {
-            this.user['motto'] = motto
+            this.user = {"username": '', "personID": '', "avatar":'', "identity": '', "course": ''}
         },
         setAvatar(avatar:string) {
             this.user['avatar'] = avatar
+        },
+        setCourse(course:string) {
+            this.user['course'] = course
         }
     }
 })

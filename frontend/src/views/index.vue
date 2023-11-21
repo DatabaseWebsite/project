@@ -1,6 +1,6 @@
 <template>
   <el-container class="all">
-    <el-aside v-if="!isMenuHide" class="aside">
+    <el-aside v-if="!isMenuHide" class="aside" :style="{width: isCollapse ? '70px': '180px'}">
       <el-menu
         default-active="1"
         class="menu"
@@ -38,6 +38,12 @@
         </router-link>
         <router-link to="">
           <el-menu-item index="6">
+            <el-icon><Tools /></el-icon>
+            <template #title><span>用户管理</span></template>
+          </el-menu-item>
+        </router-link>
+        <router-link to="">
+          <el-menu-item index="6">
             <el-icon><List /></el-icon>
             <template #title><span>日志管理</span></template>
           </el-menu-item>
@@ -62,7 +68,7 @@
       </div>
     </el-aside>
     <el-container>
-      <el-header class="head" :style="{left: isMenuHide ? '0' : '180px', width: isMenuHide ? '100%': 'calc(100% - 180px)'} ">
+      <el-header class="head" :style="{left: isMenuHide ? '0' : (isCollapse ? '70px' : '180px'), width: isMenuHide ? '100%': (isCollapse ? 'calc(100% - 70px)': 'calc(100% - 180px)')} ">
         <div style="display: flex; justify-content: space-between; align-items: center; margin: 0.5%">
           <el-button v-if="isMenuHide" @click="isMenuHide=!isMenuHide" text><el-icon><ArrowRightBold /></el-icon></el-button>
           <el-button v-else @click="isMenuHide=!isMenuHide" text><el-icon><ArrowLeftBold /></el-icon></el-button>
@@ -89,13 +95,14 @@ import {
   Files,
   Grid,
   List,
-  Notification,
+  Notification, Tools,
   User
 } from "@element-plus/icons-vue";
 
 export default {
   name: "index",
   components: {
+    Tools,
     ChatLineSquare,
     ArrowRightBold, ArrowRight, ArrowLeftBold, User, List, ChatSquare, Document, Grid, Notification, Files},
   data() {
@@ -143,7 +150,6 @@ export default {
   top:0;
 }
 .aside {
-  width: 180px;
   height: 100%;
   position: fixed;
   left: 0;

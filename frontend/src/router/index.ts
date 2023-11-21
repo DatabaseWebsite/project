@@ -1,10 +1,11 @@
 import {createRouter, createWebHashHistory, RouteRecordRaw} from "vue-router";
 import Index from "@/views/index.vue"
+import StuCenter from "@/components/userCenter/index.vue"
 const index: RouteRecordRaw[] = [
   {
     path: "/",
-    name: "index",
-    component: Index,
+    name: "stuCenter",
+    component: StuCenter,
   }
 ]
 // 创建router

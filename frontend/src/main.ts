@@ -5,6 +5,7 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import {router} from './router'
 import {createPinia} from 'pinia'
+import "@icon-park/vue-next/styles/index.css";
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate' // pinia状态可持久化
 const app = createApp(App)
