@@ -90,7 +90,7 @@ def refresh_token(request):
             raise jwt.InvalidTokenError
 
         token = generate_token(user)
-        return JsonResponse({'token': token}, status=200)
+        return JsonResponse({'access': token}, status=200)
     except jwt.InvalidTokenError:
         return JsonResponse({'error': '登录令牌无效， 请重新登录'}, status=401)
 
