@@ -8,5 +8,6 @@ urlpatterns = [
     path('send-captcha/', api.send_mail),
     path('update-avatar/', api.update_avatar),
     path('user-info/', api.get_user_info),
+    path('refresh-token', api.refresh_token),
 
 ]

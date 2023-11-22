@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.http import JsonResponse
 from django.utils import timezone
+from django.views.decorators.http import require_GET
 
 from users.models.auth_record import AuthRecord
 from users.models.email_captcha import EmailCaptcha
@@ -49,32 +50,54 @@ def generate_refresh_token(user: User, refresh_token_delta: int = 6 * 24) -> str
         "iat": current_time,
         "type": "refresh_token",
     }
-    refresh_token = jwt.encode(refresh_token_payload, settings.SECRET_KEY, algorithm="HS256")
-    if type(refresh_token) is str:
-        return refresh_token
-    return refresh_token.decode('utf-8')
+    new_refresh_token = jwt.encode(refresh_token_payload, settings.SECRET_KEY, algorithm="HS256")
+    if type(new_refresh_token) is str:
+        return new_refresh_token
+    return new_refresh_token.decode('utf-8')
+
+
+def get_payload(request):
+    header = request.META.get('HTTP_AUTHORIZATION')
+    if header is None:
+        raise jwt.InvalidTokenError
+    auth_info = header.split(' ')
+    if len(auth_info) != 2:
+        raise jwt.InvalidTokenError
+    auth_type, auth_token = auth_info
+    if auth_type != 'Bearer':
+        raise jwt.InvalidTokenError
+
+    payload = jwt.decode(auth_token, settings.SECRET_KEY, algorithms=['HS256'])
+    if payload['type'] != 'refresh_token':
+        raise jwt.InvalidTokenError
+    return payload
+
+
+@require_GET
+def refresh_token(request):
+
+    try:
+        payload = get_payload(request)
+        user_id = payload['user_id']
+        record_id = payload['record_id']
+        user = User.objects.filter(id=user_id).first()
+        record = AuthRecord.objects.filter(id=record_id).first()
+
+        if record is None or record.user != user:
+            raise jwt.InvalidTokenError
+
+        if record.expires_by < timezone.now():
+            raise jwt.InvalidTokenError
+
+        token = generate_token(user)
+        return JsonResponse({'token': token}, status=200)
+    except jwt.InvalidTokenError:
+        return JsonResponse({'error': '登录令牌无效， 请重新登录'}, status=401)
 
 
 def get_user(request):
-    header = request.META.get('HTTP_AUTHORIZATION')
     try:
-        if header is None:
-            raise jwt.InvalidTokenError
-
-        # 解码token
-        auth_info = header.split(' ')
-
-        if len(auth_info) != 2:
-            raise jwt.InvalidTokenError
-        auth_type, auth_token = auth_info
-
-        if auth_type != 'Bearer':
-            raise jwt.InvalidTokenError
-
-        payload = jwt.decode(auth_token, settings.SECRET_KEY, algorithms=['HS256'])
-
-        if payload['type'] != 'access_token':
-            raise jwt.InvalidTokenError
+        payload = get_payload(request)
         user_id = payload['user_id']
         user = User.objects.filter(id=user_id).first()
         return user
