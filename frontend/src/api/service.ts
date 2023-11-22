@@ -2,7 +2,6 @@ import axios from 'axios'
 import cookies from "@/lib/cookies.ts";
 import {router} from "@/router";
 import {ElLoading, ElMessage} from "element-plus";
-import * as process from "process";
 import {refreshToken} from "@/api/user_api.ts";
 import qs from 'qs';
 import {get} from "lodash";
@@ -59,7 +58,7 @@ export function getErrorMessage (msg) {
 function createService() {
     // 创建一个 axios 实例
     const service = axios.create({
-        baseURL: process.env.baseURL,
+        baseURL: 'http://127.0.0.1:8000/',
         timeout: 60000,
         paramsSerializer: (params) => qs.stringify(params, { indices: false }) // 参数序列化
     })
@@ -89,14 +88,14 @@ function createService() {
                 // success
                 return dataAxios
             case 401:
-                if (response.config.url === 'user/login/') {
-                    getErrorMessage(dataAxios.msg)
+                if (response.config.url === 'api/login/') {
+                    getErrorMessage(dataAxios['error'])
                     break
                 }
                 let res = await refreshToken()
                 let config = response.config
                 cookies.set('token', res.data.access)
-                config.headers.Authorization = 'JWT ' + res.data.access
+                config.headers.Authorization = 'Bearer ' + res.data.access
                 config["__retryCount"] = config["__retryCount"] || 0
                 if (config["__retryCount"] >= config["retry"]) {
                     // 如果重试次数超过3次则跳转登录页面
@@ -117,7 +116,7 @@ function createService() {
         // 超出 2xx 范围的状态码都会触发该函数。
         // 对响应错误做点什么
         endLoading()
-        const status = error.response.status
+        const {status} = error.response
         switch (status) {
             case 400:
                 error.message = '请求错误'
@@ -184,11 +183,10 @@ function createRequestFunction (service) {
         }
         const configDefault = {
             headers: {
-                Authorization: 'JWT ' + token,
-                'Content-Type': get(config, 'headers.Content-Type', 'application/json')
+                Authorization: 'Bearer ' + token,
             },
             timeout: 60000,
-            baseURL: process.env.baseURL,
+            baseURL: 'http://127.0.0.1:8000/',
             data: {},
             params: params,
             retry: 3, // 重新请求次数

@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import {resolve} from 'path'
 // https://vitejs.dev/config/
-process.env.baseURL = 'http://localhost:8000/' // todo: 本地开发环境
+process.env.baseURL = 'http://127.0.0.1:8000/' // todo: 本地开发环境
 export default defineConfig({
   base: './',
   plugins: [vue()],
