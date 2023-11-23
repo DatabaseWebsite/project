@@ -66,18 +66,21 @@ def get_payload(request):
     auth_type, auth_token = auth_info
     if auth_type != 'Bearer':
         raise jwt.InvalidTokenError
-
-    payload = jwt.decode(auth_token, settings.SECRET_KEY, algorithms=['HS256'])
-    if payload['type'] != 'refresh_token':
-        raise jwt.InvalidTokenError
+    try:
+        payload = jwt.decode(auth_token, settings.SECRET_KEY, algorithms=['HS256'])
+    except Exception as e:
+        print(f"JWT decode failed with error: {e}")
+        raise
     return payload
 
 
 @require_GET
 def refresh_token(request):
-
     try:
         payload = get_payload(request)
+        if payload['type'] != 'refresh_token':
+            raise jwt.InvalidTokenError
+
         user_id = payload['user_id']
         record_id = payload['record_id']
         user = User.objects.filter(id=user_id).first()
@@ -98,6 +101,9 @@ def refresh_token(request):
 def get_user(request):
     try:
         payload = get_payload(request)
+        print(payload)
+        if payload['type'] != 'access_token':
+            raise jwt.InvalidTokenError
         user_id = payload['user_id']
         user = User.objects.filter(id=user_id).first()
         return user
