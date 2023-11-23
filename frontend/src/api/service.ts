@@ -2,9 +2,9 @@ import axios from 'axios'
 import cookies from "@/lib/cookies.ts";
 import {router} from "@/router";
 import {ElLoading, ElMessage} from "element-plus";
-import {refreshToken} from "@/api/user_api.ts";
 import qs from 'qs';
 import {get} from "lodash";
+import {user_refresh_token_api} from "@/api/user_api.ts";
 /**
  * @description: 创建axios实例
  */
@@ -27,32 +27,6 @@ const startLoading = () => {
 
 const endLoading = () => {
     loading.close();
-}
-export function getErrorMessage (msg) {
-    if (typeof msg === 'string') {
-        return msg
-    }
-    if (typeof msg === 'object') {
-        if (msg.code === 'token_not_valid') {
-            cookies.remove('token')
-            cookies.remove('uuid')
-            router.push({ path: '/login' })
-            router.go(0)
-            return '登录超时，请重新登录！'
-        }
-        if (msg.code === 'user_not_found') {
-            cookies.remove('token')
-            cookies.remove('uuid')
-            router.push({ path: '/login' })
-            router.go(0)
-            return '用户无效，请重新登录！'
-        }
-        return Object.values(msg)
-    }
-    if (Object.prototype.toString.call(msg).slice(8, -1) === 'Array') {
-        return msg
-    }
-    return msg
 }
 
 function createService() {
@@ -77,22 +51,19 @@ function createService() {
         // 2xx 范围内的状态码都会触发该函数。
         // 对响应数据做点什么
         endLoading()
-        let dataAxios = response.data || null;
-        if (response.headers['content-disposition']) { // todo: 处理文件下载
-            dataAxios = response
-        }
+        let dataAxios = response || null;
         // 这个状态码是和后端约定的
-        const {code} = dataAxios
-        switch (code) {
+        let status = response.status
+        switch (status) {
             case 200:
                 // success
                 return dataAxios
-            case 401:
+            case 201:
                 if (response.config.url === 'api/login/') {
-                    getErrorMessage(dataAxios['error'])
+                    ElMessage.error(dataAxios['error'])
                     break
                 }
-                let res = await refreshToken()
+                let res = await user_refresh_token_api()
                 let config = response.config
                 cookies.set('token', res.data.access)
                 config.headers.Authorization = 'Bearer ' + res.data.access
@@ -108,7 +79,7 @@ function createService() {
                 config["__retryCount"] += 1
                 return service(config)
             default:
-                ElMessage.error(getErrorMessage(dataAxios.msg))
+                ElMessage.error(dataAxios.data['error'])
                 break
         }
         return response

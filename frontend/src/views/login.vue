@@ -14,14 +14,21 @@
       </div>
     </div>
   </div>
+  <el-button @click="test">test</el-button>
 </template>
 <script lang="ts">
 import { loginUser, rules} from "@/components/login/loginValidators.ts";
 import LoginForm from "@/components/login/loginForm.vue";
+import {user_info_api} from "@/api/user_api.ts";
 
 export default {
   name: "login",
   components: { LoginForm },
+  methods: {
+    async test() {
+      await user_info_api()
+    },
+  },
   setup() {
     return {
       loginUser,

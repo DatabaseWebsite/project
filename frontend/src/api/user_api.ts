@@ -4,10 +4,10 @@ import {request} from "@/api/service.ts";
 /**
  * @api {post} /user/refresh-token 刷新token
  */
-export const refreshToken = () => {
-  const refresh = cookies.get('refresh');
+export const user_refresh_token_api = () => {
+  const refresh = cookies.get('refreshToken');
   return request({
-    url: 'user/refresh-token/',
+    url: 'api/refresh-token/',
     method: 'post',
     data: {
       refresh: refresh

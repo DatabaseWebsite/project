@@ -3,12 +3,12 @@ from datetime import timedelta
 from django.conf import settings
 from django.http import JsonResponse
 from django.utils import timezone
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST
 
 from users.models.auth_record import AuthRecord
 from users.models.email_captcha import EmailCaptcha
 from users.models.user import User
-
+import json
 import jwt
 
 
@@ -67,6 +67,7 @@ def get_payload(request):
     if auth_type != 'Bearer':
         raise jwt.InvalidTokenError
     try:
+        print(auth_token)
         payload = jwt.decode(auth_token, settings.SECRET_KEY, algorithms=['HS256'])
     except Exception as e:
         print(f"JWT decode failed with error: {e}")
@@ -74,10 +75,17 @@ def get_payload(request):
     return payload
 
 
-@require_GET
+@require_POST
 def refresh_token(request):
+    data = json.loads(request.body.decode('utf-8'))
+    refresh = data.get('refresh')
+    print(refresh)
     try:
-        payload = get_payload(request)
+        payload = jwt.decode(refresh, settings.SECRET_KEY, algorithms=['HS256'])
+    except Exception as e:
+        print(f"JWT decode failed with error: {e}")
+        raise
+    try:
         if payload['type'] != 'refresh_token':
             raise jwt.InvalidTokenError
 
@@ -101,7 +109,6 @@ def refresh_token(request):
 def get_user(request):
     try:
         payload = get_payload(request)
-        print(payload)
         if payload['type'] != 'access_token':
             raise jwt.InvalidTokenError
         user_id = payload['user_id']
@@ -117,7 +124,7 @@ def jwt_auth():
             user = get_user(request)
             request.user = user
             if user is None:
-                return JsonResponse({'error': '请先登录'}, status=401)
+                return JsonResponse({'error': '请先登录'}, status=201)
             return api(request, *args, **kwargs)
 
         return wrapper

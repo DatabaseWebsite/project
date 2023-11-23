@@ -69,6 +69,7 @@ export default {
             username: ctx.loginUser.username,
             password: ctx.loginUser.password
           })
+          res = res.data
           cookies.set('uuid', res["userId"])
           cookies.set('token', res["access"])
           cookies.set('refreshToken', res["refresh"])
