@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span class="nickname">申屠阿玉</span>
+          <span class="nickname">{{user['username']}}</span>
         </div>
       </template>
       <el-container>
@@ -25,8 +25,9 @@
                 <div style="display: flex; align-items: center;">
                   <icon-people :size="30" style="margin-right: 10px;"/>
                   <div>
-                    <i style="display: block; text-align: left; color:gray; font-size: 14px">学工号</i>
-                    <i style="display: block;">21373032</i>
+                    <i style="display: block; text-align: left; color:gray; font-size: 14px" v-if="user['identity'] === 'TEACHER'">教工号</i>
+                    <i style="display: block; text-align: left; color:gray; font-size: 14px" v-else>学工号</i>
+                    <i style="display: block;">{{user['personID']}}</i>
                   </div>
                 </div>
               </div>
@@ -35,7 +36,7 @@
                   <icon-permissions size="30" style="margin-right: 10px;"/>
                   <div>
                     <i style="display: block; text-align: left; color:gray; font-size: 14px">用户身份</i>
-                    <i style="display: block;">学生</i>
+                    <i style="display: block;">{{identity}}</i>
                   </div>
                 </div>
               </div>
@@ -44,7 +45,7 @@
                   <icon-book :size="30" style="margin-right: 10px;"/>
                   <div>
                     <i style="display: block; text-align: left; color:gray; font-size: 14px">当前课程</i>
-                    <i style="display: block;">2023数据库原理</i>
+                    <i style="display: block;">{{user['course']}}</i>
                   </div>
                 </div>
               </div>
@@ -74,17 +75,17 @@ import {
   UploadPicture as IconUploadPicture,
   Book as IconBook
 } from "@icon-park/vue-next";
+import useAuthStore from "@/store/user.ts";
 
 export default {
   name: "stuCenter",
   components: {AvatarEdit, IconPermissions, IconPeople, IconUploadPicture, IconBook},
-  data() {
-  },
-  methods: {
-  },
   setup(_props) {
     const dialogVisible = ref(false)
     const rotated = ref(false)
+    const user = useAuthStore().getUser
+    const identity = user['identity'] === 'TEACHER' ? '教师' :
+                    (user['identity'] === 'STUDENT' ? '学生' : '助教')
     const closeAvatarEdits = () => {
       dialogVisible.value = false;
     };
@@ -101,7 +102,9 @@ export default {
       dialogVisible,
       closeAvatarEdits,
       rotateAvatar,
-      resetRotation
+      resetRotation,
+      user,
+      identity
     };
   },
 }

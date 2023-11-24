@@ -43,13 +43,13 @@
           </el-menu-item>
         </router-link>
         <router-link to="">
-          <el-menu-item index="6">
+          <el-menu-item index="7">
             <el-icon><List /></el-icon>
             <template #title><span>日志管理</span></template>
           </el-menu-item>
         </router-link>
-        <router-link to="">
-          <el-menu-item index="7">
+        <router-link to="/userCenter">
+          <el-menu-item index="8">
             <el-icon><User /></el-icon>
             <template #title><span>个人中心</span></template>
           </el-menu-item>

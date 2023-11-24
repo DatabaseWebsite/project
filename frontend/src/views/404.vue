@@ -22,5 +22,8 @@
   }
 }
 </style>
-<script setup>
+<script lang="ts">
+export default {
+  name: 'NotFound'
+}
 </script>

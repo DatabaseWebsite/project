@@ -20,7 +20,7 @@
             :auto-upload="false">
             <el-button slot="trigger" size="small" type="primary" ref="uploadBtn">选择图片</el-button>
           </el-upload>
-          <div>支持jpg、png格式的图片，大小不超过3M</div>
+          <div>支持jpg、png格式的图片，大小不超过2M</div>
         </div>
         <div v-show="options.img" class="avatar-left-crop">
           <vueCropper
@@ -139,13 +139,13 @@ export default {
     //读取原图
     uploads(file) {
       const isIMAGE = file.raw.type === 'image/jpeg' || file.raw.type === 'image/png';
-      const isLt3M = file.raw.size / 1024 / 1024 < 3;
+      const isLt2M = file.raw.size / 1024 / 1024 < 2;
       if (!isIMAGE) {
         ElMessage.warning("请选择 jpg、png 格式的图片" );
         return false;
       }
-      if (!isLt3M) {
-        ElMessage.warning("图片大小不能超过 5MB" );
+      if (!isLt2M) {
+        ElMessage.warning("图片大小不能超过 2MB" );
         return false;
       }
       let reader = new FileReader();

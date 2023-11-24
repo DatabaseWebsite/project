@@ -26,8 +26,7 @@
       <el-button
         @click="handleLogin('loginForm')"
         class="submit-btn"
-      >登录</el-button
-      >
+      >登录</el-button>
     </el-form-item>
 
     <!-- 找回密码 -->
@@ -39,10 +38,10 @@
 
 <script lang="ts">
 import {getCurrentInstance} from "vue";
-import {ElMessage} from "element-plus";
 import useAuthStore from "@/store/user.ts";
 import {user_info_api, user_login_api} from "@/api/user_api.ts";
 import cookies from "@/lib/cookies.ts";
+import {router} from "@/router";
 
 export default {
   name: 'loginForm',
@@ -76,7 +75,7 @@ export default {
           userStore.loginSuccess()
           let userInfoRes = await user_info_api()
           userStore.setUserinfo(userInfoRes.data)
-          // todo：跳转到首页
+          router.push('/')// todo：跳转到首页
         } else {
           console.log("error submit!!");
           return false;
