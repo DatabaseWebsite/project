@@ -5,6 +5,7 @@
         default-active="1"
         class="menu"
         :collapse="isCollapse"
+        @select="menuSelect"
         >
         <router-link to="">
           <el-menu-item index="1">
@@ -18,7 +19,7 @@
             <template #title><span>课程管理</span></template>
           </el-menu-item>
         </router-link>
-        <router-link to="">
+        <router-link to="/reference">
           <el-menu-item index="3">
             <el-icon><Files /></el-icon>
             <template #title><span>课程资料</span></template>
@@ -67,13 +68,18 @@
         <el-avatar class="avatar-else" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
       </div>
     </el-aside>
-    <el-container>
-      <el-header class="head" :style="{left: isMenuHide ? '0' : (isCollapse ? '70px' : '180px'), width: isMenuHide ? '100%': (isCollapse ? 'calc(100% - 70px)': 'calc(100% - 180px)')} ">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin: 0.5%">
-          <el-button v-if="isMenuHide" @click="isMenuHide=!isMenuHide" text><el-icon><ArrowRightBold /></el-icon></el-button>
-          <el-button v-else @click="isMenuHide=!isMenuHide" text><el-icon><ArrowLeftBold /></el-icon></el-button>
-          <i>{{currentTime}} {{timeState}}好，申屠阿玉</i>
-          <el-icon :size="30"><ChatLineSquare /></el-icon>
+    <el-container :style="{width: mainWidth}">
+      <el-header class="head" :style="{left: isMenuHide ? '0' : (isCollapse ? '70px' : '180px'), width: mainWidth} ">
+        <div class="title">
+          <div>
+            <el-button v-if="isMenuHide" @click="isMenuHide=!isMenuHide" text><el-icon><ArrowRightBold /></el-icon></el-button>
+            <el-button v-else @click="isMenuHide=!isMenuHide" text><el-icon><ArrowLeftBold /></el-icon></el-button>
+            <i>{{menuTitle}}</i>
+          </div>
+          <div>
+            <i>{{currentTime}} {{timeState}}好，申屠阿玉</i>
+            <icon-comments :size="30" style="padding: 0; margin-left: 15px; margin-right: 10px;"/>
+          </div>
         </div>
         <el-divider style="margin: 0; padding: 0;"/>
       </el-header>
@@ -89,7 +95,7 @@
 <script lang="ts">
 import {
   ArrowLeftBold,
-  ArrowRight, ArrowRightBold, ChatLineSquare,
+  ArrowRight, ArrowRightBold,
   ChatSquare,
   Document,
   Files,
@@ -98,24 +104,59 @@ import {
   Notification, Tools,
   User
 } from "@element-plus/icons-vue";
+import {
+  Comments as IconComments,
+} from "@icon-park/vue-next";
 
 export default {
   name: "index",
   components: {
-    Tools,
-    ChatLineSquare,
-    ArrowRightBold, ArrowRight, ArrowLeftBold, User, List, ChatSquare, Document, Grid, Notification, Files},
+    Tools, ArrowRightBold, ArrowRight, ArrowLeftBold, User, List, ChatSquare, Document, Grid, Notification, Files, IconComments },
   data() {
     return {
       isCollapse: false,
       isMenuHide: false,
       currentTime: '',
       timeState: '',
+      menuTitle: '课程公告',
     };
   },
   methods: {
     toggleCollapse() {
       this.isCollapse = window.innerWidth < 1000;
+    },
+    menuSelect(index) {
+      switch (index) {
+        case "1":
+          this.menuTitle = '课程公告'
+          break
+        case "2":
+          this.menuTitle = '课程管理'
+          break
+        case "3":
+          this.menuTitle = '课程资料'
+          break
+        case "4":
+          this.menuTitle = '课程作业'
+          break
+        case "5":
+          this.menuTitle = '讨论区'
+          break
+        case "6":
+          this.menuTitle = '用户管理'
+          break
+        case "7":
+          this.menuTitle = '日志管理'
+          break
+        case "8":
+          this.menuTitle = '个人中心'
+          break
+      }
+    }
+  },
+  computed: {
+    mainWidth() {
+      return this.isMenuHide ? '100%' : (this.isCollapse ? 'calc(100% - 70px)': 'calc(100% - 180px)')
     },
   },
   mounted() {
@@ -202,5 +243,13 @@ export default {
     }
   }
 }
-
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5%;
+  font-family: "Microsoft YaHei",cursive;
+  font-size: 18px;
+  color: dimgray;
+}
 </style>
