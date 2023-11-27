@@ -5,3 +5,11 @@ from .user_management import update_avatar
 from .user_management import get_user_info
 from .auth import refresh_token
 from .user_management import logout_user
+from .user_management import change_password
+from .course_management import create_course
+from .course_management import all_course_info
+from .user_management import update_selected_course
+from .user_management import xlsx_create_user
+from .user_management import user_list
+from .homework_management import create_homework
+from .homework_management import submit_homework

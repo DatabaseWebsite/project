@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'corsheaders',#跨域请求
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

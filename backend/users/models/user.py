@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from users.models.course import Course
+
 MEDIA_ADDRESS = ''
 
 
@@ -19,7 +21,7 @@ class User(AbstractUser):
     # 头像
     avatar = models.ImageField(upload_to='avatars/', default='avatar/default.png', verbose_name='头像')
     # 所选课程
-    course = models.CharField(max_length=123, default='数据库', verbose_name='所选课程，temp，以后要改成外键')
+    selected_course = models.ForeignKey(Course, on_delete=models.SET_NULL, verbose_name="所选课程", null=True, blank=True)
 
     def get_avatar_url(self):
         return MEDIA_ADDRESS + str(self.avatar)
