@@ -59,7 +59,7 @@
     <span slot="footer" class="dialog-footer">
     <el-button @click="closeDialog">取 消</el-button>
     <el-button type="primary" @click="getCrop">确 定</el-button>
-  </span>
+    </span>
   </el-dialog>
 </template>
 

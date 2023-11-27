@@ -39,7 +39,7 @@
 <script lang="ts">
 import {getCurrentInstance} from "vue";
 import useAuthStore from "@/store/user.ts";
-import {user_info_api, user_login_api} from "@/api/user_api.ts";
+import {user_info_api, user_login_api} from "@/api/api.ts";
 import cookies from "@/lib/cookies.ts";
 import {router} from "@/router";
 

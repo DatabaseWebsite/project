@@ -4,7 +4,7 @@ import {router} from "@/router";
 import {ElLoading, ElMessage} from "element-plus";
 import qs from 'qs';
 import {get} from "lodash";
-import {user_refresh_token_api} from "@/api/user_api.ts";
+import {user_refresh_token_api} from "@/api/api.ts";
 /**
  * @description: 创建axios实例
  */
@@ -89,47 +89,43 @@ function createService() {
         endLoading()
         const {status} = error.response
         switch (status) {
-            case 400:
-                error.message = '请求错误'
-                break
             case 401:
                 cookies.remove('token')
                 cookies.remove('uuid')
                 cookies.remove('refresh')
                 router.push({ path: '/login' })
-                error.message = '认证已失效,请重新登录~'
                 break
             case 403:
-                error.message = '拒绝访问'
+                error.response.error = '拒绝访问'
                 break
             case 404:
-                error.message = `请求地址出错: ${error.response.config.url}`
+                error.response.error = `请求地址出错: ${error.response.config.url}`
                 break
             case 408:
-                error.message = '请求超时'
+                error.response.error = '请求超时'
                 break
             case 500:
-                error.message = '服务器内部错误'
+                error.response.error = '服务器内部错误'
                 break
             case 501:
-                error.message = '服务未实现'
+                error.response.error = '服务未实现'
                 break
             case 502:
-                error.message = '网关错误'
+                error.response.error = '网关错误'
                 break
             case 503:
-                error.message = '服务不可用'
+                error.response.error = '服务不可用'
                 break
             case 504:
-                error.message = '网关超时'
+                error.response.error = '网关超时'
                 break
             case 505:
-                error.message = 'HTTP版本不受支持'
+                error.response.error = 'HTTP版本不受支持'
                 break
             default:
                 break
         }
-        ElMessage.error(error.message)
+        ElMessage.error(error.response.error)
         return Promise.reject(error)
     })
     return service

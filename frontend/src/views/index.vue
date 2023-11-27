@@ -1,94 +1,64 @@
 <template>
+  <el-affix class="head">
+    <div class="title">
+      <div>
+        <i>{{menuTitle}}</i>
+      </div>
+      <div>
+        <i>{{currentTime}} {{timeState}}好，{{user['username']}}</i>
+        <icon-comments :size="30" style="padding: 0; margin-left: 15px; margin-right: 10px;"/>
+      </div>
+    </div>
+    <el-divider style="margin: 0; padding: 0;"/>
+  </el-affix>
   <el-container class="all">
-    <el-aside v-if="!isMenuHide" class="aside" :style="{width: isCollapse ? '70px': '180px'}">
+    <el-aside class="aside" style="width:70px">
       <el-menu
         default-active="1"
-        class="menu"
-        :collapse="isCollapse"
+        :collapse="true"
         @select="menuSelect"
+        router
         >
-        <router-link to="">
-          <el-menu-item index="1">
-            <el-icon><Notification /></el-icon>
-            <template #title><span>课程公告</span></template>
-          </el-menu-item>
-        </router-link>
-        <router-link to="">
-          <el-menu-item index="2">
-            <el-icon><Grid /></el-icon>
-            <template #title><span>课程管理</span></template>
-          </el-menu-item>
-        </router-link>
-        <router-link to="/reference">
-          <el-menu-item index="3">
-            <el-icon><Files /></el-icon>
-            <template #title><span>课程资料</span></template>
-          </el-menu-item>
-        </router-link>
-        <router-link to="">
-          <el-menu-item index="4">
-            <el-icon><Document /></el-icon>
-            <template #title><span>课程作业</span></template>
-          </el-menu-item>
-        </router-link>
-        <router-link to="">
-          <el-menu-item index="5">
-            <el-icon><ChatSquare /></el-icon>
-            <template #title><span>讨论区</span></template>
-          </el-menu-item>
-        </router-link>
-        <router-link to="">
-          <el-menu-item index="6">
-            <el-icon><Tools /></el-icon>
-            <template #title><span>用户管理</span></template>
-          </el-menu-item>
-        </router-link>
-        <router-link to="">
-          <el-menu-item index="7">
-            <el-icon><List /></el-icon>
-            <template #title><span>日志管理</span></template>
-          </el-menu-item>
-        </router-link>
-        <router-link to="/userCenter">
-          <el-menu-item index="8">
-            <el-icon><User /></el-icon>
-            <template #title><span>个人中心</span></template>
-          </el-menu-item>
-        </router-link>
+        <el-menu-item index="/">
+          <el-icon><Notification /></el-icon>
+          <template #title><span>课程公告</span></template>
+        </el-menu-item>
+        <el-menu-item index="/">
+          <el-icon><Grid /></el-icon>
+          <template #title><span>课程管理</span></template>
+        </el-menu-item>
+        <el-menu-item index="/reference">
+          <el-icon><Files /></el-icon>
+          <template #title><span>课程资料</span></template>
+        </el-menu-item>
+        <el-menu-item index="/">
+          <el-icon><Document /></el-icon>
+          <template #title><span>课程作业</span></template>
+        </el-menu-item>
+        <el-menu-item index="/discussionArea">
+          <el-icon><ChatSquare /></el-icon>
+          <template #title><span>讨论区</span></template>
+        </el-menu-item>
+        <el-menu-item index="/">
+          <el-icon><Tools /></el-icon>
+          <template #title><span>用户管理</span></template>
+        </el-menu-item>
+        <el-menu-item index="/">
+          <el-icon><List /></el-icon>
+          <template #title><span>日志管理</span></template>
+        </el-menu-item>
+        <el-menu-item index="/userCenter">
+          <el-icon><User /></el-icon>
+          <template #title><span>个人中心</span></template>
+        </el-menu-item>
       </el-menu>
-      <el-container v-if="!isCollapse" class="user-info">
-        <el-aside class= "aside">
-          <el-avatar class="avatar" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
-        </el-aside>
-        <el-main class="main">
-          <i class="nickname"> 申屠阿玉</i>
-        </el-main>
-      </el-container>
-      <div  v-else class="only-avatar">
+      <div class="only-avatar">
         <el-avatar class="avatar-else" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
       </div>
     </el-aside>
-    <el-container :style="{width: mainWidth}">
-      <el-header class="head" :style="{left: isMenuHide ? '0' : (isCollapse ? '70px' : '180px'), width: mainWidth} ">
-        <div class="title">
-          <div>
-            <el-button v-if="isMenuHide" @click="isMenuHide=!isMenuHide" text><el-icon><ArrowRightBold /></el-icon></el-button>
-            <el-button v-else @click="isMenuHide=!isMenuHide" text><el-icon><ArrowLeftBold /></el-icon></el-button>
-            <i>{{menuTitle}}</i>
-          </div>
-          <div>
-            <i>{{currentTime}} {{timeState}}好，申屠阿玉</i>
-            <icon-comments :size="30" style="padding: 0; margin-left: 15px; margin-right: 10px;"/>
-          </div>
-        </div>
-        <el-divider style="margin: 0; padding: 0;"/>
-      </el-header>
-      <el-main>
-        <el-scrollbar style="height: 100%; overflow-y: hidden;">
-          <router-view></router-view>
-        </el-scrollbar>
-      </el-main>
-    </el-container>
+    <el-main style="position: absolute; left: 70px;width: calc(100% - 70px); top: 80px">
+      <router-view/>
+    </el-main>
   </el-container>
 </template>
 
@@ -107,6 +77,7 @@ import {
 import {
   Comments as IconComments,
 } from "@icon-park/vue-next";
+import useAuthStore from "@/store/user.ts";
 
 export default {
   name: "index",
@@ -114,32 +85,28 @@ export default {
     Tools, ArrowRightBold, ArrowRight, ArrowLeftBold, User, List, ChatSquare, Document, Grid, Notification, Files, IconComments },
   data() {
     return {
-      isCollapse: false,
-      isMenuHide: false,
       currentTime: '',
       timeState: '',
       menuTitle: '课程公告',
+      user: useAuthStore().getUser
     };
   },
   methods: {
-    toggleCollapse() {
-      this.isCollapse = window.innerWidth < 1000;
-    },
     menuSelect(index) {
       switch (index) {
-        case "1":
+        case "/":
           this.menuTitle = '课程公告'
           break
         case "2":
           this.menuTitle = '课程管理'
           break
-        case "3":
+        case "/reference":
           this.menuTitle = '课程资料'
           break
         case "4":
           this.menuTitle = '课程作业'
           break
-        case "5":
+        case "/discussionArea":
           this.menuTitle = '讨论区'
           break
         case "6":
@@ -148,47 +115,35 @@ export default {
         case "7":
           this.menuTitle = '日志管理'
           break
-        case "8":
+        case "/userCenter":
           this.menuTitle = '个人中心'
           break
       }
     }
   },
-  computed: {
-    mainWidth() {
-      return this.isMenuHide ? '100%' : (this.isCollapse ? 'calc(100% - 70px)': 'calc(100% - 180px)')
-    },
-  },
   mounted() {
-    window.addEventListener("resize", this.toggleCollapse);
-    this.toggleCollapse();
     setInterval(() => {
       let timeNow = new Date()
       this.currentTime = timeNow.toLocaleString();
       let hours = timeNow.getHours();
       if (hours >= 6 && hours <= 10) this.timeState = '早上'
-      else if (hours <= 14) this.timeState = '中午'
-      else if (hours <= 18) this.timeState = '下午'
+      else if (hours > 10 && hours <= 14) this.timeState = '中午'
+      else if (hours > 14 && hours <= 18) this.timeState = '下午'
       else this.timeState = '晚上'
     }, 1000);
   },
-  beforeDestroy() {
-    window.removeEventListener("resize", this.toggleCollapse);
-  }
 }
 
 </script>
 
 <style lang="scss" scoped>
-.all {
-  height: 100%;
-  width: 100%;
-}
 .head {
   padding: 0;
   height: 60px;
-  position: fixed;
+  position: absolute;
   top:0;
+  left: 70px;
+  width: calc(100% - 70px);
 }
 .aside {
   height: 100%;
@@ -213,23 +168,6 @@ export default {
         height: 60px;
       }
     }
-    .main {
-      width: 110px;
-      height: 70px;
-      position: absolute;
-      right: 10px;
-      .nickname {
-        font-family: "Microsoft YaHei",cursive;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        max-height: 2em;
-        font-size: 15px;
-        color:gray;
-        font-weight: bold;
-        text-align: center;
-      }
-    }
   }
   .only-avatar {
     position: fixed;
@@ -244,6 +182,7 @@ export default {
   }
 }
 .title {
+  background-color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;

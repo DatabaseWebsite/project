@@ -3,7 +3,8 @@ import Index from "@/views/index.vue"
 import UserCenter from "@/components/userCenter/index.vue"
 import Login from "@/views/login.vue"
 import NotFound from "@/views/404.vue"
-import Reference from "@/views/reference.vue"
+import Reference from "@/components/materials/index.vue"
+import DiscussionArea from "@/views/discussionArea.vue";
 import useAuthStore from "@/store/user.ts";
 const routes: RouteRecordRaw[] = [
   {
@@ -26,6 +27,11 @@ const routes: RouteRecordRaw[] = [
         path: '/userCenter',
         name: 'userCenter',
         component: UserCenter,
+      },
+      {
+        path: '/discussionArea',
+        name: 'discussionArea',
+        component: DiscussionArea,
       },
     ]
   },
