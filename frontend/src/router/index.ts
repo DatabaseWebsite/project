@@ -6,6 +6,8 @@ import NotFound from "@/views/404.vue"
 import Reference from "@/components/materials/index.vue"
 import DiscussionArea from "@/views/discussionArea.vue";
 import useAuthStore from "@/store/user.ts";
+import announceFormVue from "@/components/announce/announceForm.vue";
+import Announcement from "@/views/announcement.vue"
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -32,6 +34,11 @@ const routes: RouteRecordRaw[] = [
         path: '/discussionArea',
         name: 'discussionArea',
         component: DiscussionArea,
+      },
+      {
+        path: '/announcement',
+        name: 'announcement',
+        component: Announcement,
       },
     ]
   },

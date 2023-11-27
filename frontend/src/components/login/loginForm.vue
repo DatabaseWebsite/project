@@ -27,7 +27,7 @@
         @click="handleLogin('loginForm')"
         class="submit-btn"
       >登录</el-button>
-    </el-form-item>
+	  </el-form-item>
 
     <!-- 找回密码 -->
     <div class="tiparea">
@@ -72,7 +72,7 @@ export default {
             userStore.loginSuccess()
             let userInfoRes = await user_info_api()
             userStore.setUserinfo(userInfoRes.data)
-            router.push('/')// todo：跳转到首页
+            router.push('/announcement')// todo：跳转到首页
           })
         } else {
           console.log("error submit!!");

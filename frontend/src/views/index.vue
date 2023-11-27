@@ -19,7 +19,7 @@
         @select="menuSelect"
         router
         >
-        <el-menu-item index="/">
+        <el-menu-item index="/announcement">
           <el-icon><Notification /></el-icon>
           <template #title><span>课程公告</span></template>
         </el-menu-item>
@@ -94,7 +94,7 @@ export default {
   methods: {
     menuSelect(index) {
       switch (index) {
-        case "/":
+        case "/announcement":
           this.menuTitle = '课程公告'
           break
         case "2":
