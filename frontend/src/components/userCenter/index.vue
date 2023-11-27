@@ -13,7 +13,7 @@
               <div class="avatar-container">
                 <el-avatar
                   :size="150"
-                  src="/src/assets/img/avatar.jpg"
+                  :src="user['avatar']"
                   @mouseenter="rotateAvatar"
                   @mouseleave="resetRotation"
                 />
@@ -56,17 +56,18 @@
         <el-footer class="footer">
           <el-row :gutter="20">
             <el-col :span="6"><el-button type="primary" text>切换课程</el-button></el-col>
-            <el-col :span="6"><el-button type="danger" text>修改密码</el-button></el-col>
-            <el-col :span="6"><el-button type="danger" text>退出登录</el-button></el-col>
+            <el-col :span="6"><el-button type="danger" text @click="changePwdVisible=true">修改密码</el-button></el-col>
+            <el-col :span="6"><el-button type="danger" text @click="openLogout">退出登录</el-button></el-col>
           </el-row>
         </el-footer>
       </el-container>
     </el-card>
   </div>
+  <ChangePassword v-if="changePwdVisible" :changePwdVisible.sync="changePwdVisible"/>
   <AvatarEdit v-if="dialogVisible" :dialogVisible.sync="dialogVisible"/>
 </template>
 
-<script>
+<script lang="ts">
 import AvatarEdit from "@/components/userCenter/avatarEdit.vue";
 import {ref} from "vue";
 import {
@@ -76,12 +77,18 @@ import {
   Book as IconBook
 } from "@icon-park/vue-next";
 import useAuthStore from "@/store/user.ts";
+import cookies from "@/lib/cookies.ts";
+import {user_logout_api} from "@/api/api.ts";
+import {router} from "@/router/index.ts";
+import {ElMessage, ElMessageBox} from "element-plus";
+import ChangePassword from "@/components/userCenter/changePassword.vue";
 
 export default {
   name: "stuCenter",
-  components: {AvatarEdit, IconPermissions, IconPeople, IconUploadPicture, IconBook},
+  components: {ChangePassword, AvatarEdit, IconPermissions, IconPeople, IconUploadPicture, IconBook},
   setup(_props) {
     const dialogVisible = ref(false)
+    const changePwdVisible = ref(false)
     const rotated = ref(false)
     const user = useAuthStore().getUser
     const identity = user['identity'] === 'TEACHER' ? '教师' :
@@ -89,7 +96,9 @@ export default {
     const closeAvatarEdits = () => {
       dialogVisible.value = false;
     };
-
+    const closeChangePwd = () => {
+      changePwdVisible.value = false;
+    };
     const rotateAvatar = () => {
       rotated.value = true;
     };
@@ -98,13 +107,36 @@ export default {
     const resetRotation = () => {
       rotated.value = false;
     };
+    const openLogout = () => {
+      ElMessageBox.confirm(
+        '确认退出当前账号？',
+        'Warning',
+        {
+          confirmButtonText: '是',
+          cancelButtonText:'否',
+          type:'Warning',
+        }
+      ).then(() => {
+        logout()
+      })
+    }
+    const logout = async () => {
+      await user_logout_api().then(res => {
+        useAuthStore().logout()
+        cookies.removeAll()
+        router.push('/login')
+      })
+    }
     return {
       dialogVisible,
+      changePwdVisible,
       closeAvatarEdits,
+      closeChangePwd,
       rotateAvatar,
       resetRotation,
       user,
-      identity
+      identity,
+      openLogout
     };
   },
 }

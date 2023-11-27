@@ -53,7 +53,7 @@
         </el-menu-item>
       </el-menu>
       <div class="only-avatar">
-        <el-avatar class="avatar-else" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
+        <el-avatar class="avatar-else" :src="user['avatar']"/>
       </div>
     </el-aside>
     <el-main style="position: absolute; left: 70px;width: calc(100% - 70px); top: 80px">

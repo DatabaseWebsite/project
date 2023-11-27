@@ -63,10 +63,12 @@
   </el-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import 'vue-cropper/dist/index.css' // 引入该样式才能显示截图框
 import { VueCropper } from 'vue-cropper'
 import {ElMessage} from "element-plus";
+import {user_update_avatar_api} from "@/api/api.ts";
+import useAuthStore from "@/store/user.ts";
 export default {
   name: "avatarEdit",
   props: {
@@ -89,7 +91,7 @@ export default {
         autoCropHeight: 200, //截图框高度
         fixed: true,  //固定截图框大小
         fixedNumber: [1, 1], //截图框的宽高比例
-        fixedBox: false,      //固定截图框大小，不允许改变
+        fixedBox: true,      //固定截图框大小，不允许改变
         canMove: false,      //上传图片不可以移动
         canMoveBox: true,    //截图框能拖动
         centerBox: true,    //截图框被限制在图片里面
@@ -165,12 +167,19 @@ export default {
     //获取截图信息
     getCrop() {
       // 获取截图的 base64 数据
-      this.$refs.cropper.getCropData((data) => {
-        console.log(data)
-      })
+      // this.$refs.cropper.getCropData((data) => {
+      //   console.log(data)
+      // })
       // 获取截图的 blob 数据
-      this.$refs.cropper.getCropBlob((data) => {
-        console.log(data)
+      this.$refs.cropper.getCropBlob(async (data) => {
+        const formData = new FormData()
+        formData.append('avatar', data)
+        await user_update_avatar_api(formData).then(res => {
+          useAuthStore().setAvatar(res.data.url)
+          console.log(res.data.url)
+          location.reload()
+          this.closeDialog()
+        })
       })
     },
     //关闭弹框

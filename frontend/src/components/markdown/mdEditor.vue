@@ -28,12 +28,13 @@ export default {
   components: {VueMarkdownEditor},
   methods: {
     async uploadImg(event, insertImage, files) {
-      let res = await upload_image_api({
-        'image': files[0],
-      })
-      insertImage({
-        url: res.data.url,
-        desc: res.data.name,
+      const formData = new FormData()
+      formData.append('image', files[0])
+      await upload_image_api(formData).then(res => {
+        insertImage({
+          url: res.data.url,
+          desc: res.data.name,
+        })
       })
     },
     change() {

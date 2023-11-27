@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from users.models.course import Course
 
-MEDIA_ADDRESS = ''
+MEDIA_ADDRESS = 'http://127.0.0.1:8000/media/'
 
 
 class Category(models.TextChoices):
@@ -24,4 +24,5 @@ class User(AbstractUser):
     selected_course = models.ForeignKey(Course, on_delete=models.SET_NULL, verbose_name="所选课程", null=True, blank=True)
 
     def get_avatar_url(self):
+        print(MEDIA_ADDRESS + str(self.avatar))
         return MEDIA_ADDRESS + str(self.avatar)

@@ -64,18 +64,16 @@ export default {
     const handleLogin = (formName: string) => {
       ctx.$refs[formName].validate(async (valid: boolean) => {
         if (valid) {
-          let res = await user_login_api({
-            username: ctx.loginUser.username,
-            password: ctx.loginUser.password
+          await user_login_api(ctx.loginUser.username, ctx.loginUser.password).then(async (res) => {
+            res = res.data
+            cookies.set('uuid', res["userId"])
+            cookies.set('token', res["access"])
+            cookies.set('refreshToken', res["refresh"])
+            userStore.loginSuccess()
+            let userInfoRes = await user_info_api()
+            userStore.setUserinfo(userInfoRes.data)
+            router.push('/')// todo：跳转到首页
           })
-          res = res.data
-          cookies.set('uuid', res["userId"])
-          cookies.set('token', res["access"])
-          cookies.set('refreshToken', res["refresh"])
-          userStore.loginSuccess()
-          let userInfoRes = await user_info_api()
-          userStore.setUserinfo(userInfoRes.data)
-          router.push('/')// todo：跳转到首页
         } else {
           console.log("error submit!!");
           return false;

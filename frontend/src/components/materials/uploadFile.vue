@@ -28,7 +28,7 @@
 
 import {ElMessage} from "element-plus";
 import useAuthStore from "@/store/user.ts";
-import {upload_file_api} from "@/api/api.ts";
+import {upload_materials_api} from "@/api/api.ts";
 import {UploadFilled} from "@element-plus/icons-vue";
 
 export default {
@@ -67,12 +67,10 @@ export default {
       this.fileList.forEach((file) => {
         formData.append(file.name, file.raw)
       })
-      let res = await upload_file_api({
-        files: formData,
-        uploadType: '课程资料'
+      await upload_materials_api(formData).then(async res => {
+        this.fileList = []
+        await this.$parent.updateMaterials()
       })
-      this.fileList = []
-      await this.$parent.updateMaterials()
     },
   },
 }

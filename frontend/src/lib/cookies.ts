@@ -36,6 +36,13 @@ const cookies = {
    */
   remove: (name = 'default') => {
     return Cookies.remove(`databaseCPW-${name}`)
+  },
+  removeAll: () => {
+    const cookies = Cookies.get()
+    Object.keys(cookies).forEach(name => {
+      if (name.startsWith('databaseCPW-'))
+        Cookies.remove(name)
+    })
   }
 }
 

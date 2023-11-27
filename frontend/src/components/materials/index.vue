@@ -2,10 +2,10 @@
   <div v-if="canUpload" class="upload-box">
     <UploadFile/>
   </div>
-  <div v-for="(item) in materialData">
+  <div v-for="(item, index) in materialData">
     <div class="material-item">
       <div class="left-section">
-        <div class="id">{{ item.id }}</div>
+        <div class="id">{{ index }}</div>
         <div class="name-time">
           <p class="name">{{ item.name }}</p>
           <p class="upload-time">{{ item.uploadTime }}</p>
@@ -95,8 +95,9 @@ export default {
     })
     const materialDataRef = ref(toRefs(materialData))
     const updateMaterials = async () => {
-      let res = await get_materials_api()
-      materialData.value = res.data
+      await get_materials_api().then(res => {
+        materialData.value = res.data
+      })
     }
     onMounted(async () => {
       console.log('mounted')

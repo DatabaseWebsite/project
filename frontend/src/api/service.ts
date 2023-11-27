@@ -5,6 +5,7 @@ import {ElLoading, ElMessage} from "element-plus";
 import qs from 'qs';
 import {get} from "lodash";
 import {user_refresh_token_api} from "@/api/api.ts";
+import useAuthStore from "@/store/user.ts";
 /**
  * @description: 创建axios实例
  */
@@ -32,13 +33,14 @@ const endLoading = () => {
 function createService() {
     // 创建一个 axios 实例
     const service = axios.create({
-        baseURL: 'http://127.0.0.1:8000/',
+        baseURL: "/api",
         timeout: 60000,
         paramsSerializer: (params) => qs.stringify(params, { indices: false }) // 参数序列化
     })
 // http request 拦截器
     service.interceptors.request.use(function (config){
         // 在发送请求前做些什么
+        console.log(config)
         startLoading();
         return config;
     },function (error) {
@@ -70,8 +72,7 @@ function createService() {
                 config["__retryCount"] = config["__retryCount"] || 0
                 if (config["__retryCount"] >= config["retry"]) {
                     // 如果重试次数超过3次则跳转登录页面
-                    cookies.remove('token')
-                    cookies.remove('uuid')
+                    cookies.removeAll()
                     router.push({path: '/login'})
                     ElMessage.error('认证已失效,请重新登录~')
                     break
@@ -90,9 +91,8 @@ function createService() {
         const {status} = error.response
         switch (status) {
             case 401:
-                cookies.remove('token')
-                cookies.remove('uuid')
-                cookies.remove('refresh')
+                cookies.removeAll()
+                useAuthStore().logout()
                 router.push({ path: '/login' })
                 break
             case 403:
@@ -153,7 +153,7 @@ function createRequestFunction (service) {
                 Authorization: 'Bearer ' + token,
             },
             timeout: 60000,
-            baseURL: 'http://127.0.0.1:8000/',
+            baseURL: '/api',
             data: {},
             params: params,
             retry: 3, // 重新请求次数

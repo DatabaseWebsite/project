@@ -16,10 +16,8 @@ from users.models.user import User
 
 @require_POST
 def login_user(request):
-    data = json.loads(request.body.decode('utf-8'))
-    print(data)
-    username = data.get('username')
-    password = data.get('password')
+    username = request.POST.get('username')
+    password = request.POST.get('password')
 
     user = authenticate(request, username=username, password=password)
 
@@ -91,10 +89,9 @@ def update_avatar(request):
 @jwt_auth()
 @require_POST
 def change_password(request):
-    data = json.loads(request.body.decode('utf-8'))
-    old_password = data.get('old_password')
-    new_password = data.get('new_password')
-
+    old_password = request.POST.get('old_password')
+    new_password = request.POST.get('new_password')
+    print(old_password, new_password)
     user = authenticate(username=request.user.username, password=old_password)
     if user is not None:
         user.password = make_password(new_password)
