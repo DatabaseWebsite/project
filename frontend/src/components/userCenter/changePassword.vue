@@ -62,7 +62,6 @@ export default {
   methods: {
     closeChangePwd() {
       this.$parent.closeChangePwd()
-      Object.assign(this.$data, this.$options.data())
     }
   },
   setup(_props, {emit}) {

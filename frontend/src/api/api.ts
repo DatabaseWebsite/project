@@ -33,6 +33,16 @@ export const user_change_password_api = (oldPassword: string, newPassword: strin
   return axios.post('api/change-password/', data)
 }
 
+export const user_get_courses_api = () => {
+  return axios.get('api/all-course-info/')
+}
+
+export const user_select_course_api = (courseId: number) => {
+ let data = new URLSearchParams();
+  data.append('course_id', courseId.toString());
+  return axios.post('api/update-selected-course/', data)
+}
+
 /*
  * @api {post} /upload-materials/ 上传文件
  * @param files: {{name, raw}*}
