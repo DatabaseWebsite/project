@@ -55,7 +55,7 @@
         <el-divider style="width: 100%; margin: 0; padding-bottom: 10px"/>
         <el-footer class="footer">
           <el-row :gutter="20">
-            <el-col :span="6"><el-button type="primary" text>切换课程</el-button></el-col>
+            <el-col :span="6"><el-button type="primary" text @click="courseSelectVisible=true;">切换课程</el-button></el-col>
             <el-col :span="6"><el-button type="danger" text @click="changePwdVisible=true">修改密码</el-button></el-col>
             <el-col :span="6"><el-button type="danger" text @click="openLogout">退出登录</el-button></el-col>
           </el-row>
@@ -65,6 +65,7 @@
   </div>
   <ChangePassword v-if="changePwdVisible" :changePwdVisible.sync="changePwdVisible"/>
   <AvatarEdit v-if="dialogVisible" :dialogVisible.sync="dialogVisible"/>
+  <CourseSelcet v-if="courseSelectVisible" :courseSelectVisible.sync="courseSelectVisible"/>
 </template>
 
 <script lang="ts">
@@ -80,15 +81,17 @@ import useAuthStore from "@/store/user.ts";
 import cookies from "@/lib/cookies.ts";
 import {user_logout_api} from "@/api/api.ts";
 import {router} from "@/router/index.ts";
-import {ElMessage, ElMessageBox} from "element-plus";
+import {ElMessageBox} from "element-plus";
 import ChangePassword from "@/components/userCenter/changePassword.vue";
+import CourseSelcet from "@/components/userCenter/courseSelect.vue";
 
 export default {
   name: "stuCenter",
-  components: {ChangePassword, AvatarEdit, IconPermissions, IconPeople, IconUploadPicture, IconBook},
+  components: {CourseSelcet, ChangePassword, AvatarEdit, IconPermissions, IconPeople, IconUploadPicture, IconBook},
   setup(_props) {
     const dialogVisible = ref(false)
     const changePwdVisible = ref(false)
+    const courseSelectVisible = ref(false)
     const rotated = ref(false)
     const user = useAuthStore().getUser
     const identity = user['identity'] === 'TEACHER' ? '教师' :
@@ -98,6 +101,9 @@ export default {
     };
     const closeChangePwd = () => {
       changePwdVisible.value = false;
+    };
+    const closeCourseSelect = () => {
+      courseSelectVisible.value = false;
     };
     const rotateAvatar = () => {
       rotated.value = true;
@@ -130,8 +136,10 @@ export default {
     return {
       dialogVisible,
       changePwdVisible,
+      courseSelectVisible,
       closeAvatarEdits,
       closeChangePwd,
+      closeCourseSelect,
       rotateAvatar,
       resetRotation,
       user,

@@ -105,8 +105,7 @@ def change_password(request):
 @require_POST
 def update_selected_course(request):
     user = request.user
-    data = json.loads(request.body.decode('utf-8'))
-    new_course_id = int(data.get('course_id'))
+    new_course_id = int(request.POST.get('course_id'))
     new_course = Course.objects.get(pk=new_course_id)
     if new_course is not None:
         if user.selected_course is not None:
