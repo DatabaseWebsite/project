@@ -81,7 +81,7 @@ import useAuthStore from "@/store/user.ts";
 import cookies from "@/lib/cookies.ts";
 import {user_logout_api} from "@/api/api.ts";
 import {router} from "@/router/index.ts";
-import {ElMessage, ElMessageBox} from "element-plus";
+import {ElMessageBox} from "element-plus";
 import ChangePassword from "@/components/userCenter/changePassword.vue";
 import CourseSelcet from "@/components/userCenter/courseSelect.vue";
 

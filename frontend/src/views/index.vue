@@ -39,7 +39,7 @@
           <el-icon><ChatSquare /></el-icon>
           <template #title><span>讨论区</span></template>
         </el-menu-item>
-        <el-menu-item index="/">
+        <el-menu-item index="/userManage">
           <el-icon><Tools /></el-icon>
           <template #title><span>用户管理</span></template>
         </el-menu-item>

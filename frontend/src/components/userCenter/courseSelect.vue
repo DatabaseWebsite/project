@@ -10,7 +10,7 @@
     <el-radio-group v-model="selected">
      <el-radio
        v-for="item in courses"
-       :label="item['course_id']"
+       :label="item"
        >{{item['name']}}</el-radio>
     </el-radio-group>
     <el-button @click="closeCourseSelect"> 取消 </el-button>
@@ -22,7 +22,7 @@
 
 <script lang="ts">
 
-import {user_get_courses_api, user_select_course_api} from "@/api/api.ts";
+import {get_all_courses_api, user_select_course_api} from "@/api/api.ts";
 import useAuthStore from "@/store/user.ts";
 
 export default {
@@ -36,7 +36,7 @@ export default {
   data() {
     return {
       courses: [],
-      selected: 1
+      selected: {}
     }
   },
   watch: {
@@ -49,19 +49,16 @@ export default {
       this.$parent.closeCourseSelect()
     },
     async submit() {
-      let selectName = ''
-      for (const course of this.courses)
-        if (course['course_id'] === this.selected)
-          selectName = course['name']
-      await user_select_course_api(this.selected).then(res => {
-        useAuthStore().setCourse(selectName)
+      console.log(this.selected)
+      await user_select_course_api(this.selected['course_id']).then(res => {
+        useAuthStore().setCourse(this.selected['name'])
         // location.reload()
         this.closeCourseSelect()
       })
     }
   },
   mounted() {
-    user_get_courses_api().then(res => {
+    get_all_courses_api().then(res => {
       this.courses = res.data.result
       console.log(this.courses)
     })

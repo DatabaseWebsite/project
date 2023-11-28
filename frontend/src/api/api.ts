@@ -33,7 +33,11 @@ export const user_change_password_api = (oldPassword: string, newPassword: strin
   return axios.post('api/change-password/', data)
 }
 
-export const user_get_courses_api = () => {
+/*
+ * @api {get} /all-course-info/ 获取所有课程信息
+ * @return result: 每条信息包含course_id, name
+ */
+export const get_all_courses_api = () => {
   return axios.get('api/all-course-info/')
 }
 
@@ -43,11 +47,11 @@ export const user_select_course_api = (courseId: number) => {
   return axios.post('api/update-selected-course/', data)
 }
 
+
 /*
  * @api {post} /upload-materials/ 上传文件
  * @param files: {{name, raw}*}
- * @param uploadType: string 上传类型, 例如 '课程资料'（支持复用接口）
- * 另外，上传的课程id即为该用户的默认课程(即在用户信息栏里边要记录用户当前使用的course)
+ * 另外，上传的课程id即为该用户的当前课程
  * 需要后端记录上传时间
  */
 export const upload_materials_api = (files: FormData) => {
@@ -65,10 +69,13 @@ export const get_materials_api = () => {
 
 /*
  * @api {post} /del-material/ 删除课程资料
- * @param id: int 资料id
+ * @param material_id: int 资料id
  * @return null
  */
-export const del_material_api = () => {
+export const del_material_api = (id:number) => {
+  let data = new URLSearchParams();
+  data.append('material_id', id.toString());
+  return axios.post('api/del-material/', data)
 }
 
 /*
@@ -80,3 +87,105 @@ export const upload_image_api = (image: FormData) => {
   return axios.post('api/upload-image/', image)
 }
 
+/*
+  * @api {get} /user-list/ 获取用户列表
+  * @return result: 每条信息包含id, personId, username, grade, course, courses:{course_name, identity}
+ */
+export const get_user_list_api = (page:number=1) => {
+return axios.get('api/user-list/?page=' + page.toString())
+}
+
+export const get_all_user_list_api = () => {
+  return axios.get('api/user-list/')
+}
+
+/*
+ * @api {post} /signup/ 单用户注册
+ */
+export const signup_api = (personId: string, username: string, grade: string, course: string, identity: string) => {
+  let data = new URLSearchParams();
+  data.append('person_id', personId)
+  data.append('username', username) // 密码默认为personId
+  data.append('grade', grade)
+  data.append('course', course)
+  data.append('identity', identity)
+  return axios.post('api/signup/', data)
+}
+
+/*
+ * @api {post} /del-user/ 删除用户
+ */
+export const del_user_api = (id: number) => {
+  let data = new URLSearchParams();
+  data.append('id', id.toString())
+  return axios.post('api/del-user/', data)
+}
+
+/*
+ * @api {post} /update-user/ 更新用户信息
+ */
+export const update_userinfo_api = (id: number, personId: string, username: string, grade: string) => {
+  let data = new URLSearchParams();
+  data.append('id', id.toString())
+  data.append('person_id', personId)
+  data.append('username', username)
+  data.append('grade', grade)
+  return axios.post('api/update-userinfo/', data)
+}
+
+/*
+ * @api {post} /reset-user-password/ 重置用户密码
+ * 密码重置为personId
+ */
+export const reset_user_password_api = (id: number) => {
+  let data = new URLSearchParams();
+  data.append('id', id.toString())
+  return axios.post('api/reset-user-password/', data)
+}
+
+/*
+  * @api {post} /excel-create-users/ 批量注册
+  * @param excel: FormData: 通过xlsxFile获取，excel内包含学号，姓名，年级
+  * @param course: string: 课程名
+  * @param identity: string: 身份
+ */
+export const excel_create_users_api = (excel: FormData, course:string, identity: string) => {
+  let data = new URLSearchParams();
+  data.append('course', course)
+  data.append('identity', identity)
+  return axios.post('api/excel-create-users/', excel, {params: data})
+}
+
+/*
+  * @api {post} /del-users/ 批量删除用户
+  * @param ids: number[]: 用户id列表
+ */
+export const del_users_api = (ids: number[]) => {
+  return axios.post('api/del-users/', {ids})
+}
+
+/*
+ *@api {get} /search-user/ 搜索用户
+ * @params personId: string, username: string, grade: string, course: number, identity: string
+ * return result: 每条包含 id, personId, username, grade, course, courses:{course_name, identity}
+ */
+export const search_user_api = (personId: string, username: string, grade: string, course:string, identity: string, page: number) => {
+  let data = new URLSearchParams();
+  data.append('person_id', personId)
+  data.append('username', username)
+  data.append('grade', grade)
+  data.append('course', course)
+  data.append('identity', identity)
+  data.append('page', page.toString())
+  return axios.post('api/search-user/', data)
+}
+
+export const search_all_user_api = (personId: string, username: string, grade: string, course:string, identity: string) => {
+  let data = new URLSearchParams();
+  data.append('person_id', personId)
+  data.append('username', username)
+  data.append('grade', grade)
+  data.append('course', course)
+  data.append('identity', identity)
+  return axios.post('api/search-user/', data)
+}

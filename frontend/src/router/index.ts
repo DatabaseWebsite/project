@@ -6,6 +6,7 @@ import NotFound from "@/views/404.vue"
 import Reference from "@/components/materials/index.vue"
 import DiscussionArea from "@/views/discussionArea.vue";
 import useAuthStore from "@/store/user.ts";
+import UserManage from "@/components/userManage/index.vue";
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -33,6 +34,11 @@ const routes: RouteRecordRaw[] = [
         name: 'discussionArea',
         component: DiscussionArea,
       },
+      {
+        path: '/userManage',
+        name: 'userManage',
+        component: UserManage,
+      }
     ]
   },
   {
