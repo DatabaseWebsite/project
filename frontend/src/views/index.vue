@@ -109,7 +109,7 @@ export default {
         case "/discussionArea":
           this.menuTitle = '讨论区'
           break
-        case "6":
+        case '/userManage':
           this.menuTitle = '用户管理'
           break
         case "7":
