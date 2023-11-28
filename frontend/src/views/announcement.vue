@@ -1,18 +1,15 @@
 <template>
     <div>
+        
         <announceForm v-for="(item, index) in arr2" :item =item>
 
-        </announceForm>
+        </announceForm> 
     </div>
-    <div>
-    <ul>
-      <li v-for="(item, index) in arr2" :key="index">
-        <announceForm title={{item}} content="hello">
 
-        </announceForm>
-      </li>
-    </ul>
-  </div>
+    <div>
+        
+        111
+    </div>
 </template>
   
 <script>

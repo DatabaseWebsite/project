@@ -72,7 +72,7 @@ export default {
             userStore.loginSuccess()
             let userInfoRes = await user_info_api()
             userStore.setUserinfo(userInfoRes.data)
-            router.push('/announcement')// todo：跳转到首页
+            router.push('/')// todo：跳转到首页
           })
         } else {
           console.log("error submit!!");

@@ -23,7 +23,7 @@
           <el-icon><Notification /></el-icon>
           <template #title><span>课程公告</span></template>
         </el-menu-item>
-        <el-menu-item index="/">
+        <el-menu-item index="/course_management">
           <el-icon><Grid /></el-icon>
           <template #title><span>课程管理</span></template>
         </el-menu-item>
@@ -97,7 +97,7 @@ export default {
         case "/announcement":
           this.menuTitle = '课程公告'
           break
-        case "2":
+        case "/course_managment":
           this.menuTitle = '课程管理'
           break
         case "/reference":

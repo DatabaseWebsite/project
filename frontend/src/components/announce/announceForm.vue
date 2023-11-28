@@ -1,4 +1,5 @@
 <template>
+  <el-container class="card-container">
   <el-card class="box-card">
     <template #header>
       <div class="card-header">
@@ -12,6 +13,7 @@
       {{ item.content }}
     </div>
   </el-card>
+  </el-container>
 </template>
 
 <script lang="ts">
@@ -25,7 +27,6 @@ export default {
   },
   data() {
     return {
-      
       text: '',
       ritem: ''
     }
@@ -48,6 +49,11 @@ export default {
 /*:deep(.el-form-item__label)  {*/
 /*  color: white; !* 设置字体颜色为白色 *!*/
 /*}*/
+.card-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -63,6 +69,8 @@ export default {
 }
 
 .box-card {
-  width: 1500px;
+  width: 90%;
+  padding:5px;
+  margin:10px;
 }
 </style>

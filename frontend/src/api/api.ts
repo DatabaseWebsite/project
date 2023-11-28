@@ -70,3 +70,10 @@ export const upload_image_api = (image: FormData) => {
   return axios.post('api/upload-image/', image)
 }
 
+export const create_course_api = (name: string) => {
+  return axios.post('api/create_course/', name)
+}
+
+export const all_course_info_api = () => {
+  return axios.get('api/all-course-info/')
+}
