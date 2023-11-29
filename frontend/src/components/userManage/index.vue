@@ -30,8 +30,8 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm"> 查询 </el-button>
-          <el-button type="info" @click="resetForm"> 重置 </el-button>
+          <el-button type="primary" @click="submitForm"> <el-icon><Search/></el-icon>查询 </el-button>
+          <el-button type="info" @click="resetForm"> <el-icon><Refresh/></el-icon>重置 </el-button>
         </el-form-item>
       </el-form>
       <el-button size="small" type="primary" @click="createVisible=true"> <icon-add-user/>新增 </el-button>
@@ -42,7 +42,7 @@
     <el-main>
       <el-table ref="multipleTableRef" :data="tableData" border @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="50"></el-table-column>
-        <el-table-column prop="id" label="ID" width="70"></el-table-column>
+        <el-table-column prop="id" label="序号" width="70"></el-table-column>
         <el-table-column prop="person_id" label="学号" width="140"></el-table-column>
         <el-table-column prop="username" label="姓名" min-width="100"></el-table-column>
         <el-table-column prop="grade" label="年级" width="80"></el-table-column>
@@ -160,7 +160,9 @@ import {
 import {
   Delete,
   Download,
-  UploadFilled
+  UploadFilled,
+  Search,
+  Refresh
 } from "@element-plus/icons-vue";
 import {ref} from "vue";
 import {registerRules, registerUser} from "@/components/userManage/registerForm.ts";
@@ -186,7 +188,7 @@ export default {
   },
   components: {
     IconEditName, IconAddUser, IconPeopleDeleteOne,
-    Delete, Download, UploadFilled, uploadExcel
+    Delete, Download, UploadFilled, uploadExcel, Search, Refresh
   },
   data() {
     return {
@@ -341,14 +343,11 @@ export default {
             ElMessage.success('导出成功！')
           })
         } else {
-          const title = ['ID', '学号', '姓名', '年级', '参与课程及身份']
-          exportExcel(this.tableData, '用户信息', title, 'sheetName')
-          ElMessage.success('导出成功！')
-          // await get_all_user_list_api().then(res => {
-          //   const title = ['ID', '学号', '姓名', '年级', '参与课程及身份']
-          //   exportExcel(res.data['result'], '用户信息', title, 'sheetName')
-          //   ElMessage.success('导出成功！')
-          // })
+          await get_all_user_list_api().then(res => {
+            const title = ['序号', '学号', '姓名', '年级', '参与课程及身份']
+            exportExcel(res.data['result'], '用户信息', title, 'sheetName')
+            ElMessage.success('导出成功！')
+          })
         }
       })
     },

@@ -43,10 +43,20 @@
           <el-icon><Tools /></el-icon>
           <template #title><span>用户管理</span></template>
         </el-menu-item>
-        <el-menu-item index="/">
-          <el-icon><List /></el-icon>
-          <template #title><span>日志管理</span></template>
-        </el-menu-item>
+        <el-sub-menu>
+          <template #title>
+            <el-icon><Management /></el-icon>
+            <span>日志管理</span>
+          </template>
+          <el-menu-item index="/loginLog">
+            <el-icon><List/></el-icon>
+            <template #title><span>登录日志</span></template>
+          </el-menu-item>
+          <el-menu-item index="/operationLog">
+            <el-icon><DocumentChecked /></el-icon>
+            <template #title><span>操作日志</span></template>
+          </el-menu-item>
+        </el-sub-menu>
         <el-menu-item index="/userCenter">
           <el-icon><User /></el-icon>
           <template #title><span>个人中心</span></template>
@@ -72,7 +82,9 @@ import {
   Grid,
   List,
   Notification, Tools,
-  User
+  User,
+  Management,
+  DocumentChecked
 } from "@element-plus/icons-vue";
 import {
   Comments as IconComments,
@@ -82,7 +94,7 @@ import useAuthStore from "@/store/user.ts";
 export default {
   name: "index",
   components: {
-    Tools, ArrowRightBold, ArrowRight, ArrowLeftBold, User, List, ChatSquare, Document, Grid, Notification, Files, IconComments },
+    Tools, ArrowRightBold, ArrowRight, ArrowLeftBold, User, List, ChatSquare, Document, Grid, Notification, Files, Management, DocumentChecked, IconComments },
   data() {
     return {
       currentTime: '',
@@ -112,8 +124,11 @@ export default {
         case '/userManage':
           this.menuTitle = '用户管理'
           break
-        case "7":
-          this.menuTitle = '日志管理'
+        case "/loginLog":
+          this.menuTitle = '日志管理/登录日志'
+          break
+        case "/operationLog":
+          this.menuTitle = '日志管理/操作日志'
           break
         case "/userCenter":
           this.menuTitle = '个人中心'

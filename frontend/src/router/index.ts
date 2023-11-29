@@ -7,6 +7,8 @@ import Reference from "@/components/materials/index.vue"
 import DiscussionArea from "@/views/discussionArea.vue";
 import useAuthStore from "@/store/user.ts";
 import UserManage from "@/components/userManage/index.vue";
+import LoginLog from "@/components/log/loginLog.vue";
+import OperationLog from "@/components/log/operationLog.vue";
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -38,6 +40,16 @@ const routes: RouteRecordRaw[] = [
         path: '/userManage',
         name: 'userManage',
         component: UserManage,
+      },
+      {
+        path: '/loginLog',
+        name: 'loginLog',
+        component: LoginLog,
+      },
+      {
+        path: '/operationLog',
+        name: 'operationLog',
+        component: OperationLog,
       }
     ]
   },
