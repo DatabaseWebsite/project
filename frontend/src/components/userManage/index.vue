@@ -102,7 +102,7 @@
     <uploadExcel @file-uploaded="handleFileUploaded"/>
     <el-form v-model="batchCreationInfo" label-width="80">
       <el-form-item label="加入课程" prop="course">
-        <el-select v-model="batchCreationInfo.course" placeholder="请选择课程" clearable>
+        <el-select v-model="batchCreationInfo.course_id" placeholder="请选择课程" clearable>
           <el-option
             v-for="item in courseInfo"
             :label="item['name']"
@@ -241,7 +241,7 @@ export default {
       editVisible: false,
       batchCreationInfo: {
         file: [],
-        course: '',
+        course_id: '',
         identity: ''
       }
     }
@@ -380,7 +380,7 @@ export default {
     async submitBatchCreation() {
       let data = new FormData()
       data.append('xlsxFile', this.batchCreationInfo.file[0].raw)
-      await excel_create_users_api(data, this.batchCreationInfo.course, this.batchCreationInfo.identity).then(res => {
+      await excel_create_users_api(data, this.batchCreationInfo.course_id, this.batchCreationInfo.identity).then(res => {
         ElMessage.success('批量创建成功！')
         this.batchCreationVisible = false
         this.queryUsers()

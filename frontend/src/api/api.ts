@@ -149,9 +149,9 @@ export const reset_user_password_api = (id: number) => {
   * @param course: string: 课程名
   * @param identity: string: 身份
  */
-export const excel_create_users_api = (excel: FormData, course:string, identity: string) => {
+export const excel_create_users_api = (excel: FormData, course_id:string, identity: string) => {
   let data = new URLSearchParams();
-  data.append('course', course)
+  data.append('course_id', course_id)
   data.append('identity', identity)
   return axios.post('api/excel-create-users/', excel, {params: data})
 }
