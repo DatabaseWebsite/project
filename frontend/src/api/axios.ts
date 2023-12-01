@@ -4,6 +4,7 @@ import {router} from "@/router";
 import {ElLoading, ElMessage} from "element-plus";
 import {user_refresh_token_api} from "@/api/api.ts";
 import useAuthStore from "@/store/user.ts";
+import {record} from "@/api/record.ts";
 
 let loading: any;
 const startLoading = () => {
@@ -79,11 +80,13 @@ axios.interceptors.response.use(async function (response) {
       ElMessage.error(dataAxios.data['error'])
       break
   }
+  await record(response.config, response)
   return response
 }, async function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
   endLoading()
+  await record(error.config, error.response)
   const {status} = error.response
   switch (status) {
     case 401:

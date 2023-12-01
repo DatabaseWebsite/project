@@ -26,6 +26,7 @@
       <el-form-item>
         <el-button @click="closeChangePwd"> 取消 </el-button>
         <el-button
+          type="primary"
           @click="handleResetPwd"
         >确认修改</el-button>
       </el-form-item>

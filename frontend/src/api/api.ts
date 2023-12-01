@@ -149,9 +149,9 @@ export const reset_user_password_api = (id: number) => {
   * @param course: string: 课程名
   * @param identity: string: 身份
  */
-export const excel_create_users_api = (excel: FormData, course:string, identity: string) => {
+export const excel_create_users_api = (excel: FormData, course_id:string, identity: string) => {
   let data = new URLSearchParams();
-  data.append('course', course)
+  data.append('course_id', course_id)
   data.append('identity', identity)
   return axios.post('api/excel-create-users/', excel, {params: data})
 }
@@ -188,6 +188,61 @@ export const search_all_user_api = (personId: string, username: string, grade: s
   data.append('course', course)
   data.append('identity', identity)
   return axios.post('api/search-user/', data)
+}
+
+export const get_login_log_api = (page: number) => {
+  return axios.get('api/login-log/?page=' + page.toString())
+}
+
+export const search_login_log_api = (username: string, ip: string, startTime:string, endTime:string, page: number) => {
+  let data = new URLSearchParams();
+  data.append('username', username)
+  data.append('ip', ip)
+  data.append('start_time', startTime)
+  data.append('end_time', endTime)
+  data.append('page', page.toString())
+  return axios.post('api/search-login-log/', data)
+}
+
+export const get_operation_log_api = (page: number) => {
+  return axios.get('api/operation-log/?page=' + page.toString())
+}
+
+export const search_operation_log_api = (requestModule:string, api: string, ip: string, username: string, operation: string, starTime: string, endTime: string, page: number) => {
+  let data = new URLSearchParams();
+  data.append('request_module', requestModule)
+  data.append('ip', ip)
+  data.append('username', username)
+  data.append('operation', operation)
+  data.append('start_time', starTime)
+  data.append('end_time', endTime)
+  data.append('page', page.toString())
+  data.append('api', api)
+  return axios.post('api/search-operation-log/', data)
+}
+
+export const record_login_log_api = (ip:string, address: string, browser: string, time:string, username: string) => {
+  let data = new URLSearchParams();
+  data.append('ip', ip)
+  data.append('address', address)
+  data.append('browser', browser)
+  data.append('time', time)
+  data.append('username', username)
+  return axios.post('api/record-login-log/', data)
+}
+
+export const record_operation_log_api = (requestModule:string, api: string, ip: string, operation: string, browser: string, status: string, code: string, time: string, username: string) => {
+  let data = new URLSearchParams();
+  data.append('request_module', requestModule)
+  data.append('api', api)
+  data.append('operation', operation)
+  data.append('ip', ip)
+  data.append('time', time)
+  data.append('browser', browser)
+  data.append('status', status)
+  data.append('code', code)
+  data.append('username', username)
+  return axios.post('api/record-operation-log/', data)
 }
 
 export const create_course_api = (name: string) => {
