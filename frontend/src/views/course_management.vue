@@ -1,5 +1,16 @@
 <template>  
-  <el-container>   
+  <el-container>
+    <el-aside> 
+    <el-form :model="course" ref="courseRef">  
+          <el-form-item>  
+            <el-button type="primary" @click="addCourse">添加课程</el-button>  
+             
+          </el-form-item>  
+          <el-form-item label="course_name" prop="name">  
+            <el-input v-model="course.name"></el-input>  
+          </el-form-item>      
+    </el-form>  
+    </el-aside> 
     <el-main>  
       <courseForm v-for="(item, index) in course_info" :item="item" />  
     </el-main>  
@@ -16,7 +27,11 @@ export default {
   components: { courseForm },  
   data() {  
     return {  
-      course_info: null,  
+      course_info: null,
+      course:{
+        name:"",
+      },  
+      try_course:"1234",
     };  
   },  
   created() {  
@@ -35,7 +50,20 @@ export default {
       } catch (error) {  
         console.error("Error calling API:", error);  
       }  
-    },  
+    },
+    addCourse() {
+      
+      this.$refs.courseRef.validate((valid) => {  
+        if (valid) {  
+          console.log("success");
+          //course_add_api(course.name);
+          this.handleLogin();
+          
+        } else {  
+          console.log('提交失败');  
+        }  
+      });  
+    }
   },  
 };  
 </script>  
