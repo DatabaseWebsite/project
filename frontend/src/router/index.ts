@@ -21,7 +21,7 @@ const routes: RouteRecordRaw[] = [
     path:'/',
     name: 'index',
     component: Index,
-    // redirect: ; 设为课程公告页，保证一进入就渲染右侧页面
+    redirect: '/announcement', //设为课程公告页，保证一进入就渲染右侧页面
     children: [
       {
         path: '/reference',

@@ -16,6 +16,7 @@
     "axios": "^1.6.2",
     "browser-tool": "^1.2.0",
     "element-plus": "^2.4.3",
+    "file-saver": "^2.0.5",
     "highlight.js": "^11.9.0",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",

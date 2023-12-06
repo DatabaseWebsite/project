@@ -1,5 +1,5 @@
 <template>
-  <div v-if="canUpload" class="upload-box">
+  <div v-if="power" class="upload-box">
     <UploadFile/>
   </div>
   <div v-for="(item, index) in materialData">
@@ -12,7 +12,18 @@
         </div>
       </div>
       <div class="right-section">
-        <icon-down-load :size="30" @click="download(item.url, item.name)" />
+        <icon-down-load :size="30" style="margin: 20px" @click="download(item.url, item.fileName)" />
+        <el-popconfirm
+          confirm-button-text="确定"
+          cancel-button-text="取消"
+          title="确定删除该资料吗？"
+          @confirm="handleDelete(item.id)"
+          style="margin: 20px"
+        >
+          <template #reference>
+            <el-button v-if="power" type="text"><icon-delete :size="30" style="color:darkred"/></el-button>
+          </template>
+        </el-popconfirm>
       </div>
     </div>
     <el-divider style="margin: 0; padding: 0"/>
@@ -23,92 +34,58 @@
 <script lang="ts">
 import UploadFile from "@/components/materials/uploadFile.vue";
 import useAuthStore from "@/store/user.ts";
-import {computed, inject, onMounted, reactive, ref, toRefs} from "vue";
-import {get_materials_api} from "@/api/api.ts";
+import {del_material_api, get_materials_api} from "@/api/api.ts";
 import {
   Download as IconDownLoad,
+  Delete as IconDelete,
 } from "@icon-park/vue-next";
+import {saveAs} from "file-saver";
 
 export default {
   name: "reference",
-  components: {UploadFile, IconDownLoad},
-  methods: {
-    download(fileUrl, fileName) {
-      const a = document.createElement('a')
-      a.href = fileUrl
-      a.download = fileName
-      a.style.display = 'none'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-    }
-  },
-  setup(_props) {
-    const use = useAuthStore()
-    const canUpload = ref(computed(() => {
-      console.log(use.getUser['identity'])
-      return use.getUser['identity'] === 'TEACHER' || use.getUser['identity'] === 'ASSISTANT'
-    }))
-
-    // interface MaterialItem {
-    //   name: string,
-    //   uploadTime: string
-    //   url: string
-    // }
-    const materialData = reactive<Record<string, Record<string, string>>>({
-      '1': {
-        id: '1',
+  components: {UploadFile, IconDownLoad, IconDelete},
+  data() {
+    return {
+      materialData: [{
+        id: 1,
         name: 'test',
         uploadTime: '2021-06-01',
-        url: '',
+        fileName: '2.png',
+        url: "http://127.0.0.1:8000/media/avatars/2.png",
       },
-      '2': {
-        id: '2',
+      {
+        id: 2,
         name: '2023词法分析辅助库',
         uploadTime: '2021-06-02',
-        url: '',
-      },
-      '3': {
-        id: '2',
-        name: '2023词法分析辅助库',
-        uploadTime: '2021-06-02',
-        url: '',
-      },
-      '4': {
-        id: '2',
-        name: '2023词法分析辅助库',
-        uploadTime: '2021-06-02',
-        url: '',
-      },
-      '5': {
-        id: '2',
-        name: '2023词法分析辅助库',
-        uploadTime: '2021-06-02',
-        url: '',
-      },
-      '6': {
-        id: '2',
-        name: '2023词法分析辅助库',
-        uploadTime: '2021-06-02',
-        url: '',
-      }
-    })
-    const materialDataRef = ref(toRefs(materialData))
-    const updateMaterials = async () => {
-      await get_materials_api().then(res => {
-        materialData.value = res.data
-      })
-    }
-    onMounted(async () => {
-      console.log('mounted')
-      // await updateMaterials()
-    })
-    return {
-      canUpload,
-      materialData,
-      updateMaterials
+        fileName: '2.png',
+        url: "http://127.0.0.1:8000/media/avatars/2.png",
+      }]
     }
   },
+  methods: {
+    download(fileUrl, fileName) {
+      saveAs(fileUrl, fileName)
+    },
+    async getMaterials() {
+      await get_materials_api().then(res => {
+        this.materialData = res.data
+      })
+    },
+    async handleDelete(id) {
+      await del_material_api(id).then(res => {
+        this.getMaterials()
+      })
+    }
+  },
+  computed: {
+    power() {
+      const use = useAuthStore()
+      return use.getUser['identity'] === 'TEACHER' || use.getUser['identity'] === 'ASSISTANT'
+    }
+  },
+  mounted() {
+
+  }
 }
 </script>
 
@@ -160,6 +137,8 @@ export default {
 }
 
 .right-section {
+  display: flex;
   text-align: right;
+  align-items: center;
 }
 </style>
