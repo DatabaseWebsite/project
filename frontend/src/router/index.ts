@@ -11,6 +11,8 @@ import LoginLog from "@/components/log/loginLog.vue";
 import OperationLog from "@/components/log/operationLog.vue";
 import Announcement from "@/views/announcement.vue"
 import Course_management from "@/views/course_management.vue";
+import Homework from "@/components/homework/index.vue";
+import TeacherWorkDetail from "@/components/homework/teacherWorkDetail.vue";
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -29,47 +31,53 @@ const routes: RouteRecordRaw[] = [
         component: Reference,
       },
       {
-        path: '/userCenter',
+        path: 'userCenter',
         name: 'userCenter',
         component: UserCenter,
       },
       {
-        path: '/discussionArea',
+        path: 'discussionArea',
         name: 'discussionArea',
         component: DiscussionArea,
       },
       {
-        path: '/announcement',
+        path: 'announcement',
         name: 'announcement',
         component: Announcement,
       },
       {
-        path: '/course_management',
+        path: 'course_management',
         name: 'course_management',
         component: Course_management,
       },
       {
-        path: '/userManage',
+        path: 'userManage',
         name: 'userManage',
         component: UserManage,
       },
       {
-        path: '/loginLog',
+        path: 'loginLog',
         name: 'loginLog',
         component: LoginLog,
       },
       {
-        path: '/operationLog',
+        path: 'operationLog',
         name: 'operationLog',
         component: OperationLog,
+      },
+      {
+        path: 'homework',
+        name: 'homework',
+        component: Homework,
+      },
+      {
+        path: 'homework/workdetail',
+        name: 'workdetail',
+        component: TeacherWorkDetail,
       }
     ]
   },
-  {
-    path:"/:pathMatch(.*)*",
-    name: 'NotFound',
-    component:NotFound
-  },
+
 ]
 // 创建router
 const router = createRouter({

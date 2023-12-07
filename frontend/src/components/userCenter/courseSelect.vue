@@ -22,7 +22,7 @@
 
 <script lang="ts">
 
-import {get_all_courses_api, user_select_course_api} from "@/api/api.ts";
+import {get_user_select_course_api, user_select_course_api} from "@/api/api.ts";
 import useAuthStore from "@/store/user.ts";
 
 export default {
@@ -58,7 +58,7 @@ export default {
     }
   },
   mounted() {
-    get_all_courses_api().then(res => {
+    get_user_select_course_api().then(res => {
       this.courses = res.data.result
       console.log(this.courses)
     })

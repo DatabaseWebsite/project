@@ -26,7 +26,7 @@ export const registerRules = reactive<FormRules<RegisterRuleForm>>({
     {min: 2, max: 10, message: '姓名长度为2-10位', trigger: 'blur'}
   ],
   grade: [
-    {required: true, message: '请输入年级,如2021', trigger: 'blur'},
+    // {required: true, message: '请输入年级,如2021', trigger: 'blur'},
     {min: 4, max: 4, message: '年级长度为4位', trigger: 'blur'}
   ],
   course: [

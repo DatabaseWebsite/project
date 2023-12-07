@@ -25,7 +25,7 @@ def create_course(request):
                                                              selected_course=user.current_course).first().type
 
         if user_category != 'TEACHER':
-            return JsonResponse({"error": "您没有此权限"}, status=400)
+            return JsonResponse({"error": "您没有此权限"}, status=405)
         else:
             course = Course(name=course_name)
             course.save()
@@ -46,7 +46,7 @@ def all_course_info(request):
         data = [{'course_id': course.id, 'name': course.name} for course in courses]
         return JsonResponse({"result": data}, status=status.HTTP_200_OK)
     else:
-        return JsonResponse({"error": "您没有此权限"}, status=400)
+        return JsonResponse({"error": "您没有此权限"}, status=405)
 
 
 @jwt_auth()

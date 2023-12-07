@@ -46,13 +46,13 @@ def signup_admin(request):
     name = request.POST.get('name')
 
     if username is None or password is None or email is None:
-        return JsonResponse({"error": "内容未填写完整"}, status=400)
+        return JsonResponse({"error": "内容未填写完整"}, status=405)
     if User.objects.filter(username=username).exists():
-        return JsonResponse({"error": "用户名已存在"}, status=400)
+        return JsonResponse({"error": "用户名已存在"}, status=405)
     if User.objects.filter(email=email).exists():
-        return JsonResponse({"error": "邮箱已注册"}, status=400)
+        return JsonResponse({"error": "邮箱已注册"}, status=405)
     if password == '':
-        return JsonResponse({"error": "密码不能为空"}, status=400)
+        return JsonResponse({"error": "密码不能为空"}, status=405)
 
     # 使用 create_user 方法创建用户，它会处理密码的哈希存储
     User.objects.create_user(username=username, password=password, email=email, name=name, is_admin=True)
@@ -63,10 +63,10 @@ def signup_admin(request):
 @jwt_auth()
 @require_POST
 def create_single_user(request):
-    new_user_username = request.POST.get('username')
+    new_user_username = request.POST.get('person_id')
     new_user_email = request.POST.get('email')
-    new_user_category = request.POST.get('category')
-    new_user_name = request.POST.get('name')
+    new_user_category = request.POST.get('identity')
+    new_user_name = request.POST.get('username')
 
     request_user = request.user
 
@@ -75,7 +75,7 @@ def create_single_user(request):
         current_user_type = CourseSelectionRecord.objects.filter(user=request_user,
                                                                  selected_course=course).first().type
         if current_user_type == "STUDENT":
-            return JsonResponse({"error": "您无此权限"}, status=400)
+            return JsonResponse({"error": "您无此权限"}, status=405)
     else:
         course_id = request.POST.get('course_id')
         course = Course.objects.filter(pk=course_id).first()
@@ -86,7 +86,7 @@ def create_single_user(request):
             return JsonResponse({"message": "用户{}({})已加入过课程{}".format(
                 new_user_username,
                 CourseSelectionRecord.objects.filter(user=registered_user, selected_course=course).first().type,
-                course.name)}, status=400)
+                course.name)}, status=405)
         else:
             courseSelectedRecord = CourseSelectionRecord(
                 user=registered_user,
@@ -136,7 +136,7 @@ def delete_user(request):
         deleted_user.delete()
         return JsonResponse({"message": "注销成功"}, status=200)
     else:
-        return JsonResponse({"error": "您无此权限"}, status=400)
+        return JsonResponse({"error": "您无此权限"}, status=405)
 
 
 @jwt_auth()
@@ -162,7 +162,7 @@ def delete_users(request):
             count = count + 1
         return JsonResponse({"massage": "总计{}个用户已被删除".format(count)}, status=200)
     else:
-        return JsonResponse({"error": "您无此权限"}, status=400)
+        return JsonResponse({"error": "您无此权限"}, status=405)
 
 
 @jwt_auth()
@@ -177,7 +177,7 @@ def change_password(request):
         user.save()
         return JsonResponse({"message": "密码修改成功"})
     else:
-        return JsonResponse({"error": "旧密码错误"}, status=400)
+        return JsonResponse({"error": "旧密码错误"}, status=405)
 
 
 @jwt_auth()
@@ -188,7 +188,7 @@ def update_avatar(request):
 
     if avatar:
         if avatar.size > 1024 * 1024 * 2:
-            return JsonResponse({"error": "图片大小不能超过2MB"}, status=400)
+            return JsonResponse({"error": "图片大小不能超过2MB"}, status=405)
         if user.avatar.name != 'avatar/default.png':
             user.avatar.delete()
 
@@ -198,7 +198,7 @@ def update_avatar(request):
 
         user.avatar = avatar
     else:
-        return JsonResponse({"error": "未上传头像"}, status=400)
+        return JsonResponse({"error": "未上传头像"}, status=405)
 
     user.save()
     return JsonResponse({"message": "更新成功", "url": user.get_avatar_url()})
@@ -229,7 +229,7 @@ def update_current_course(request):
     new_course = Course.objects.get(pk=new_course_id)
     if new_course is not None:
         if not CourseSelectionRecord.objects.filter(user=user, selected_course=new_course).exists():
-            return JsonResponse({"error": "您未加入该课程"}, status=400)
+            return JsonResponse({"error": "您未加入该课程"}, status=405)
 
         if user.current_course is not None:
             course_id = user.current_course.id
@@ -244,7 +244,7 @@ def update_current_course(request):
             user.save()
             return JsonResponse({"message": "修改课程成功"}, status=200)
     else:
-        return JsonResponse({"error": "未查询到此课程"}, status=400)
+        return JsonResponse({"error": "未查询到此课程"}, status=405)
 
 
 @jwt_auth()
@@ -280,7 +280,7 @@ def get_user_info(request):
 def user_selected_course(request):
     user = request.user
     if user.is_admin:
-        return JsonResponse({"error": "您为网站管理员"}, status=400)
+        return JsonResponse({"error": "您为网站管理员"}, status=405)
     else:
         courseSelectionRecords = CourseSelectionRecord.objects.filter(user=user).all()
         data = [
@@ -362,7 +362,7 @@ def xlsx_create_users(request):
 @jwt_auth()
 @require_GET
 def user_list(request):
-    all_users = User.objects.all()
+    all_users = User.objects.filter(is_admin=False)
     items_per_page = ITEMS_PER_PAGE
     page_number = request.GET.get('page', 1)
 

@@ -49,7 +49,7 @@ def create_homework(request):
         normalHomework.save()
         return JsonResponse({"massage": "作业成功创建"}, status=200)
     else:
-        return JsonResponse({"error": "您无此权限"}, status=400)
+        return JsonResponse({"error": "您无此权限"}, status=405)
 
 
 @jwt_auth()

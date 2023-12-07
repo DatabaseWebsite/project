@@ -95,7 +95,8 @@ export default {
     const rotated = ref(false)
     const user = useAuthStore().getUser
     const identity = user['identity'] === 'TEACHER' ? '教师' :
-                    (user['identity'] === 'STUDENT' ? '学生' : '助教')
+                    (user['identity'] === 'STUDENT' ? '学生' :
+                     user['identity'] === 'ADMIN' ? '管理员' : '助教')
     const closeAvatarEdits = () => {
       dialogVisible.value = false;
     };

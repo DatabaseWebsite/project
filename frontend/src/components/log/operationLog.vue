@@ -165,7 +165,7 @@ export default {
       } else {
         const page = this.curPage || 1
         window.location.href = `/#/operationLog?page=${page}`
-        await get_operation_log_api(this.curPage).then(res => {
+        await get_operation_log_api(page).then(res => {
           this.tableData = res.data['result']
           this.totalPage = res.data['total_page']
         })

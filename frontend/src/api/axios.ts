@@ -30,7 +30,7 @@ const endLoading = () => {
 // 设置接口超时时间
 axios.defaults.timeout = 60000;
 
-axios.defaults.baseURL = '/api'
+axios.defaults.baseURL = 'http://127.0.0.1:8000/';
 // http request 拦截器
 axios.interceptors.request.use(function (config){
   // 在发送请求前做些什么
@@ -58,7 +58,7 @@ axios.interceptors.response.use(async function (response) {
       // success
       return dataAxios
     case 201:
-      if (response.config.url === 'api/login/') {
+      if (response.config.url === 'api/user/login/') {
         ElMessage.error(dataAxios['error'])
         break
       }
@@ -126,7 +126,7 @@ axios.interceptors.response.use(async function (response) {
     default:
       break
   }
-  ElMessage.error(error.response.error)
+  ElMessage.error(error.response.data.error)
   return Promise.reject(error)
 });
 

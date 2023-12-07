@@ -38,18 +38,17 @@ export default {
     this.handleLogin(); // Call the login function during the creation of the component  
   },  
   methods: {  
-    async handleLogin() {  
-      try {  
+    async handleLogin() {
         // Call the API  
-        let info = await all_course_info_api();  
+        await create_course_api(this.course.name).then(res => {
+          this.course_info = res.data.result;
+          console.log(res)
+
+          console.log("API call successful");
+        })
   
         // Update the data property  
-        this.course_info = info.data.result;  
-  
-        console.log("API call successful");  
-      } catch (error) {  
-        console.error("Error calling API:", error);  
-      }  
+
     },
     addCourse() {
       

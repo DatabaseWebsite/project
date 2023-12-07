@@ -34,7 +34,7 @@
           <el-button type="info" @click="resetForm"> <el-icon><Refresh/></el-icon>重置 </el-button>
         </el-form-item>
       </el-form>
-      <el-button size="small" type="primary" @click="createVisible=true"> <icon-add-user/>新增 </el-button>
+      <el-button size="small" type="primary" @click="createVisible=true;"> <icon-add-user/>新增 </el-button>
       <el-button size="small" type="danger" @click="batchDelete"> <el-icon><Delete/> </el-icon>批量删除 </el-button>
       <el-button size="small" type="warning" @click="onExport"> <el-icon><Download/></el-icon>导出 </el-button>
       <el-button size="small" type="success" @click="batchCreationVisible=true"> <el-icon><UploadFilled/></el-icon>批量创建 </el-button>
@@ -201,39 +201,7 @@ export default {
       },
       courseInfo: [],
       isSearching: false,
-      tableData: [
-        {
-          id: 1,
-          person_id: '2019210000',
-          username: '张三',
-          grade: '2019',
-          courses: '计算机网络（学生）,编译原理（学生）',
-        }, {
-           id: 2,
-            person_id: '2019210001',
-            username: '李四',
-            grade: '2019',
-            courses: '计算机网络（助教）',
-          }, {
-            id: 3,
-            person_id: '2019210002',
-            username: '王五',
-            grade: '2019',
-            courses: '计算机网络（老师）',
-        }, {
-          id: 4,
-          person_id: '2019210003',
-          username: '赵六',
-          grade: '2019',
-          courses: '计算机网络（学生）',
-        }, {
-          id: 5,
-          person_id: '2019210004',
-          username: '孙七',
-          grade: '2019',
-          courses: '计算机网络（学生）',
-        }
-      ],
+      tableData: [],
       curPage: 1,
       totPage: 1,
       createVisible: false,
@@ -306,18 +274,6 @@ export default {
         await this.queryUsers()
       }
     },
-    async resetForm() {
-      this.isSearching = false
-      this.curPage = 1
-      this.searchInfo = {
-        personId: '',
-        username: '',
-        grade: '',
-        course: '',
-        identity: ''
-      }
-      await this.queryUsers()
-    },
     async changePage(currentPage) {
       this.curPage = currentPage
       await this.queryUsers()
@@ -385,6 +341,30 @@ export default {
         this.batchCreationVisible = false
         this.queryUsers()
       })
+    },
+    async resetForm() {
+      this.isSearching = false
+      this.curPage = 1
+      this.searchInfo = {
+        personId: '',
+        username: '',
+        grade: '',
+        course: '',
+        identity: ''
+      }
+      await this.queryUsers()
+    }
+  },
+  watch: {
+    async createVisible(val) {
+      if (val) {
+        await get_all_courses_api().then(res => {
+          this.courseInfo = res.data['result']
+          console.log(res)
+          ElMessage.success('获取课程信息成功！')
+        })
+        console.log(this.courseInfo)
+      }
     }
   },
   setup(_props) {
@@ -396,9 +376,18 @@ export default {
       if (!formEl) return
       await formEl.validate(async (valid, fields) => {
         if (valid) {
-          await signup_api(registerUser.personId, registerUser.username, registerUser.grade, registerUser.course, registerUser.identity).then(res => {
+          await signup_api(registerUser.personId, registerUser.username, registerUser.grade, registerUser.course, registerUser.identity).then(async res => {
             ElMessage.success('创建成功！')
-            this.resetForm()
+            this.isSearching = false
+            this.curPage = 1
+            this.searchInfo = {
+              personId: '',
+              username: '',
+              grade: '',
+              course: '',
+              identity: ''
+            }
+            await this.queryUsers()
             this.createVisible = false
           })
         } else {
@@ -410,9 +399,18 @@ export default {
       if (!formEl) return
       await formEl.validate(async (valid, fields) => {
         if (valid) {
-          await update_userinfo_api(editUserInfo.id, editUserInfo.personId, editUserInfo.username, editUserInfo.grade).then(res => {
+          await update_userinfo_api(editUserInfo.id, editUserInfo.personId, editUserInfo.username, editUserInfo.grade).then(async res => {
             ElMessage.success('修改成功！')
-            this.resetForm()
+            this.isSearching = false
+            this.curPage = 1
+            this.searchInfo = {
+              personId: '',
+              username: '',
+              grade: '',
+              course: '',
+              identity: ''
+            }
+            await this.queryUsers()
             this.editVisible = false
           })
         } else {
@@ -454,9 +452,6 @@ export default {
     }
   },
   async mounted() {
-    await get_all_courses_api().then(res => {
-      this.courseInfo = res.data['result']
-    })
     this.getRequest()
     await this.queryUsers()
   }

@@ -6,31 +6,31 @@ import axios from "@/api/axios.ts";
  */
 export const user_refresh_token_api = () => {
   cookies.set('token', cookies.get('refresh'));
-  return axios.get('api/refresh-token/')
+  return axios.get('api/user/refresh-token/')
 }
 export const user_login_api = (username:string, password: string) => {
   const data = new URLSearchParams();
   data.append('username', username);
   data.append('password', password);
-  return axios.post('api/login/', data)
+  return axios.post('api/user/login/', data)
 }
 
 export const user_logout_api = () => {
-  return axios.get('api/logout/')
+  return axios.get('api/user/logout/')
 }
 export const user_update_avatar_api = (avatar: FormData) => {
-  return axios.post('api/update-avatar/', avatar)
+  return axios.post('api/user/update-avatar/', avatar)
 }
 
 export const user_info_api = () => {
-  return axios.get('api/user-info/')
+  return axios.get('api/user/user-info/')
 }
 
 export const user_change_password_api = (oldPassword: string, newPassword: string) => {
   let data = new URLSearchParams();
   data.append('old_password', oldPassword);
   data.append('new_password', newPassword);
-  return axios.post('api/change-password/', data)
+  return axios.post('api/user/change-password/', data)
 }
 
 /*
@@ -38,13 +38,16 @@ export const user_change_password_api = (oldPassword: string, newPassword: strin
  * @return result: 每条信息包含course_id, name
  */
 export const get_all_courses_api = () => {
-  return axios.get('api/all-course-info/')
+  return axios.get('api/userManage/all-course-info/')
+}
+export const get_user_select_course_api = () => {
+  return axios.get('api/user/user-selected-course/')
 }
 
 export const user_select_course_api = (courseId: number) => {
  let data = new URLSearchParams();
   data.append('course_id', courseId.toString());
-  return axios.post('api/update-selected-course/', data)
+  return axios.post('api/user/update-current-course/', data)
 }
 
 
@@ -55,7 +58,7 @@ export const user_select_course_api = (courseId: number) => {
  * 需要后端记录上传时间
  */
 export const upload_materials_api = (files: FormData) => {
-  return axios.post('api/upload-materials/', files)
+  return axios.post('api/material/upload-materials/', files)
 }
 
 /*
@@ -64,7 +67,7 @@ export const upload_materials_api = (files: FormData) => {
  * @return materials
  */
 export const get_materials_api = () => {
-  return axios.get('api/get-materials/')
+  return axios.get('api/material/material-list/')
 }
 
 /*
@@ -75,7 +78,7 @@ export const get_materials_api = () => {
 export const del_material_api = (id:number) => {
   let data = new URLSearchParams();
   data.append('material_id', id.toString());
-  return axios.post('api/del-material/', data)
+  return axios.post('api/material/del-material/', data)
 }
 
 /*
@@ -92,11 +95,11 @@ export const upload_image_api = (image: FormData) => {
   * @return result: 每条信息包含id, personId, username, grade, course, courses:{course_name, identity}
  */
 export const get_user_list_api = (page:number=1) => {
-return axios.get('api/user-list/?page=' + page.toString())
+return axios.get('api/userManage/user-list/?page=' + page.toString())
 }
 
 export const get_all_user_list_api = () => {
-  return axios.get('api/user-list/')
+  return axios.get('api/userManage/user-list/page=')
 }
 
 /*
@@ -107,9 +110,9 @@ export const signup_api = (personId: string, username: string, grade: string, co
   data.append('person_id', personId)
   data.append('username', username) // 密码默认为personId
   data.append('grade', grade)
-  data.append('course', course)
+  data.append('course_id', course)
   data.append('identity', identity)
-  return axios.post('api/signup/', data)
+  return axios.post('api/userManage/create-single-user/', data)
 }
 
 /*
@@ -118,7 +121,7 @@ export const signup_api = (personId: string, username: string, grade: string, co
 export const del_user_api = (id: number) => {
   let data = new URLSearchParams();
   data.append('id', id.toString())
-  return axios.post('api/del-user/', data)
+  return axios.post('api/userManage/del-user/', data)
 }
 
 /*
@@ -130,7 +133,7 @@ export const update_userinfo_api = (id: number, personId: string, username: stri
   data.append('person_id', personId)
   data.append('username', username)
   data.append('grade', grade)
-  return axios.post('api/update-userinfo/', data)
+  return axios.post('api/userManage/update-user-info/', data)
 }
 
 /*
@@ -140,7 +143,7 @@ export const update_userinfo_api = (id: number, personId: string, username: stri
 export const reset_user_password_api = (id: number) => {
   let data = new URLSearchParams();
   data.append('id', id.toString())
-  return axios.post('api/reset-user-password/', data)
+  return axios.post('api/userManage/reset-user-password/', data)
 }
 
 /*
@@ -153,7 +156,7 @@ export const excel_create_users_api = (excel: FormData, course_id:string, identi
   let data = new URLSearchParams();
   data.append('course_id', course_id)
   data.append('identity', identity)
-  return axios.post('api/excel-create-users/', excel, {params: data})
+  return axios.post('api/userManage/xlsx-create-users/', excel, {params: data})
 }
 
 /*
@@ -161,7 +164,7 @@ export const excel_create_users_api = (excel: FormData, course_id:string, identi
   * @param ids: number[]: 用户id列表
  */
 export const del_users_api = (ids: number[]) => {
-  return axios.post('api/del-users/', {ids})
+  return axios.post('api/userManage/del-users/', {ids})
 }
 
 /*
@@ -177,7 +180,7 @@ export const search_user_api = (personId: string, username: string, grade: strin
   data.append('course', course)
   data.append('identity', identity)
   data.append('page', page.toString())
-  return axios.post('api/search-user/', data)
+  return axios.post('api/userManage/search-users/', data)
 }
 
 export const search_all_user_api = (personId: string, username: string, grade: string, course:string, identity: string) => {
@@ -187,11 +190,11 @@ export const search_all_user_api = (personId: string, username: string, grade: s
   data.append('grade', grade)
   data.append('course', course)
   data.append('identity', identity)
-  return axios.post('api/search-user/', data)
+  return axios.post('api/userManage/search-users/', data)
 }
 
 export const get_login_log_api = (page: number) => {
-  return axios.get('api/login-log/?page=' + page.toString())
+  return axios.get('api/log/login-log/?page=' + page.toString())
 }
 
 export const search_login_log_api = (username: string, ip: string, startTime:string, endTime:string, page: number) => {
@@ -201,11 +204,11 @@ export const search_login_log_api = (username: string, ip: string, startTime:str
   data.append('start_time', startTime)
   data.append('end_time', endTime)
   data.append('page', page.toString())
-  return axios.post('api/search-login-log/', data)
+  return axios.post('api/log/search-login-log/', data)
 }
 
 export const get_operation_log_api = (page: number) => {
-  return axios.get('api/operation-log/?page=' + page.toString())
+  return axios.get('api/log/operation-log/?page=' + page.toString())
 }
 
 export const search_operation_log_api = (requestModule:string, api: string, ip: string, username: string, operation: string, starTime: string, endTime: string, page: number) => {
@@ -218,7 +221,7 @@ export const search_operation_log_api = (requestModule:string, api: string, ip: 
   data.append('end_time', endTime)
   data.append('page', page.toString())
   data.append('api', api)
-  return axios.post('api/search-operation-log/', data)
+  return axios.post('api/log/search-operation-log/', data)
 }
 
 export const record_login_log_api = (ip:string, address: string, browser: string, time:string, username: string) => {
@@ -228,7 +231,7 @@ export const record_login_log_api = (ip:string, address: string, browser: string
   data.append('browser', browser)
   data.append('time', time)
   data.append('username', username)
-  return axios.post('api/record-login-log/', data)
+  return axios.post('api/log/record-login-log/', data)
 }
 
 export const record_operation_log_api = (requestModule:string, api: string, ip: string, operation: string, browser: string, status: string, code: string, time: string, username: string) => {
@@ -242,13 +245,85 @@ export const record_operation_log_api = (requestModule:string, api: string, ip: 
   data.append('status', status)
   data.append('code', code)
   data.append('username', username)
-  return axios.post('api/record-operation-log/', data)
+  return axios.post('api/log/record-operation-log/', data)
 }
 
 export const create_course_api = (name: string) => {
-  return axios.post('api/create_course/', name)
+  const data = new URLSearchParams();
+  data.append('course_name', name)
+  return axios.post('api/course/create-course/', data)
 }
 
 export const all_course_info_api = () => {
-  return axios.get('api/all-course-info/')
+  return axios.get('api/userManage/all-course-info/')
+}
+
+/*
+ * title: string
+ * file: files
+ * description: string
+ * totalScore: string
+ * deadline: string // 后端：datetime.fromisoformat(deadline)
+ */
+export const create_work_api = (data : FormData) => {
+  return axios.post('api/homework/create-work', data)
+}
+/*
+ * id: string
+ * title: string
+ * file: file
+ * description: string
+ * totalScore: string
+ * deadline: string // 后端：datetime.fromisoformat(deadline)
+ */
+export const modify_work_api = (data : FormData) => {
+  return axios.post('api/homework/modify-work', data)
+}
+export const delete_work_api = (id : number) => {
+  return axios.post('api/homework/remove-work', id.toString())
+}
+/*
+ * 根据身份判断返回信息
+ * 老师等返回创建时的所有信息,files返回id, name, url
+ * 学生：返回id,title, totalScore, deadline, status, score
+ */
+export const get_works_info_api = () => {
+  return axios.get('api/homework/works-info')
+}
+
+export const get_one_work_api = (id: number) => {
+  let data = new URLSearchParams()
+  data.append('id', id.toString())
+  return axios.post('api/homework/work-detail/', data)
+}
+
+export const get_work_submissions_api = (page: number) => {
+  return axios.get('api/homework/work-submissions/?page=' + page.toString())
+}
+
+export const get_work_submission_by_id_api = (id: any) => {
+  let data = new URLSearchParams()
+  data.append('id', id.toString())
+  return axios.post('api/homework/work-submissions-detail/', data)
+}
+
+export const submit_work_score_api = (id: number, score: number) => {
+  let data = new URLSearchParams()
+  data.append('id', id.toString())
+  data.append('score', score.toString())
+  return axios.post('api/homework/submit-work-score/', data)
+}
+
+export const student_get_work_detail_api = (id: number) => {
+  let data = new URLSearchParams()
+  data.append('id', id.toString())
+  return axios.post('api/homework/student-work-detail', data)
+}
+
+export const student_submit_work_api = (id: number, context: string, file: any) => {
+  let data = new FormData()
+  data.append('id', id.toString())
+  data.append('context', context)
+  data.append('file', file.raw)
+  return axios.post('api/homework/student-submit-work', data)
 }

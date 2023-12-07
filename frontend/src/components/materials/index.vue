@@ -1,6 +1,6 @@
 <template>
   <div v-if="power" class="upload-box">
-    <UploadFile/>
+    <UploadMaterials/>
   </div>
   <div v-for="(item, index) in materialData">
     <div class="material-item">
@@ -32,7 +32,7 @@
 <!--  课程资料页面-->
 
 <script lang="ts">
-import UploadFile from "@/components/materials/uploadFile.vue";
+import UploadMaterials from "@/components/materials/uploadMaterials.vue";
 import useAuthStore from "@/store/user.ts";
 import {del_material_api, get_materials_api} from "@/api/api.ts";
 import {
@@ -43,7 +43,7 @@ import {saveAs} from "file-saver";
 
 export default {
   name: "reference",
-  components: {UploadFile, IconDownLoad, IconDelete},
+  components: {UploadMaterials, IconDownLoad, IconDelete},
   data() {
     return {
       materialData: [{

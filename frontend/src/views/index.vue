@@ -31,7 +31,7 @@
           <el-icon><Files /></el-icon>
           <template #title><span>课程资料</span></template>
         </el-menu-item>
-        <el-menu-item index="/">
+        <el-menu-item index="/homework">
           <el-icon><Document /></el-icon>
           <template #title><span>课程作业</span></template>
         </el-menu-item>
@@ -115,7 +115,7 @@ export default {
         case "/reference":
           this.menuTitle = '课程资料'
           break
-        case "4":
+        case "/homework":
           this.menuTitle = '课程作业'
           break
         case "/discussionArea":
