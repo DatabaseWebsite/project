@@ -1,0 +1,3 @@
+ITEMS_PER_PAGE = 2
+
+MEDIA_ADDRESS = 'http://101.43.220.45:8000/media/'
