@@ -59,7 +59,7 @@ axios.interceptors.response.use(async function (response) {
       return dataAxios
     case 201:
       if (response.config.url === 'api/user/login/') {
-        ElMessage.error(dataAxios['error'])
+        ElMessage.error(dataAxios.data['error'])
         break
       }
       let res = await user_refresh_token_api()
@@ -86,6 +86,7 @@ axios.interceptors.response.use(async function (response) {
 }, async function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
+  console.log(error)
   endLoading()
   // if (error.response.config.url !== 'api/record-login-log/' && error.response.config.url !== 'api/record-operation-log/')
   //   await record(error.config, error.response)

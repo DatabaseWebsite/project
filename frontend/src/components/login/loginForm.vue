@@ -42,6 +42,7 @@ import useAuthStore from "@/store/user.ts";
 import {user_info_api, user_login_api} from "@/api/api.ts";
 import cookies from "@/lib/cookies.ts";
 import {router} from "@/router";
+import {ElMessage} from "element-plus";
 
 export default {
   name: 'loginForm',
@@ -65,14 +66,16 @@ export default {
       ctx.$refs[formName].validate(async (valid: boolean) => {
         if (valid) {
           await user_login_api(ctx.loginUser.username, ctx.loginUser.password).then(async (res) => {
-            res = res.data
-            cookies.set('uuid', res["userId"])
-            cookies.set('token', res["access"])
-            cookies.set('refreshToken', res["refresh"])
-            userStore.loginSuccess()
-            let userInfoRes = await user_info_api()
-            userStore.setUserinfo(userInfoRes.data)
-            router.push('/')// todo：跳转到首页
+            if (res.data["code"] === 200) {
+              res = res.data
+              cookies.set('uuid', res["userId"])
+              cookies.set('token', res["access"])
+              cookies.set('refreshToken', res["refresh"])
+              userStore.loginSuccess()
+              let userInfoRes = await user_info_api()
+              userStore.setUserinfo(userInfoRes.data)
+              router.push('/')// todo：跳转到首页
+            }
           })
         } else {
           console.log("error submit!!");

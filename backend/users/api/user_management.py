@@ -379,14 +379,15 @@ def user_list(request):
     serialized_data = [
         {
             'id': user.id,
-            'username': user.username,
-            'name': user.name,
-            'current_course': user.current_course.name
+            'person_id': user.username,
+            'username': user.name,
+            'current_course': user.current_course.name if user.current_course else '',
         }
         for user in current_page_data
     ]
+    print(serialized_data)
     return JsonResponse({
-        'results': serialized_data,
+        'result': serialized_data,
         'total_pages': paginator.num_pages,
         'current_page': current_page_data.number})
 
@@ -425,9 +426,9 @@ def search_users(request):
     result_ = [
         {
             "id": filtered_user.id,
-            "personId": filtered_user.username,
+            "person_id": filtered_user.username,
+            "username": filtered_user.name,
             "grade": filtered_user.grade,
-            "course": filtered_user.current_course.name,
             "courses": []
         }
         for filtered_user in filtered_users

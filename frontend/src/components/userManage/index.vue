@@ -64,7 +64,7 @@
       </div>
     </el-main>
   </el-container>
-  <el-dialog title="新增用户" v-model="createVisible">
+  <el-dialog title="新增用户" v-model="createVisible" :before-close="resetForm">
     <el-form ref="registerFormRef" :model="registerUser" :rules="registerRules" label-width="80">
       <el-form-item label="学号" prop="personId">
         <el-input v-model="registerUser.personId" placeholder="请输入学号"></el-input>
@@ -164,7 +164,7 @@ import {
   Search,
   Refresh
 } from "@element-plus/icons-vue";
-import {ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {registerRules, registerUser} from "@/components/userManage/registerForm.ts";
 import {editRules, editUserInfo} from "@/components/userManage/EditUserInfo.ts";
 import uploadExcel from "@/components/userManage/uploadExcel.vue";
@@ -190,205 +190,48 @@ export default {
     IconEditName, IconAddUser, IconPeopleDeleteOne,
     Delete, Download, UploadFilled, uploadExcel, Search, Refresh
   },
-  data() {
-    return {
-      searchInfo: {
-        personId: '',
-        username: '',
-        grade: '',
-        course: '',
-        identity: '',
-      },
-      courseInfo: [],
-      isSearching: false,
-      tableData: [],
-      curPage: 1,
-      totPage: 1,
-      createVisible: false,
-      batchCreationVisible: false,
-      editVisible: false,
-      batchCreationInfo: {
-        file: [],
-        course_id: '',
-        identity: ''
-      }
-    }
-  },
-  methods: {
-    getRequest() {
-      const result = {}
-      const query = window.location.href.split('?')[1]
-      if (query) {
-        const queryArr = query.split('&')
-        queryArr.forEach(item => {
-          const value = decodeURIComponent(item.split('=')[1])
-          console.log(value)
-          const key = item.split('=')[0]
-          const results = result as any
-          results[key] = value
-        })
-      }
-      if (result['personId'] != null) {
-        this.searchInfo.personId = result['personId']
-        this.searchInfo.username = result['username']
-        this.searchInfo.grade = result['grade']
-        this.searchInfo.course = result['course']
-        this.searchInfo.identity = result['identity']
-        this.isSearching = true
-        this.curPage = result['page']
-      } else {
-        this.isSearching = false
-        this.curPage = result['page']
-      }
-    },
-    async queryUsers() {
-      if (this.isSearching) {
-        window.location.href = `/#/userManage?personId=${this.searchInfo.personId}&username=${this.searchInfo.username}&grade=${this.searchInfo.grade}&course=${this.searchInfo.course}&identity=${this.searchInfo.identity}&page=${this.curPage}`
-        await search_user_api(this.searchInfo.personId, this.searchInfo.username, this.searchInfo.grade, this.searchInfo.course, this.searchInfo.identity, this.curPage).then(res => {
-          this.tableData = res.data['result']
-          this.totPage = res.data['total_page']
-        })
-      } else {
-        const page = this.curPage || 1
-        window.location.href = `/#/userManage?page=${page}`
-        await get_user_list_api(this.curPage).then(res => {
-          this.tableData = res.data['result']
-          this.totPage = res.data['total_page']
-        })
-      }
-    },
-    async submitForm() {
-      let isValid = true
-      if (this.searchInfo.personId=='' && this.searchInfo.username=='' && this.searchInfo.course=='' && this.searchInfo.identity=='' && this.searchInfo.grade=='' ) {
-        isValid = false
-        ElMessage.warning('查询条件不能全为空')
-
-      }
-      if (this.searchInfo.course=='' && this.searchInfo.identity!='') {
-        isValid = false
-        ElMessage.warning('身份必须基于课程查询')
-      }
-      if(isValid) {
-        this.curPage = 1
-        this.isSearching = true
-        await this.queryUsers()
-      }
-    },
-    async changePage(currentPage) {
-      this.curPage = currentPage
-      await this.queryUsers()
-    },
-    handleEdit(index, row) {
-      this.editUserInfo.id = row['id']
-      this.editUserInfo.personId = row['person_id']
-      this.editUserInfo.username = row['username']
-      this.editUserInfo.grade = row['grade']
-      this.editVisible = true
-      this.queryUsers()
-    },
-    onExport() {
-      ElMessageBox.confirm('此操作将导出当前查询结果, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(async() => {
-        if (this.isSearching) {
-          await search_all_user_api(this.searchInfo.personId, this.searchInfo.username, this.searchInfo.grade, this.searchInfo.course, this.searchInfo.identity).then(res => {
-            const title = ['ID', '学号', '姓名', '年级', '参与课程及身份']
-            exportExcel(res.data['result'], '用户信息', title, 'sheetName')
-            ElMessage.success('导出成功！')
-          })
-        } else {
-          await get_all_user_list_api().then(res => {
-            const title = ['序号', '学号', '姓名', '年级', '参与课程及身份']
-            exportExcel(res.data['result'], '用户信息', title, 'sheetName')
-            ElMessage.success('导出成功！')
-          })
-        }
-      })
-    },
-    deleteOne(index, row) {
-      ElMessageBox.confirm('此操作将永久删除该用户, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(async() => {
-        await del_user_api(row['id']).then(res => {
-          ElMessage.success('删除成功！')
-          this.queryUsers()
-        })
-      })
-    },
-    resetPassword(index, row) {
-      ElMessageBox.confirm('此操作将重置该用户密码, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(async() => {
-        await reset_user_password_api(row['id']).then(res => {
-          ElMessage.success('重置成功！')
-        })
-      })
-    },
-    handleFileUploaded(file) {
-      this.batchCreationInfo.file = file
-    },
-    async submitBatchCreation() {
-      let data = new FormData()
-      data.append('xlsxFile', this.batchCreationInfo.file[0].raw)
-      await excel_create_users_api(data, this.batchCreationInfo.course_id, this.batchCreationInfo.identity).then(res => {
-        ElMessage.success('批量创建成功！')
-        this.batchCreationVisible = false
-        this.queryUsers()
-      })
-    },
-    async resetForm() {
-      this.isSearching = false
-      this.curPage = 1
-      this.searchInfo = {
-        personId: '',
-        username: '',
-        grade: '',
-        course: '',
-        identity: ''
-      }
-      await this.queryUsers()
-    }
-  },
-  watch: {
-    async createVisible(val) {
-      if (val) {
-        await get_all_courses_api().then(res => {
-          this.courseInfo = res.data['result']
-          console.log(res)
-          ElMessage.success('获取课程信息成功！')
-        })
-        console.log(this.courseInfo)
-      }
-    }
-  },
   setup(_props) {
     const registerFormRef = ref<FormInstance>()
     const editFormRef = ref<FormInstance>()
     const multipleTableRef = ref<InstanceType<typeof ElTable>>()
     const multipleSelection = ref([])
+    const searchInfo = ref({
+      personId: '',
+      username: '',
+      grade: '',
+      course: '',
+      identity: '',
+    })
+    const courseInfo = ref([])
+    const isSearching = ref(false)
+    const tableData = ref([])
+    const curPage = ref(1)
+    const totPage = ref(1)
+    const createVisible = ref(false)
+    const batchCreationVisible = ref(false)
+    const editVisible = ref(false)
+    const batchCreationInfo = ref({
+      file: [],
+      course_id: '',
+      identity: '',
+    })
+
     const submitCreate = async(formEl: FormInstance | undefined) => {
       if (!formEl) return
       await formEl.validate(async (valid, fields) => {
         if (valid) {
           await signup_api(registerUser.personId, registerUser.username, registerUser.grade, registerUser.course, registerUser.identity).then(async res => {
             ElMessage.success('创建成功！')
-            this.isSearching = false
-            this.curPage = 1
-            this.searchInfo = {
+            isSearching.value = false
+            curPage.value = 1
+            searchInfo.value = {
               personId: '',
               username: '',
               grade: '',
               course: '',
               identity: ''
             }
-            await this.queryUsers()
-            this.createVisible = false
+            await queryUsers()
           })
         } else {
           ElMessage.warning('错误提交！！')
@@ -401,17 +244,17 @@ export default {
         if (valid) {
           await update_userinfo_api(editUserInfo.id, editUserInfo.personId, editUserInfo.username, editUserInfo.grade).then(async res => {
             ElMessage.success('修改成功！')
-            this.isSearching = false
-            this.curPage = 1
-            this.searchInfo = {
+            isSearching.value = false
+            curPage.value = 1
+            searchInfo.value = {
               personId: '',
               username: '',
               grade: '',
               course: '',
               identity: ''
             }
-            await this.queryUsers()
-            this.editVisible = false
+            await queryUsers()
+            editVisible.value = false
           })
         } else {
           ElMessage.warning('错误提交！！')
@@ -434,13 +277,162 @@ export default {
           for (let i = 0; i < multipleSelection.value.length; i++) {
             data.push(multipleSelection.value[i]['id'])
           }
-          await del_users_api(data).then(res => {
+          await del_users_api(data).then(async res => {
             ElMessage.success('删除成功！')
-            this.queryUsers()
+            await queryUsers()
           })
         })
       }
     }
+    function getRequest() {
+      const result = {}
+      const query = window.location.href.split('?')[1]
+      if (query) {
+        const queryArr = query.split('&')
+        queryArr.forEach(item => {
+          const value = decodeURIComponent(item.split('=')[1])
+          const key = item.split('=')[0]
+          const results = result as any
+          results[key] = value
+        })
+      }
+      if (!query.indexOf('personId')) {
+        isSearching.value = false
+        curPage.value = result['page'] || 1
+      } else {
+        searchInfo.value['personId'] = result['personId']
+        searchInfo.value['username'] = result['username']
+        searchInfo.value['grade'] = result['grade']
+        searchInfo.value['course'] = result['course']
+        searchInfo.value['identity'] = result['identity']
+        isSearching.value = true
+        curPage.value = result['page']
+      }
+    }
+    async function queryUsers() {
+      if (isSearching.value) {
+        window.location.href = `/#/userManage?personId=${searchInfo.value.personId}&username=${searchInfo.value.username}&grade=${searchInfo.value.grade}&course=${searchInfo.value.course}&identity=${searchInfo.value.identity}&page=${curPage.value}`
+        await search_user_api(searchInfo.value.personId, searchInfo.value.username, searchInfo.value.grade, searchInfo.value.course, searchInfo.value.identity, curPage.value).then(res => {
+          tableData.value = res.data['result']
+          totPage.value = res.data['total_page']
+        })
+      } else {
+        const page = curPage.value || 1
+        window.location.href = `/#/userManage?page=${page}`
+        await get_user_list_api(curPage.value).then(res => {
+          tableData.value = res.data['result']
+          totPage.value = res.data['total_page']
+        })
+      }
+    }
+    async function submitForm() {
+      let isValid = true
+      if (searchInfo.value.personId=='' && searchInfo.value.username=='' && searchInfo.value.course=='' && searchInfo.value.identity=='' && searchInfo.value.grade=='' ) {
+        isValid = false
+        ElMessage.warning('查询条件不能全为空')
+
+      }
+      if (searchInfo.value.course=='' && searchInfo.value.identity!='') {
+        isValid = false
+        ElMessage.warning('身份必须基于课程查询')
+      }
+      if(isValid) {
+        curPage.value = 1
+        isSearching.value = true
+        await queryUsers()
+      }
+    }
+    async function changePage(currentPage) {
+      curPage.value = currentPage
+      await queryUsers()
+    }
+    async function handleEdit(index, row) {
+      editUserInfo.id = row['id']
+      editUserInfo.personId = row['person_id']
+      editUserInfo.username = row['username']
+      editUserInfo.grade = row['grade']
+      editVisible.value = true
+      await queryUsers()
+    }
+    function onExport() {
+      ElMessageBox.confirm('此操作将导出当前查询结果, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        if (isSearching.value) {
+          await search_all_user_api(searchInfo.value.personId, searchInfo.value.username, searchInfo.value.grade, searchInfo.value.course, searchInfo.value.identity).then(res => {
+            const title = ['ID', '学号', '姓名', '年级', '参与课程及身份']
+            exportExcel(res.data['result'], '用户信息', title, 'sheetName')
+            ElMessage.success('导出成功！')
+          })
+        } else {
+          await get_all_user_list_api().then(res => {
+            const title = ['序号', '学号', '姓名', '年级', '参与课程及身份']
+            exportExcel(res.data['result'], '用户信息', title, 'sheetName')
+            ElMessage.success('导出成功！')
+          })
+        }
+      })
+    }
+    function deleteOne(index, row) {
+      ElMessageBox.confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        await del_user_api(row['id']).then(res => {
+          ElMessage.success('删除成功！')
+          queryUsers()
+        })
+      })
+    }
+    function resetPassword(index, row) {
+      ElMessageBox.confirm('此操作将重置该用户密码, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        await reset_user_password_api(row['id']).then(res => {
+          ElMessage.success('重置成功！')
+        })
+      })
+    }
+    function handleFileUploaded(file) {
+      batchCreationInfo.value.file = file
+    }
+    async function submitBatchCreation() {
+      let data = new FormData()
+      data.append('xlsxFile', batchCreationInfo.value.file[0].raw)
+      await excel_create_users_api(data, batchCreationInfo.value.course_id, batchCreationInfo.value.identity).then(res => {
+        ElMessage.success('批量创建成功！')
+        batchCreationVisible.value = false
+        queryUsers()
+      })
+    }
+    async function resetForm() {
+      isSearching.value = false
+      curPage.value = 1
+      searchInfo.value = {
+        personId: '',
+        username: '',
+        grade: '',
+        course: '',
+        identity: ''
+      }
+      await queryUsers()
+    }
+    watch(createVisible, async (newVal, oldVal) => {
+      if (newVal) {
+        await get_all_courses_api().then(res => {
+          courseInfo.value = res.data['result']
+          console.log('获取课程信息成功！')
+        })
+      }
+    })
+    onMounted(async () => {
+      await queryUsers()
+    })
     return {
       registerFormRef,
       submitCreate,
@@ -449,11 +441,27 @@ export default {
       multipleTableRef,
       handleSelectionChange,
       batchDelete,
+      searchInfo,
+      courseInfo,
+      isSearching,
+      tableData,
+      curPage,
+      totPage,
+      createVisible,
+      batchCreationVisible,
+      editVisible,
+      batchCreationInfo,
+      getRequest,
+      resetPassword,
+      resetForm,
+      handleEdit,
+      handleFileUploaded,
+      submitForm,
+      submitBatchCreation,
+      deleteOne,
+      onExport,
+      changePage
     }
-  },
-  async mounted() {
-    this.getRequest()
-    await this.queryUsers()
   }
 }
 </script>

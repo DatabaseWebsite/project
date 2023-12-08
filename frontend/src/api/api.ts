@@ -99,7 +99,7 @@ return axios.get('api/userManage/user-list/?page=' + page.toString())
 }
 
 export const get_all_user_list_api = () => {
-  return axios.get('api/userManage/user-list/page=')
+  return axios.get('api/userManage/user-list/?page=')
 }
 
 /*
