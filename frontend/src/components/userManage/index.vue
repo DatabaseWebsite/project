@@ -64,7 +64,7 @@
       </div>
     </el-main>
   </el-container>
-  <el-dialog title="新增用户" v-model="createVisible" :before-close="resetForm">
+  <el-dialog title="新增用户" v-model="createVisible">
     <el-form ref="registerFormRef" :model="registerUser" :rules="registerRules" label-width="80">
       <el-form-item label="学号" prop="personId">
         <el-input v-model="registerUser.personId" placeholder="请输入学号"></el-input>
@@ -362,13 +362,13 @@ export default {
       }).then(async() => {
         if (isSearching.value) {
           await search_all_user_api(searchInfo.value.personId, searchInfo.value.username, searchInfo.value.grade, searchInfo.value.course, searchInfo.value.identity).then(res => {
-            const title = ['ID', '学号', '姓名', '年级', '参与课程及身份']
+            const title = ['序号', '学号', '姓名', '参与课程及身份']
             exportExcel(res.data['result'], '用户信息', title, 'sheetName')
             ElMessage.success('导出成功！')
           })
         } else {
           await get_all_user_list_api().then(res => {
-            const title = ['序号', '学号', '姓名', '年级', '参与课程及身份']
+            const title = ['序号', '学号', '姓名', '参与课程及身份']
             exportExcel(res.data['result'], '用户信息', title, 'sheetName')
             ElMessage.success('导出成功！')
           })
@@ -425,6 +425,11 @@ export default {
     watch(createVisible, async (newVal, oldVal) => {
       if (newVal) {
         await get_all_courses_api().then(res => {
+          registerUser.identity = ''
+          registerUser.course = ''
+          registerUser.grade = ''
+          registerUser.personId = ''
+          registerUser.username = ''
           courseInfo.value = res.data['result']
           console.log('获取课程信息成功！')
         })
