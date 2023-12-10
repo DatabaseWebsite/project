@@ -260,7 +260,7 @@ export const all_course_info_api = () => {
 
 /*
  * title: string
- * file: files
+ * file: file
  * description: string
  * totalScore: string
  * deadline: string // 后端：datetime.fromisoformat(deadline)
@@ -297,8 +297,11 @@ export const get_one_work_api = (id: number) => {
   return axios.post('api/homework/work-detail/', data)
 }
 
-export const get_work_submissions_api = (page: number) => {
-  return axios.get('api/homework/work-submissions/?page=' + page.toString())
+export const get_work_submissions_api = (id: number, page: number) => {
+  let data = new URLSearchParams()
+  data.append('id', id.toString())
+  data.append('page', page.toString())
+  return axios.post('api/homework/work-submissions/', data)
 }
 
 export const get_work_submission_by_id_api = (id: any) => {
