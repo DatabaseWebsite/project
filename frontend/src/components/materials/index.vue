@@ -80,7 +80,7 @@ export default {
   computed: {
     power() {
       const use = useAuthStore()
-      return use.getUser['identity'] === 'TEACHER' || use.getUser['identity'] === 'ASSISTANT'
+      return use.getUser['identity'] === 'ADMIN' || use.getUser['identity'] === 'TEACHER' || use.getUser['identity'] === 'ASSISTANT'
     }
   },
   mounted() {

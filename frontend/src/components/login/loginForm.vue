@@ -109,6 +109,9 @@ export default {
   --el-input-bg-color: rgb(0, 0, 0, 0);
   --el-input-border-color: rgb(0, 0, 0, 0);
 }
+:deep(.el-input__inner) {
+  color: white;
+}
 :deep(.el-input-group__append), :deep(.el-input-group__prepend) {
   background-color: rgb(0, 0, 0, 0);
   color: white;

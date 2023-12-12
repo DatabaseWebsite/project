@@ -381,7 +381,7 @@ def user_list(request):
             'id': user.id,
             'person_id': user.username,
             'username': user.name,
-            'current_course': user.current_course.name if user.current_course else '',
+            'courses': user.current_course.name if user.current_course else '',
         }
         for user in current_page_data
     ]
@@ -429,7 +429,7 @@ def search_users(request):
             "person_id": filtered_user.username,
             "username": filtered_user.name,
             "grade": filtered_user.grade,
-            "courses": []
+            "courses": ''
         }
         for filtered_user in filtered_users
     ]
@@ -438,12 +438,7 @@ def search_users(request):
     for filtered_user in filtered_users:
         selected_courses_records = CourseSelectionRecord.objects.filter(user=filtered_user)
         for record in selected_courses_records:
-            result_[i].get('courses').append(
-                {
-                    "course_name": record.selected_course.name,
-                    "identity": record.type
-                }
-            )
+            result_.get('courses').append(record.selected_course.name + '(' + record.type + ')')
 
     paginator = Paginator(result_, ITEMS_PER_PAGE)
 
