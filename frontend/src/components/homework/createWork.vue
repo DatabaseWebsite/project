@@ -16,29 +16,7 @@
         <md-editor v-model="workInfo.description"/>
       </el-form-item>
       <el-form-item label="作业文件">
-        <el-upload
-          class="upload-demo"
-          action="#"
-          drag
-          :accept="accept"
-          :auto-upload="false"
-          limit='1'
-          :file-list="workInfo.file"
-          :on-exceed="handleExceed"
-          :on-remove="handleRemove"
-          :on-change="handleChange"
-          :before-upload="handleBeforeUpload"
-        >
-          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-          <div class="el-upload__text">
-            Drop file here or <em>click to upload</em>
-          </div>
-          <template #tip>
-            <div class="el-upload__tip">
-              支持doc, docx, pdf, ppt, txt, xls, xlsx, zip, rar格式文件；文件大小不超过20M；单文件
-            </div>
-          </template>
-        </el-upload>
+        <upload-file v-model:submitFile="workInfo.file"/>
       </el-form-item>
       <el-form-item label="作业总分" prop="totalScore">
         <el-input v-model="workInfo.totalScore" placeholder="请输入作业总分"></el-input>
@@ -60,6 +38,7 @@ import {ElMessage, FormInstance} from "element-plus";
 import {create_work_api} from "@/api/api.ts";
 import {UploadFilled} from "@element-plus/icons-vue";
 import MdEditor from "@/components/markdown/mdEditor.vue";
+import UploadFile from "@/lib/uploadFile.vue";
 
 
 interface WorkRuleForm {
@@ -71,7 +50,7 @@ interface WorkRuleForm {
 }
 export default {
   name: "createWork",
-  components: {MdEditor, UploadFilled},
+  components: {UploadFile, MdEditor, UploadFilled},
   props: {
     createWorkVisible: {
       type: Boolean,
