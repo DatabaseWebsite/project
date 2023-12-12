@@ -55,7 +55,7 @@
             <el-button type="danger" size="small" @click="deleteOne(scope.$index, scope.row)">
               <icon-people-delete-one size="15"/>
             </el-button>
-            <el-button link type="primary" size="small" @click="resetPassword">重置密码</el-button>
+            <el-button link type="primary" size="small" @click="resetPassword(scope.$index, scope.row)">重置密码</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -99,7 +99,7 @@
     </el-form>
   </el-dialog>
   <el-dialog title="批量创建用户" v-model="batchCreationVisible">
-    <uploadExcel @file-uploaded="handleFileUploaded"/>
+    <upload-file v-model:submitFile="batchCreationInfo.file" :file-type="xlsxFileType" :file-size="10"/>
     <el-form v-model="batchCreationInfo" label-width="80">
       <el-form-item label="加入课程" prop="course">
         <el-select v-model="batchCreationInfo.course_id" placeholder="请选择课程" clearable>
@@ -151,7 +151,7 @@ import {
   signup_api,
   update_userinfo_api
 } from "@/api/api.ts";
-import {ElMessage, ElMessageBox, ElTable, FormInstance} from "element-plus";
+import {ElMessage, ElMessageBox, ElTable, FormInstance, FormRules} from "element-plus";
 import {
   EditName as IconEditName,
   AddUser as IconAddUser,
@@ -164,14 +164,23 @@ import {
   Search,
   Refresh
 } from "@element-plus/icons-vue";
-import {onMounted, ref, watch} from "vue";
+import {onMounted, reactive, ref, watch} from "vue";
 import {registerRules, registerUser} from "@/components/userManage/registerForm.ts";
 import {editRules, editUserInfo} from "@/components/userManage/EditUserInfo.ts";
-import uploadExcel from "@/components/userManage/uploadExcel.vue";
 import {exportExcel} from "@/components/userManage/exportExcel.ts";
-
+import UploadFile from "@/lib/uploadFile.vue";
+interface BatchCreation {
+  file: any,
+  course_id: string,
+  identity: string,
+}
 export default {
   name: "userManage",
+  data() {
+    return {
+      xlsxFileType: ['.xlsx', '.xls']
+    }
+  },
   computed: {
     editRules() {
       return editRules
@@ -187,8 +196,9 @@ export default {
     }
   },
   components: {
+    UploadFile,
     IconEditName, IconAddUser, IconPeopleDeleteOne,
-    Delete, Download, UploadFilled, uploadExcel, Search, Refresh
+    Delete, Download, UploadFilled, Search, Refresh
   },
   setup(_props) {
     const registerFormRef = ref<FormInstance>()
@@ -210,8 +220,8 @@ export default {
     const createVisible = ref(false)
     const batchCreationVisible = ref(false)
     const editVisible = ref(false)
-    const batchCreationInfo = ref({
-      file: [],
+    const batchCreationInfo = reactive<BatchCreation>({
+      file: '',
       course_id: '',
       identity: '',
     })
@@ -242,6 +252,7 @@ export default {
       if (!formEl) return
       await formEl.validate(async (valid, fields) => {
         if (valid) {
+          console.log(editUserInfo)
           await update_userinfo_api(editUserInfo.id, editUserInfo.personId, editUserInfo.username, editUserInfo.grade).then(async res => {
             ElMessage.success('修改成功！')
             isSearching.value = false
@@ -398,13 +409,24 @@ export default {
         })
       })
     }
-    function handleFileUploaded(file) {
-      batchCreationInfo.value.file = file
-    }
     async function submitBatchCreation() {
+      if (batchCreationInfo.file === '') {
+        ElMessage.warning('请上传文件！')
+        return
+      }
+      if (batchCreationInfo.course_id === '') {
+        ElMessage.warning('请选择课程！')
+        return
+      }
+      if (batchCreationInfo.identity === '') {
+        ElMessage.warning('请选择身份！')
+        return
+      }
       let data = new FormData()
-      data.append('xlsxFile', batchCreationInfo.value.file[0].raw)
-      await excel_create_users_api(data, batchCreationInfo.value.course_id, batchCreationInfo.value.identity).then(res => {
+      data.append('xlsxFile', batchCreationInfo.file[0].raw)
+      data.append('course_id', batchCreationInfo.course_id)
+      data.append('identity', batchCreationInfo.identity)
+      await excel_create_users_api(data).then(res => {
         ElMessage.success('批量创建成功！')
         batchCreationVisible.value = false
         queryUsers()
@@ -435,6 +457,17 @@ export default {
         })
       }
     })
+    watch(batchCreationVisible, async (newVal, oldVal) => {
+      if (newVal) {
+        await get_all_courses_api().then(res => {
+          batchCreationInfo.identity = ''
+          batchCreationInfo.course_id = ''
+          batchCreationInfo.file = ''
+          courseInfo.value = res.data['result']
+          console.log('获取课程信息成功！')
+        })
+      }
+    })
     onMounted(async () => {
       await queryUsers()
     })
@@ -460,7 +493,6 @@ export default {
       resetPassword,
       resetForm,
       handleEdit,
-      handleFileUploaded,
       submitForm,
       submitBatchCreation,
       deleteOne,

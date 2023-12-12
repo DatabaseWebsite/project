@@ -53,7 +53,7 @@ export const user_select_course_api = (courseId: number) => {
 
 /*
  * @api {post} /upload-materials/ 上传文件
- * @param files: {{name, raw}*}
+ * @param files: 文件数组
  * 另外，上传的课程id即为该用户的当前课程
  * 需要后端记录上传时间
  */
@@ -64,7 +64,7 @@ export const upload_materials_api = (files: FormData) => {
 /*
  * @api {get} /get-materials/ 获取课程资料
  * 根据用户当前课程获取课程资料
- * @return materials
+ * @return result
  */
 export const get_materials_api = () => {
   return axios.get('api/material/material-list/')
@@ -72,7 +72,7 @@ export const get_materials_api = () => {
 
 /*
  * @api {post} /del-material/ 删除课程资料
- * @param material_id: int 资料id
+ * @param material_id: 资料id
  * @return null
  */
 export const del_material_api = (id:number) => {
@@ -147,24 +147,23 @@ export const reset_user_password_api = (id: number) => {
 }
 
 /*
-  * @api {post} /excel-create-users/ 批量注册
-  * @param excel: FormData: 通过xlsxFile获取，excel内包含学号，姓名，年级
-  * @param course: string: 课程名
-  * @param identity: string: 身份
+ * @api {post} /excel-create-users/ 批量注册
+ * @param xlsxFile: 文件，excel内包含学号，姓名，年级
+ * @param course: string: 课程名
+ * @param identity: string: 身份
  */
-export const excel_create_users_api = (excel: FormData, course_id:string, identity: string) => {
-  let data = new URLSearchParams();
-  data.append('course_id', course_id)
-  data.append('identity', identity)
-  return axios.post('api/userManage/xlsx-create-users/', excel, {params: data})
+export const excel_create_users_api = (data: FormData) => {
+  return axios.post('api/userManage/xlsx-create-users/', data)
 }
 
 /*
-  * @api {post} /del-users/ 批量删除用户
-  * @param ids: number[]: 用户id列表
+ * @api {post} /del-users/ 批量删除用户
+ * @param ids: 用逗号隔开的string 用户id列表
  */
-export const del_users_api = (ids: number[]) => {
-  return axios.post('api/userManage/del-users/', {ids})
+export const del_users_api = (ids: any) => {
+  let data = new URLSearchParams()
+  data.append('ids', ids.join(','))
+  return axios.post('api/userManage/del-users/', data)
 }
 
 /*

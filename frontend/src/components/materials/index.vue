@@ -68,7 +68,7 @@ export default {
     },
     async getMaterials() {
       await get_materials_api().then(res => {
-        this.materialData = res.data
+        this.materialData = res.data.result
       })
     },
     async handleDelete(id) {
@@ -84,7 +84,7 @@ export default {
     }
   },
   mounted() {
-
+    this.getMaterials()
   }
 }
 </script>

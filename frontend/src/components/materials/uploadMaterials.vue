@@ -39,7 +39,7 @@ export default {
     return {
       limitNum: 5,
       fileList: [],
-      fileType: ['.doc', '.docx', '.pdf', '.ppt', '.txt', '.xls', '.xlsx'],
+      fileType: ['.doc', '.docx', '.pdf', '.ppt', '.txt', '.xls', '.xlsx', '.pptx'],
       accept: '',
     }
   },
@@ -88,7 +88,7 @@ export default {
       const formData = new FormData()
       // 你可以使用FormData.append来添加键/值对到表单里面；
       this.fileList.forEach((file) => {
-        formData.append('file', file.raw)
+        formData.append('files', file.raw)
       })
       await upload_materials_api(formData).then(async res => {
         this.fileList = []
