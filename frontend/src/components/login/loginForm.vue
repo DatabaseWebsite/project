@@ -6,34 +6,30 @@
     label-width="80px"
     class="loginForm sign-in-form"
   >
-    <h2>登录</h2>
-    <el-form-item label="用户名" prop="username">
+    <el-form-item prop="username">
       <el-input
         v-model="loginUser.username"
-        placeholder="请输入学工号或教工号..."
-      ></el-input>
+        placeholder="请输入学工号或教工号...">
+        <template #prepend>
+          <el-icon :size="20"><User/></el-icon>
+        </template>
+      </el-input>
     </el-form-item>
-    <el-form-item label="密码" prop="password">
+    <el-form-item prop="password">
       <el-input
         v-model="loginUser.password"
         placeholder="请输入密码..."
         show-password
-        type="password"
-      ></el-input>
+        type="password">
+        <template #prepend>
+          <el-icon :size="20"><Lock/></el-icon>
+        </template>
+      </el-input>
     </el-form-item>
-
-    <el-form-item>
-      <el-button
-        @click="handleLogin('loginForm')"
-        class="submit-btn"
-      >登录</el-button>
-	  </el-form-item>
-
-    <!-- 找回密码 -->
-    <div class="tiparea">
-      忘记密码请联系老师或助教
-    </div>
   </el-form>
+  <div id="login-box">
+    <button @click="handleLogin('loginForm')">登录</button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -42,10 +38,11 @@ import useAuthStore from "@/store/user.ts";
 import {user_info_api, user_login_api} from "@/api/api.ts";
 import cookies from "@/lib/cookies.ts";
 import {router} from "@/router";
-import {ElMessage} from "element-plus";
+import {Lock, User} from "@element-plus/icons-vue";
 
 export default {
   name: 'loginForm',
+  components: {Lock, User},
   emits: ['toResetPwd'],
   props: {
     loginUser: {
@@ -98,16 +95,39 @@ export default {
   margin-top: 20px;
   /*background-color: #fff;*/
   padding: 20px 40px 20px 20px;
-  border-radius: 5px;
-
+}
+:deep(input::-webkit-input-placeholder) {
+  color: #17a1e5;
+  font-size: 15px;
+}
+:deep(input::-webkit-input-placeholder) {
+  color: rgb(255, 255, 255, 0.8);
+  font-size: 15px;
+  border-bottom:2px solid white;
+}
+:deep(.el-input) {
+  --el-input-bg-color: rgb(0, 0, 0, 0);
+  --el-input-border-color: rgb(0, 0, 0, 0);
+}
+:deep(.el-input-group__append), :deep(.el-input-group__prepend) {
+  background-color: rgb(0, 0, 0, 0);
+  color: white;
+  }
+#login-box button{
+  margin-left: 100px;
+  width: 120px;
+  height: 35px;
+  border-radius:18px ;
+  outline: none;
+  border: none;
+  background-image: linear-gradient(120deg, #a6c0fe 0%, #f68084 100%);
+  color: #FFFFFF;
 }
 
-.submit-btn {
-  width: 100%;
+#login-box button:hover{
+  background-image: linear-gradient(120deg, #30cfd0 0%, #330867 100%);
 }
-.tiparea {
-  text-align: right;
-  font-size: 12px;
-  color: #333;
+#login-box .input-box i{
+  color: #FFFFFF;
 }
 </style>

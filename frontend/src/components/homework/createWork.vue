@@ -5,7 +5,7 @@
     :show-close="false"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
-    width="800px"
+    width="90%"
     style="padding: 30px"
   >
     <el-form ref="workFormRef" :model="workInfo" :rules="workRules" label-width="80">

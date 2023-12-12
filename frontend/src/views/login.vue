@@ -1,31 +1,44 @@
 <template>
 <!--  <img src="@/assets/img/loginBackground.png" alt="" class="backpage">-->
-  <div class="container" :class="{'right-panel-active':false}">
-    <div class="form-container sign-in-container">
+  <iframe src="src/components/canvas/whirlpool.html" :width="width" :height="height" style="position: absolute; top:0; left:0"/>
+  <div class="container">
       <!-- 登录 -->
-      <LoginForm :loginUser="loginUser" :rules="rules" />
+    <div style="font-size:40px; color:white; font-weight: bold; margin-top:50px; margin-bottom: 50px">
+      欢迎来到数据库课程平台
     </div>
-    <div class="overlay-container">
-      <div class="overlay">
-        <div class="overlay-panel overlay-right">
-          <h1>欢迎来到数据库课程平台</h1>
-          <p>请使用您的账号进行登录</p>
-        </div>
+    <div style="width:500px; flex-direction: column;justify-content: center;align-items: center;">
+      <LoginForm :loginUser="loginUser" :rules="rules" />
+      <div style="margin-top:50px; text-align: right; font-size: 15px; color: white;">
+        忘记密码请联系老师或助教
       </div>
     </div>
+
   </div>
 </template>
 <script lang="ts">
 import { loginUser, rules} from "@/components/login/loginValidators.ts";
 import LoginForm from "@/components/login/loginForm.vue";
+import {onMounted, ref} from "vue";
 
 export default {
   name: "login",
   components: { LoginForm },
   setup() {
+    const width = ref(0)
+    const height = ref(0)
+    onMounted(() => {
+      getWindowResize()
+      window.addEventListener('resize', getWindowResize)
+    })
+    const getWindowResize = function () {
+      width.value = window.innerWidth
+      height.value = window.innerHeight
+    }
     return {
       loginUser,
       rules,
+      width,
+      height
     };
   },
 };
@@ -86,16 +99,19 @@ a {
 }
 .container {
   /*background: #fff;*/
+  /*backdrop-filter: saturate(180%) blur(5px)!important;*/
+  /*-webkit-backdrop-filter: saturate(180%) blur(5px)!important;*/
+  /* 磨砂的背景颜色 */
+  backdrop-filter: blur(10);
+  /*background-color: rgb(16, 31, 48, 0.3);*/
   border-radius: 10px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, .25), 0 10px 10px rgba(0, 0, 0, .22);
-  position: relative;
+  box-shadow: rgba(0, 0, 0, 0.4) 0 2px 4px, rgba(0, 0, 0, 0.3) 0 7px 13px -3px, rgba(0, 0, 0, 0.2) 0 -3px 0 inset;  position: relative;
   overflow: hidden;
-  width: 800px;
+  width: 600px;
   max-width: 100%;
   min-height: 480px;
-  backdrop-filter: blur(2px);
+  text-align: center;
 }
-
 .form-container form {
   /*background: #fff;*/
   display: flex;
@@ -245,7 +261,6 @@ button.ghost {
   z-index: 100;
 }
 .overlay {
-  background-image: linear-gradient(120deg,#E6EEE9,#9BC4E0);
   color: #fff;
   position: relative;
   left: -100%;

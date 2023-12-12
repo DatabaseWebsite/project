@@ -1,10 +1,18 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import {resolve} from 'path'
+import { prismjsPlugin } from 'vite-plugin-prismjs'
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: './',
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    prismjsPlugin({
+      languages: ['javascript', 'css', 'markup', 'typescript', 'go', 'python', 'java', 'php', 'csharp', 'cpp', 'bash', 'nginx', 'sql', 'json', 'yaml', 'docker', 'markdown', 'git', 'ini', 'less', 'scss', 'stylus', 'vim', 'makefile', 'powershell', 'shell', 'shell-session', 'http', 'toml', 'xml', 'yaml'],
+      plugins: ['line-numbers'],
+    })
+  ],
   resolve: {
     alias: {
       "@":resolve(__dirname, 'src')

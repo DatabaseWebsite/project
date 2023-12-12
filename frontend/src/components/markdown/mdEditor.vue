@@ -2,9 +2,10 @@
   <VueMarkdownEditor
     v-model="(text)"
     ref="editor"
-    height="400px"
+    height="600px"
     @upload-image="uploadImg"
     @change="change"
+    :disabled-menus = "[]"
   ></VueMarkdownEditor>
 </template>
 

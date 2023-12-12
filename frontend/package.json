@@ -27,6 +27,7 @@
     "qs": "^6.11.2",
     "relation-graph": "^2.0.26",
     "three": "^0.154.0",
+    "vite-plugin-prismjs": "^0.0.8",
     "vue": "^3.3.9",
     "vue-cropper": "^1.0.9",
     "vue-jsonp": "^2.0.0",
