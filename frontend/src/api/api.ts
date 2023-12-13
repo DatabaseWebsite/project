@@ -279,7 +279,9 @@ export const modify_work_api = (data : FormData) => {
   return axios.post('api/homework/modify-work', data)
 }
 export const delete_work_api = (id : number) => {
-  return axios.post('api/homework/remove-work', id.toString())
+  let data = new URLSearchParams()
+  data.append('id', id.toString())
+  return axios.post('api/homework/remove-work', data)
 }
 /*
  * 根据身份判断返回信息

@@ -5,7 +5,7 @@
     </el-header>
     <el-main>
       <div v-for="item in workData">
-        <el-card style="margin: 0; padding: 0" shadow="hover" @click="goWorkDetail(item.id)">
+        <el-card style="margin: 0; padding: 0" shadow="hover" @click.native="goWorkDetail(item.id)">
           <div class="work-item">
             <div class="left-section">
               <IconDocDetail :size="50" style="margin-right: 20px; color: steelblue"/>
@@ -16,16 +16,15 @@
               </div>
             </div>
             <div class="right-section">
-              <icon-file-editing :size="30" style="margin: 20px" @click="editWork(item); modifyWorkVisible=true" />
+              <icon-file-editing :size="30" style="margin: 20px" @click.stop="editWork(item)" />
               <el-popconfirm
                 confirm-button-text="确定"
                 cancel-button-text="取消"
                 title="确定删除该作业吗？"
-                @confirm="deleteWork(item.id)"
-                style="margin: 20px"
-              >
+                @confirm.stop="deleteWork(item.id)"
+                style="margin: 20px">
                 <template #reference>
-                  <el-button type="text"><icon-file-removal :size="30" style="color:darkred"/></el-button>
+                  <el-button type="text" @click.stop><icon-file-removal :size="30" style="color:darkred"/></el-button>
                 </template>
               </el-popconfirm>
             </div>
@@ -39,7 +38,7 @@
   <el-dialog
     title="修改作业"
     v-model="modifyWorkVisible"
-    width="800px"
+    width="90%"
     style="padding: 30px"
   >
     <el-form ref="modifyWorkFormRef" :model="selectedWork" :rules="modifyWorkRules" label-width="80">
@@ -50,7 +49,7 @@
         <md-editor v-model="selectedWork.description"/>
       </el-form-item>
       <el-form-item label="作业文件">
-        <upload-file v-if="selectedWork.file.url === undefined" v-model="submitFile"/>
+        <upload-file v-if="selectedWork.file !== ''" v-model:submit-file="submitFile.file"/>
         <div v-else>
           <el-link type="primary" @click="download(selectedWork.file.url, selectedWork.file.name)"> {{ selectedWork.file.name }} </el-link>
           <el-button type="text" @click="removeSelectedFile" style="margin-left: 20px; color: red">删除</el-button>
@@ -79,12 +78,13 @@ import {
   FileRemoval as IconFileRemoval,
   Delete as IconDelete,
 } from "@icon-park/vue-next";
-import {delete_work_api, get_works_info_api, modify_work_api} from "@/api/api.ts";
+import {delete_work_api, get_all_courses_api, get_works_info_api, modify_work_api} from "@/api/api.ts";
 import {ElMessage, FormInstance} from "element-plus";
-import {reactive, ref} from "vue";
+import {reactive, ref, watch} from "vue";
 import MdEditor from "@/components/markdown/mdEditor.vue";
 import UploadFile from "@/lib/uploadFile.vue";
 import {saveAs} from "file-saver";
+import {registerUser} from "@/components/userManage/registerForm.ts";
 
 interface ModifyWorkRuleForm {
   id: number
@@ -94,6 +94,9 @@ interface ModifyWorkRuleForm {
   totalScore: number,
   deadline: any,
 }
+interface SubmitFile {
+  file: any
+}
 
 export default {
   name: "workManage",
@@ -101,7 +104,6 @@ export default {
   data() {
     return {
       createWorkVisible: false,
-      modifyWorkVisible: false,
       workData: [ // admin，老师，助教
         {
           id: 1,
@@ -113,7 +115,6 @@ export default {
       ],
       fileType: ['.doc', '.docx', '.pdf', '.ppt', '.txt', '.xls','.xlsx', '.zip', '.rar'],
       accept: '',
-      submitFile: '',
     }
   },
   methods: {
@@ -140,6 +141,7 @@ export default {
   },
   setup(props, context) {
     const modifyWorkFormRef = ref<FormInstance>()
+    const modifyWorkVisible = ref(false)
     const selectedWork = reactive<ModifyWorkRuleForm>({
       id: 1,
       title: '',
@@ -148,7 +150,9 @@ export default {
       totalScore: 100,
       deadline: '',
     })
+    const submitFile = reactive<SubmitFile>({ file: '' })
     const editWork = (work) => {
+      modifyWorkVisible.value = true
       selectedWork.id = work.id
       selectedWork.title = work.title
       selectedWork.description = work.description
@@ -170,52 +174,16 @@ export default {
     const removeSelectedFile = () => {
       selectedWork.file = ''
     }
-    const handleExceed = () => {
-      ElMessage.warning('仅支持单文件上传')
-    }
-    const handleChange = (file, uploadFiles) => {
-      this.submitFile = uploadFiles
-    }
-    const handleRemove = () => {
-      this.submitFile = ''
-    }
-    const handleBeforeUpload = (file) =>  {
-      if (this.fileType) {
-        let fileExtension = "";
-        if (file.name.lastIndexOf(".") > -1) {
-          fileExtension = file.name.slice(file.name.lastIndexOf("."));
-        }
-        const isTypeOk = this.fileType.some((type) => {
-          if (file.type.indexOf(type) > -1) return true;
-          return fileExtension && fileExtension.indexOf(type) > -1;
-
-        });
-        if (!isTypeOk) {
-          ElMessage.error(`文件格式不正确, 请上传${this.fileType.join("/")}格式文件!`);
-          return false;
-        }
-      }
-      // 校检文件大小
-      if (this.fileSize) {
-        const isLt = file.size / 1024 / 1024 < 20;
-        if (!isLt) {
-          ElMessage.error(`上传文件大小不能超过 20 MB!`);
-          return false;
-        }
-      }
-      return true;
-    }
     const submitForm = async(formEl: FormInstance | undefined) => {
       if (!formEl) return
       await formEl.validate(async (valid) => {
         if (valid) {
-          console.log(selectedWork)
           const data:FormData = new FormData()
           data.append('id', selectedWork.id.toString())
-          if (this.submitFile !== '')
-            data.append('file', this.submitFile.raw)
+          if (submitFile.file !== '')
+            data.append('file', submitFile.file[0].raw)
           else if (selectedWork.file === '')
-            data.append('file', 'remove')
+            data.append('removeFile', 'removeFile')
           data.append('title', selectedWork.title)
           data.append('description', selectedWork.description)
           data.append('totalScore', selectedWork.totalScore.toString())
@@ -229,14 +197,12 @@ export default {
       })
     }
     return {
+      submitFile,
       modifyWorkFormRef,
       selectedWork,
       modifyWorkRules,
+      modifyWorkVisible,
       submitForm,
-      handleExceed,
-      handleChange,
-      handleRemove,
-      handleBeforeUpload,
       editWork,
       removeSelectedFile
     }

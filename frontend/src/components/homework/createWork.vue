@@ -83,48 +83,12 @@ export default {
         {required: true, message: '请选择截止日期', trigger: 'blur'}
       ]
     })
-    const handleExceed = () => {
-      ElMessage.warning('待上传文件数量超出限制，请分批次上传！')
-    }
-    const handleChange = (file, uploadFiles) => {
-       workInfo.file = uploadFiles
-    }
-    const handleRemove = (file, uploadFiles) => {
-      workInfo.file = uploadFiles
-    }
-    const handleBeforeUpload = (file) =>  {
-      if (this.fileType) {
-        let fileExtension = "";
-        if (file.name.lastIndexOf(".") > -1) {
-          fileExtension = file.name.slice(file.name.lastIndexOf("."));
-        }
-        const isTypeOk = this.fileType.some((type) => {
-          if (file.type.indexOf(type) > -1) return true;
-          return fileExtension && fileExtension.indexOf(type) > -1;
-
-        });
-        if (!isTypeOk) {
-          ElMessage.error(`文件格式不正确, 请上传${this.fileType.join("/")}格式文件!`);
-          return false;
-        }
-      }
-      // 校检文件大小
-      if (this.fileSize) {
-        const isLt = file.size / 1024 / 1024 < 20;
-        if (!isLt) {
-          ElMessage.error(`上传文件大小不能超过 20 MB!`);
-          return false;
-        }
-      }
-      return true;
-    }
     const submitForm = async(formEl: FormInstance | undefined) => {
       if (!formEl) return
       await formEl.validate(async (valid) => {
         if (valid) {
-          console.log(workInfo)
           const data:FormData = new FormData()
-          data.append('file', workInfo.file.raw)
+          data.append('file', workInfo.file[0].raw)
           data.append('title', workInfo.title)
           data.append('description', workInfo.description)
           data.append('totalScore', workInfo.totalScore.toString())
@@ -151,10 +115,6 @@ export default {
       workInfo,
       workRules,
       submitForm,
-      handleExceed,
-      handleChange,
-      handleRemove,
-      handleBeforeUpload,
       cancel
     }
   },
