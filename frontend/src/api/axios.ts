@@ -56,10 +56,13 @@ axios.interceptors.response.use(async function (response) {
   switch (status) {
     case 200:
       // success
+      if (response.config.url !== 'api/log/record-login-log/' && response.config.url !== 'api/log/record-operation-log/')
+        await record(response.config, response)
       return dataAxios
     case 201:
       if (response.config.url === 'api/user/login/') {
         ElMessage.error(dataAxios.data['error'])
+        await record(response.config, response)
         break
       }
       let res = await user_refresh_token_api()
@@ -80,16 +83,14 @@ axios.interceptors.response.use(async function (response) {
       ElMessage.error(dataAxios.data['error'])
       break
   }
-  // if (response.config.url !== 'api/record-login-log/' && response.config.url !== 'api/record-operation-log/')
-  //   await record(response.config, response)
   return response
 }, async function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
   console.log(error)
   endLoading()
-  // if (error.response.config.url !== 'api/record-login-log/' && error.response.config.url !== 'api/record-operation-log/')
-  //   await record(error.config, error.response)
+  if (error.response.config.url !== 'api/log/record-login-log/' && error.response.config.url !== 'api/log/record-operation-log/')
+    await record(error.config, error.response)
   const {status} = error.response
   switch (status) {
     case 401:

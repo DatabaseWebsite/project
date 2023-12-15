@@ -21,7 +21,7 @@
 import { create_course_api, all_course_info_api } from "@/api/api.ts";  
 import courseForm from "@/components/course_management/courseForm.vue";  
 import { ElContainer, ElHeader, ElMain } from "element-plus";  
-  
+
 export default {  
   name: "course_management",  
   components: { courseForm },  
@@ -35,7 +35,7 @@ export default {
     };  
   },  
   created() {  
-    this.handleLogin(); // Call the login function during the creation of the component  
+    //this.handleLogin(); // Call the login function during the creation of the component
   },  
   methods: {  
     async handleLogin() {

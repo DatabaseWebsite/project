@@ -31,9 +31,20 @@ urlpatterns = [
     path('homework/submit-homework/', api.submit_homework),
     path('homework/submit-score/', api.submit_score),
 
-    path('material/upload-material/', api.upload_material),
+    path('material/upload-materials/', api.upload_material),
     path('material/material-list/', api.material_list),
     # TODO: 没测没测没测！！！
     path('materail/download-multiple-materials/', api.download_multiple_materials),
+
+    path('material/del-material/', api.delete_material),
+    path('upload-image/', api.upload_image),
+    path('userManage/reset-user-password/', api.reset_user_password),
+
+    path('log/login-log/', api.login_log),
+    path('log/search-login-log/', api.search_login_log),
+    path('log/record-login-log/', api.record_login_log),
+    path('log/operation-log/', api.operation_log),
+    path('log/search-operation-log/', api.search_operation_log),
+    path('log/record-operation-log/', api.record_operation_log),
 
 ]

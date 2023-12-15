@@ -13,6 +13,7 @@ from users.models import Course
 from users.models.course_selection_record import CourseSelectionRecord
 from users.models.normal_homework import NormalHomework
 from users.models.normal_homework_submit import NormalHomeworkSubmit
+from users.models.picture import Picture
 from users.settings import ITEMS_PER_PAGE
 
 
@@ -121,3 +122,15 @@ def submit_score(request):
     submit.save()
 
     return JsonResponse({"massage": "成功批改"}, status=200)
+
+
+@jwt_auth()
+@require_POST
+def upload_image(request):
+    image = request.FILES.get("image")
+    timestamp = str(int(time.time()))
+    _, extension = os.path.splitext(image.name)
+    image.name = f"{image.username}_{timestamp}{extension}"
+    picture = Picture(picture=image)
+    picture.save()
+    return JsonResponse({"url": picture.get_pic_url()}, status=200)

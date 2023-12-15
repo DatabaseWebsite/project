@@ -80,6 +80,8 @@ def create_single_user(request):
         course_id = request.POST.get('course_id')
         course = Course.objects.filter(pk=course_id).first()
 
+    print(">>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<")
+    print(course.name)
     if User.objects.filter(username=new_user_username).exists():
         registered_user = User.objects.filter(username=new_user_username).first()
         if CourseSelectionRecord.objects.filter(user=registered_user, selected_course=course).exists():
@@ -94,7 +96,8 @@ def create_single_user(request):
                 type=new_user_category
             )
             courseSelectedRecord.save()
-            return JsonResponse({"message": "成功将用户{}加入课程{}".format(new_user_username, course.name)}, status=200)
+            return JsonResponse({"message": "成功将用户{}加入课程{}".format(new_user_username, course.name)},
+                                status=200)
     else:
         new_user = User.objects.create_user(
             username=new_user_username,
@@ -110,7 +113,9 @@ def create_single_user(request):
             type=new_user_category
         )
         courseSelectedRecord.save()
-        return JsonResponse({"message": "成功创建用户{}，并加入课程{}".format(new_user_username, course.name)}, status=200)
+        print("((((((((((()))))))))))))")
+        return JsonResponse({"message": "成功创建用户{}，并加入课程{}".format(new_user_username, course.name)},
+                            status=200)
 
 
 @jwt_auth()
@@ -146,8 +151,8 @@ def delete_users(request):
     current_user_type = CourseSelectionRecord.objects.filter(user=user,
                                                              selected_course=user.current_course).first().type
     if user.is_admin or current_user_type == "TEACHER" or current_user_type == "ASSISTANT":
-        deleted_ids = request.POST.getlist('ids')
-        print(deleted_ids)
+        id_str = str(request.POST.get('ids'))
+        deleted_ids = id_str.split(",")
         count = 0
         for deleted_id in deleted_ids:
             if not User.objects.filter(pk=deleted_id).exists():
@@ -238,11 +243,19 @@ def update_current_course(request):
             else:
                 user.current_course = new_course
                 user.save()
-                return JsonResponse({"message": "修改课程成功，您当前浏览的课程为{}".format(new_course.name)}, status=200)
+                return JsonResponse({
+                    "message": "修改课程成功，您当前浏览的课程为{}".format(new_course.name),
+                    "identity": str(
+                        CourseSelectionRecord.objects.filter(user=user, selected_course=new_course).first().type)
+                }, status=200)
         else:
             user.current_course = new_course
             user.save()
-            return JsonResponse({"message": "修改课程成功"}, status=200)
+            return JsonResponse({
+                "message": "修改课程成功",
+                "identity": str(
+                    CourseSelectionRecord.objects.filter(user=user, selected_course=new_course).first().type)
+            }, status=200)
     else:
         return JsonResponse({"error": "未查询到此课程"}, status=405)
 
@@ -376,20 +389,28 @@ def user_list(request):
     except EmptyPage:
         return JsonResponse({'error': 'Page not found'}, status=404)
 
+    courses = {}
+    for user in all_users:
+        records = CourseSelectionRecord.objects.filter(user=user)
+        course = ""
+        for record in records:
+            course = course + str(record.selected_course.name) + "(" + str(record.type) + "),"
+        courses[user] = course[:-1]
+
     serialized_data = [
         {
             'id': user.id,
             'person_id': user.username,
             'username': user.name,
-            'courses': user.current_course.name if user.current_course else '',
+            'courses': courses[user]
         }
         for user in current_page_data
     ]
-    print(serialized_data)
+
     return JsonResponse({
         'result': serialized_data,
         'total_pages': paginator.num_pages,
-        'current_page': current_page_data.number})
+        'current_page': current_page_data.number}, status=200)
 
 
 @jwt_auth()
@@ -423,24 +444,26 @@ def search_users(request):
     user_ids_filtered_course_select_records = filtered_course_select_records.values_list('user__id', flat=True)
     filtered_users = filtered_users.filter(id__in=user_ids_filtered_course_select_records)
 
-    result_ = [
-        {
-            "id": filtered_user.id,
-            "person_id": filtered_user.username,
-            "username": filtered_user.name,
-            "grade": filtered_user.grade,
-            "courses": ''
-        }
+    result_ = {
+        filtered_user:
+            {
+                "id": filtered_user.id,
+                "person_id": filtered_user.username,
+                "username": filtered_user.name,
+                "grade": filtered_user.grade,
+                "courses": ''
+            }
         for filtered_user in filtered_users
-    ]
+    }
 
-    i = 0
     for filtered_user in filtered_users:
         selected_courses_records = CourseSelectionRecord.objects.filter(user=filtered_user)
         for record in selected_courses_records:
-            result_.get('courses').append(record.selected_course.name + '(' + record.type + ')')
+            result_[filtered_user]['courses'] = (result_[filtered_user]['courses'] +
+                                                 str(record.selected_course.name) + '(' + str(record.type) + '),')
+        result_[filtered_user]['courses'] = result_[filtered_user]['courses'][:-1]
 
-    paginator = Paginator(result_, ITEMS_PER_PAGE)
+    paginator = Paginator(list(result_.values()), ITEMS_PER_PAGE)
 
     try:
         current_page_data = paginator.page(page)
@@ -456,3 +479,15 @@ def search_users(request):
             'current_page': current_page_data.number
         }, status=200
     )
+
+
+@jwt_auth()
+@require_POST
+def reset_user_password(request):
+    user_id = request.POST.get('id')
+    user = User.objects.get(pk=user_id)
+    username = user.username
+    new_password = make_password(username)
+    user.password = new_password
+    user.save()
+    return JsonResponse({"massage": "密码成功重置为学号"}, status=200)

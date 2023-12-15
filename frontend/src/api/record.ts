@@ -39,7 +39,7 @@ export const record = async (config, response) => {
   let address = userInfo['ad_info']['province'] + userInfo['ad_info']['city'] + userInfo['ad_info']['district']
   let date = new Date()
   let browser = BrowserInfo['browser'] + BrowserInfo['browserVersion']
-  if (api === '/api/login' && status === 200) {
+  if (api === '/api/user/login/' && status === 200) {
     await record_login_log_api(ip, address, browser, dateToString(date), username)
   }
   await record_operation_log_api(requestModule, api, ip, method, browser, status.toString(), code, dateToString(date), username)
