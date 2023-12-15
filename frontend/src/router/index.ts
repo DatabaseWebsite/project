@@ -1,0 +1,118 @@
+import {createRouter, createWebHashHistory, RouteRecordRaw} from "vue-router";
+import Index from "@/views/index.vue"
+import UserCenter from "@/components/userCenter/index.vue"
+import Login from "@/views/login.vue"
+import NotFound from "@/views/404.vue"
+import Reference from "@/components/materials/index.vue"
+import DiscussionArea from "@/views/discussionArea.vue";
+import useAuthStore from "@/store/user.ts";
+import UserManage from "@/components/userManage/index.vue";
+import LoginLog from "@/components/log/loginLog.vue";
+import OperationLog from "@/components/log/operationLog.vue";
+import Announcement from "@/views/announcement.vue"
+import Course_management from "@/views/course_management.vue";
+import Homework from "@/components/homework/index.vue";
+import TeacherWorkDetail from "@/components/homework/teacherWorkDetail.vue";
+import DiscussionBoard from "@/components/discussion/DiscussionBoard.vue"
+import PostDetail from "@/views/PostDetail.vue";
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/login',
+    name: 'login',
+    component: Login,
+  },
+  {
+    path:'/',
+    name: 'index',
+    component: Index,
+    // redirect: ; 设为课程公告页，保证一进入就渲染右侧页面
+    children: [
+      {
+        path: '/reference',
+        name: 'reference',
+        component: Reference,
+      },
+      {
+        path: 'userCenter',
+        name: 'userCenter',
+        component: UserCenter,
+      },
+      
+      {
+        path: 'announcement',
+        name: 'announcement',
+        component: Announcement,
+      },
+      {
+        path: 'course_management',
+        name: 'course_management',
+        component: Course_management,
+      },
+      {
+        path: 'userManage',
+        name: 'userManage',
+        component: UserManage,
+      },
+      {
+        path: 'loginLog',
+        name: 'loginLog',
+        component: LoginLog,
+      },
+      {
+        path: 'operationLog',
+        name: 'operationLog',
+        component: OperationLog,
+      },
+      {
+        path: 'homework',
+        name: 'homework',
+        component: Homework,
+      },
+      {
+        path: 'homework/workdetail',
+        name: 'workdetail',
+        component: TeacherWorkDetail,
+      },
+      {
+        path: 'discussionArea',
+        name: 'discussionArea',
+        component: DiscussionArea,
+      },
+      {
+        path: 'discussionArea/post/:id',
+        name: 'PostDetail',
+        component: PostDetail,
+      }
+    ]
+  },
+
+]
+// 创建router
+const router = createRouter({
+  // 配置为Hash模式
+  history: createWebHashHistory(),
+  // 配置routes
+  routes,
+  // 路由跳转时返回顶部
+  scrollBehavior () {
+    return {top: 0}
+  }
+})
+
+// 路由守卫
+//@ts-ignore
+router.beforeEach((to, from,next) =>{
+  const userStore = useAuthStore()
+  const isLogin = userStore.getAuthenticated
+  const identity = userStore.getUser['identity']
+  if (to.path === "/login") {
+    // 若用户已登录且前往登录页，则跳转到首页
+    isLogin ? next("/") : next()
+  } else { // 拦截
+    isLogin ? next() : next("/login")
+  }
+})
+
+export {router}
+
