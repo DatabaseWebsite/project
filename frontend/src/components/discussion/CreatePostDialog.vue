@@ -33,7 +33,7 @@
     methods: {
       createPost() {
         //API NEED
-        console.log('POST CREATED', this.newPost);
+        console.log('POST CREATED', this.newPost.title, this.newPost.content);
   
         
         this.newPost.title = '';

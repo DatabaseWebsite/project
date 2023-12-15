@@ -28,10 +28,12 @@
             <el-table-column prop="identity" label="identity" />  
             <el-table-column fixed="right" label="操作" width="200">
               <template #default="scope">
-                <el-button type="primary" size="small" @click="deleteStudent">
-                    删除学生
+                <el-button type="primary" size="small" @click="showDeleteConfirm(scope.row)">
+                  删除学生
                 </el-button>
-                <el-button type="primary" size="small" @click="changeStudent(scope.$index, scope.row)">修改身份</el-button>
+                <el-button type="primary" size="small" @click="changeStudent(scope.$index, scope.row)">
+                  修改身份
+                </el-button>
               </template>
             </el-table-column>
           </el-table>  
@@ -57,7 +59,7 @@
           <el-input v-model="createUserInfo.identity" placeholder="请TEACHER,ASSISTANT,STUDENT"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitCreate(editFormRef)"> 提交 </el-button>
+          <el-button type="primary" @click="submitCreate"> 提交 </el-button>
         </el-form-item>
       </el-form>
       
@@ -68,82 +70,78 @@
         <el-form-item label="身份" prop="identity">
           <el-input v-model="changeInfo.identity" placeholder="新身份"></el-input>
         </el-form-item>
-        
         <el-form-item>
           <el-button type="primary" @click="submitChange(changeFormRef)"> 提交 </el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
+
+    <el-dialog v-model="deleteVisible" title="确认删除" width="30%">
+      <span>确定要删除这位学生吗？</span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancelDialog">取消</el-button>
+          <el-button type="primary" @click="deleteStudent">确认删除</el-button>
+        </span>
+      </template>
+    </el-dialog>
 </template>
 
 <script setup lang="ts">
-  import { ref, defineProps, defineEmits, withDefaults } from 'vue';
-  import { ElMessage } from 'element-plus';
-  
-  
+import { ref, defineProps } from 'vue';
+
+// 定义和初始化状态
 const courseInfoVisible = ref(false);
 const createVisible = ref(false);
 const changeVisible = ref(false);
+const deleteVisible = ref(false); // 确认删除的对话框状态
 
 const { item } = defineProps(['item']);
-const students = ref([{id:1,name:'gaosj',identity:'老师'},{id:2,name:'byc',identity:'学生'},] );
-const createUserInfo = ref({
-  personId: '',
-  username: '',
-  identity: '',
-});
-const submitCreate = async (formEl) => {
-  if (!formEl) return;
-  await formEl.validate(async (valid, fields) => {
-    if (valid) {
-      // Handle form submission logic here
-      // Example: await update_userinfo_api(editUserInfo.id, editUserInfo.personId, editUserInfo.username, editUserInfo.grade);
-      // ElMessage.success('修改成功！');
-      // this.resetForm();
-      // this.editVisible = false;
-    } else {
-      ElMessage.warning('错误提交！');
-    }
-  });
+const students = ref([{ id: 1, name: 'gaosj', identity: '老师' }, { id: 2, name: 'byc', identity: '学生' }]);
+const createUserInfo = ref({ personId: '', username: '', identity: '' });
+const changeInfo = ref({});
+let currentStudent = ref({}); // 当前选中的学生
+
+// 创建学生
+const submitCreate = () => {
+  students.value.push({ id: createUserInfo.value.personId, name: createUserInfo.value.username, identity: createUserInfo.value.identity });
+  createUserInfo.value = { personId: '', username: '', identity: '' };
   createVisible.value = false;
 };
-const submitChange = async (formEl) => {
-  console.log("formEl ", formEl, changeInfo);
-  const form = editFormRef;
-  await form.validate(async (valid, fields) => {
-    if (valid) {
-      // Handle form submission logic here
-      // Example: await update_userinfo_api(editUserInfo.id, editUserInfo.personId, editUserInfo.username, editUserInfo.grade);
-      // ElMessage.success('修改成功！');
-      // this.resetForm();
-      console.log("id identity ", object.value.id, changeInfo.value.identity);
-      // change_user_identity_api(object.value.id, changeInfo.value.identity);
-    } else {
-      ElMessage.warning('错误提交！');
-    }
-  });
+
+// 删除学生
+const deleteStudent = () => {
+  students.value = students.value.filter(student => student.id !== currentStudent.value.id);
+  deleteVisible.value = false;
+};
+
+// 显示删除学生确认对话框
+const showDeleteConfirm = (student) => {
+  deleteVisible.value = true;
+  currentStudent.value = student;
+};
+
+// 修改学生身份
+const changeStudent = (index, row) => {
+  changeVisible.value = true;
+  changeInfo.value = { ...row };
+  currentStudent.value = row;
+};
+
+// 提交身份修改
+const submitChange = () => {
+  const student = students.value.find(s => s.id === currentStudent.value.id);
+  if (student) {
+    student.identity = changeInfo.value.identity;
+  }
   changeVisible.value = false;
 };
-const deleteStudent = () => {
-  // Handle delete student logic here
-  students.value = []; // TODO: delete_student_api(courseid, student.id)
-};
 
-const changeStudent = (index,row) => {
-  // Handle change student logic here
-  changeVisible.value = true;
-  console.log("type ", typeof students)
-  console.log("index row ", index, row.id)
-  students.value = [{ id: 3, name: 'cqj', identity: '老师' }]; // TODO: add_student_api(courseid, student.id)
-  object.value = row;
-};
-
+// 取消对话框
 const cancelDialog = () => {
   courseInfoVisible.value = false;
-};
-
-const confirmDialog = () => {
-  courseInfoVisible.value = false;
+  deleteVisible.value = false;
+  changeVisible.value = false;
 };
 
 </script>
