@@ -3,9 +3,6 @@
   <md-editor v-model="text" />
   <md-preview :text="text" :navigation-visible="true"/> -->
   <discussionBoard/>
-  <div>
-    111
-  </div>
 </template>
 
 <script>

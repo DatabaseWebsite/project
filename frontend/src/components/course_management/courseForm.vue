@@ -22,7 +22,7 @@
           <el-button type="primary" size="small" @click="createVisible = true">添加学生</el-button>
         </el-header>
         <el-main>
-          <el-table :data="students" style="width: 100%">  
+          <el-table :data="paginatedStudents" style="width: 100%">  
             <el-table-column prop="id" label="id" width="90" />  
             <el-table-column prop="name" label="Name" width="90" />  
             <el-table-column prop="identity" label="identity" />  
@@ -37,6 +37,13 @@
               </template>
             </el-table-column>
           </el-table>  
+          <el-pagination
+            layout="prev, pager, next"
+            :total="students.length"
+            :page-size="10"
+            :current-page="currentPage"
+            @current-change="handlePageChange">
+          </el-pagination>
         </el-main>
       </el-container>
       <template #footer>  
@@ -88,16 +95,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps } from 'vue';
+import { ref, defineProps,computed  } from 'vue';
 
 // 定义和初始化状态
 const courseInfoVisible = ref(false);
 const createVisible = ref(false);
 const changeVisible = ref(false);
 const deleteVisible = ref(false); // 确认删除的对话框状态
-
+const currentPage = ref(1);
 const { item } = defineProps(['item']);
-const students = ref([{ id: 1, name: 'gaosj', identity: '老师' }, { id: 2, name: 'byc', identity: '学生' }]);
+const students = ref([{ id: 1, name: 'gaosj', identity: '老师' }, { id: 2, name: 'byc', identity: '学生' }, { id: 2, name: 'byc', identity: '学生' },
+ { id: 2, name: 'byc', identity: '学生' },{ id: 2, name: 'byc', identity: '学生' }, { id: 2, name: 'byc', identity: '学生' },{ id: 2, name: 'byc', identity: '学生' },
+ { id: 2, name: 'byc', identity: '学生' }, { id: 2, name: 'byc', identity: '学生' },{ id: 2, name: 'byc', identity: '学生' },{ id: 2, name: 'byc', identity: '学生' }, 
+ { id: 2, name: 'byc', identity: '学生' },]);
+//const students = ref([]);
 const createUserInfo = ref({ personId: '', username: '', identity: '' });
 const changeInfo = ref({});
 let currentStudent = ref({}); // 当前选中的学生
@@ -144,6 +155,17 @@ const cancelDialog = () => {
   changeVisible.value = false;
 };
 
+// 计算当前页面的学生列表
+const paginatedStudents = computed(() => {
+  const start = (currentPage.value - 1) * 10;
+  const end = start + 10;
+  return students.value ? students.value.slice(start, end) : [];
+});
+
+// 处理分页变化
+const handlePageChange = (newPage) => {
+  currentPage.value = newPage;
+};
 </script>
 
 <style scoped>  
