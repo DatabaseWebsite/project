@@ -30,9 +30,13 @@ from .material import delete_material
 from .user import reset_user_password
 from .homework import upload_image
 
-from .login import record_login_log
-from .login import record_operation_log
-from .login import login_log
-from .login import operation_log
-from .login import search_login_log
-from .login import search_operation_log
+from .log import record_login_log
+from .log import record_operation_log
+from .log import login_log
+from .log import operation_log
+from .log import search_login_log
+from .log import search_operation_log
+
+from .notice import create_notice
+from .notice import delete_notice
+from .notice import notice_list

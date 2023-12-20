@@ -265,7 +265,7 @@ export const all_course_info_api = () => {
  * deadline: string // 后端：datetime.fromisoformat(deadline)
  */
 export const create_work_api = (data : FormData) => {
-  return axios.post('api/homework/create-work', data)
+  return axios.post('api/homework/create-homework/', data)
 }
 /*
  * id: string
