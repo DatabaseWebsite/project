@@ -21,7 +21,7 @@
 import { create_course_api, all_course_info_api } from "@/api/api.ts";  
 import courseForm from "@/components/course_management/courseForm.vue";  
 import { ElContainer, ElHeader, ElMain } from "element-plus";  
-
+  
 export default {  
   name: "course_management",  
   components: { courseForm },  

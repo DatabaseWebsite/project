@@ -30,12 +30,12 @@ def login_user(request):
         token = generate_token(user)
         refresh_token = generate_refresh_token(user)
         return JsonResponse(
-            {"msg": "Login successful.", 'access': token, 'refresh': refresh_token, 'userId': username, 'code': 200},
+            {"msg": "Login successful.", 'access': token, 'refresh': refresh_token, 'userId': username, 'username': user.name,  'code': 200},
             status=200)
     elif User.objects.filter(username=username).exists():
-        return JsonResponse({"error": "密码错误", 'code': 401}, status=201)
+        return JsonResponse({"error": "密码错误", 'code': 401, "personId": username}, status=201)
     else:
-        return JsonResponse({"error": "用户不存在", 'code': 401}, status=201)
+        return JsonResponse({"error": "用户不存在", 'code': 401, "personId": username}, status=201)
 
 
 @require_POST

@@ -30,7 +30,9 @@
     </el-header>
     <el-main>
       <el-table :data="tableData" border>
-        <el-table-column prop="id" label="序号" width="70"/>
+        <el-table-column label="序号" width="70" v-slot="{ row, $index }">
+          {{ $index + 1 }}
+        </el-table-column>
         <el-table-column prop="username" label="登录用户名" min-width="140"/>
         <el-table-column prop="ip" label="登录ip" min-width="160"/>
         <el-table-column prop="address" label="登陆地址" min-width="180"/>
@@ -57,25 +59,9 @@ export default {
       searchInfo: {
         username: '',
         ip: '',
-        duration: [],
+        duration: null,
       },
-      tableData: [
-        { // loginLog
-          id: 1,
-          username: 'admin',
-          ip: '218.192.13.231',
-          address: '北京市海淀区',
-          time: '2021-01-01 14:00:00',
-          browser: 'Chrome 119.0.0'
-        }, {
-          id: 2,
-          username: '程钱佳',
-          ip: '218.29.221.16',
-          address: '北京市海淀区',
-          time: '2021-01-01 14:00:00',
-          browser: 'Chrome 119.0.0'
-        }
-      ],
+      tableData: [],
       curPage: 1,
       totalPage: 1,
       isSearching: false,
@@ -99,15 +85,19 @@ export default {
         this.isSearching = true
         this.searchInfo.ip = result['ip']
         this.searchInfo.username = result['username']
-        this.searchInfo.duration[0] = this.stringToDate(result['startTime'])
-        this.searchInfo.duration[1] = this.stringToDate(result['endTime'])
-        this.curPage = result['page']
+        if (result['startTime'] != null && result['endTime'] != null) {
+          this.searchInfo.duration = []
+          this.searchInfo.duration[0] = this.stringToDate(result['startTime'])
+          this.searchInfo.duration[1] = this.stringToDate(result['endTime'])
+        }
+        this.curPage = Number(result['page'])
       } else {
         this.isSearching = false
-        this.curPage = result['page']
+        this.curPage = Number(result['page'])
       }
     },
     dateToString(date: Date) {
+      if (date === undefined) return ''
       let year = date.getFullYear()
       let month: string | number = date.getMonth() + 1
       let day: string | number = date.getDate()
@@ -131,17 +121,22 @@ export default {
     },
     async queryLog() {
       if (this.isSearching) {
-        window.location.href = `/#/loginLog?username=${this.searchInfo.username}&ip=${this.searchInfo.ip}&startTime=${this.dateToString(this.searchInfo.duration[0])}&endTime=${this.dateToString(this.searchInfo.duration[1])}&page=${this.curPage}`
-        await search_login_log_api(this.searchInfo.username, this.searchInfo.ip, this.dateToString(this.searchInfo.duration[0]), this.dateToString(this.searchInfo.duration[1]), this.curPage).then(res => {
+        if (this.searchInfo.duration === null)
+          history.pushState(null, null, `/#/loginLog?username=${this.searchInfo.username}&ip=${this.searchInfo.ip}&page=${this.curPage}`)
+        else
+          history.pushState(null, null, `/#/loginLog?username=${this.searchInfo.username}&ip=${this.searchInfo.ip}&startTime=${this.dateToString(this.searchInfo.duration[0])}&endTime=${this.dateToString(this.searchInfo.duration[1])}&page=${this.curPage}`)
+        const startTime = this.searchInfo.duration === null ? '' : this.dateToString(this.searchInfo.duration[0])
+        const endTime = this.searchInfo.duration === null ? '' : this.dateToString(this.searchInfo.duration[1])
+        await search_login_log_api(this.searchInfo.username, this.searchInfo.ip, startTime, endTime, this.curPage).then(res => {
           this.tableData = res.data['result']
-          this.totalPage = res.data['total_page']
+          this.totalPage = res.data['total_pages']
         })
       } else {
         const page = this.curPage || 1
-        window.location.href = `/#/loginLog?page=${page}`
+        history.pushState(null, null, `/#/loginLog?page=${page}`)
         await get_login_log_api(page).then(res => {
           this.tableData = res.data['result']
-          this.totalPage = res.data['total_page']
+          this.totalPage = res.data['total_pages']
         })
       }
     },

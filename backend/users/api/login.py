@@ -94,7 +94,6 @@ def operation_log(request):
     if page_number == "":
         items_per_page = all_operation_log.count()
         page_number = 1
-    print("???????????????")
     paginator = Paginator(all_operation_log, items_per_page)
     try:
         current_page_data = paginator.page(page_number)
@@ -115,7 +114,6 @@ def operation_log(request):
         }
         for log in current_page_data
     ]
-
     return JsonResponse({
         'result': serialized_data,
         'total_pages': paginator.num_pages,

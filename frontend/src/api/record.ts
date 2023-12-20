@@ -10,36 +10,36 @@ export const record = async (config, response) => {
   let method = config.method
   let requestModule = ''
   let status = response.status
-  let code = response.data.message
-  let username = useAuthStore().getUser.username
-  if (api.startsWith('/api/login'))
+  let code = response.data.error || response.error || response.statusText || ''
+  console.log(response)
+  let username = useAuthStore().getUser.username || response.data.username || response.data.personId || ''
+  if (api.startsWith('api/user/login/'))
     requestModule = '登录模块'
-  else if (api.startsWith('/api/user/'))
+  else if (api.startsWith('api/user/'))
     requestModule = '用户中心模块'
-  else if (api.startsWith('/api/log/'))
+  else if (api.startsWith('api/log/'))
     requestModule = '日志管理模块'
-  else if (api.startsWith('/api/board/'))
+  else if (api.startsWith('api/board/'))
     requestModule = '课程公告模块'
-  else if (api.startsWith('/api/course/'))
+  else if (api.startsWith('api/course/'))
     requestModule = '课程管理模块'
-  else if (api.startsWith('/api/materials/'))
+  else if (api.startsWith('api/material/'))
     requestModule = '课程资料模块'
-  else if (api.startsWith('/api/homework/'))
+  else if (api.startsWith('api/homework/'))
     requestModule = '课程作业模块'
-  else if (api.startsWith('/api/discussion/'))
+  else if (api.startsWith('api/discussion/'))
     requestModule = '讨论区模块'
-  else if (api.startsWith('/api/userManage/'))
+  else if (api.startsWith('api/userManage/'))
     requestModule = '用户管理模块'
   else
     requestModule = '其他模块'
   let userInfo = await getUserInfo()
   userInfo = userInfo['result']
-  console.log(userInfo)
   let ip = userInfo['ip']
   let address = userInfo['ad_info']['province'] + userInfo['ad_info']['city'] + userInfo['ad_info']['district']
   let date = new Date()
   let browser = BrowserInfo['browser'] + BrowserInfo['browserVersion']
-  if (api === '/api/user/login/' && status === 200) {
+  if (api.startsWith('api/user/login/') && status === 200) {
     await record_login_log_api(ip, address, browser, dateToString(date), username)
   }
   await record_operation_log_api(requestModule, api, ip, method, browser, status.toString(), code, dateToString(date), username)
