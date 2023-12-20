@@ -148,8 +148,10 @@ def delete_user(request):
 @require_POST
 def delete_users(request):
     user = request.user
-    current_user_type = CourseSelectionRecord.objects.filter(user=user,
-                                                             selected_course=user.current_course).first().type
+    current_user_type = ""
+    if not user.is_admin:
+        current_user_type = CourseSelectionRecord.objects.filter(user=user,
+                                                                 selected_course=user.current_course).first().type
     if user.is_admin or current_user_type == "TEACHER" or current_user_type == "ASSISTANT":
         id_str = str(request.POST.get('ids'))
         deleted_ids = id_str.split(",")
@@ -194,7 +196,8 @@ def update_avatar(request):
     if avatar:
         if avatar.size > 1024 * 1024 * 2:
             return JsonResponse({"error": "图片大小不能超过2MB"}, status=405)
-        if user.avatar.name != 'avatar/default.png':
+        if user.avatar.name != 'avatars/default.png':
+            print(user.avatar.name)
             user.avatar.delete()
 
         timestamp = str(int(time.time()))
@@ -312,8 +315,9 @@ def xlsx_create_users(request):
     xlsx_file = request.FILES.get('xlsxFile')
     workbook = openpyxl.load_workbook(xlsx_file)
     worksheet = workbook.active
-    new_users_category = request.POST.get('type')
-
+    new_users_category = request.POST.get('identity')
+    print("((((((())))))))))))))))))))(((")
+    print(new_users_category)
     # 确定课程
     request_user = request.user
     if request_user.is_admin:
@@ -487,6 +491,7 @@ def reset_user_password(request):
     user_id = request.POST.get('id')
     user = User.objects.get(pk=user_id)
     username = user.username
+    print(username)
     new_password = make_password(username)
     user.password = new_password
     user.save()

@@ -1,3 +1,3 @@
-ITEMS_PER_PAGE = 2
+ITEMS_PER_PAGE = 5
 
 MEDIA_ADDRESS = 'http://127.0.0.1:8000/media/'
