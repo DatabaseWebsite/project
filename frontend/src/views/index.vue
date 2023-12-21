@@ -139,7 +139,7 @@ export default {
   mounted() {
     setInterval(() => {
       let timeNow = new Date()
-      this.currentTime = timeNow.toLocaleString();
+      this.currentTime = timeNow.toLocaleString().replaceAll('/', '-');
       let hours = timeNow.getHours();
       if (hours >= 6 && hours <= 10) this.timeState = '早上'
       else if (hours > 10 && hours <= 14) this.timeState = '中午'

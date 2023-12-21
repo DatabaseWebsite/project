@@ -18,7 +18,7 @@
       <el-form-item label="作业文件">
         <upload-file v-model:submitFile="workInfo.file"/>
       </el-form-item>
-      <el-form-item label="作业总分" prop="totalScore">
+      <el-form-item label="作业总分" prop="totalScore"  style="width: 300px;">
         <el-input v-model="workInfo.totalScore" placeholder="请输入作业总分"></el-input>
       </el-form-item>
       <el-form-item label="截止时间" prop="deadline">
@@ -67,7 +67,7 @@ export default {
     const workFormRef = ref<FormInstance>()
     const workInfo = reactive<WorkRuleForm>({
       title: '',
-      file: '',
+      file: [],
       description: '',
       totalScore: 100,
       deadline: '',
@@ -88,7 +88,8 @@ export default {
       await formEl.validate(async (valid) => {
         if (valid) {
           const data:FormData = new FormData()
-          data.append('file', workInfo.file[0].raw)
+          const file = workInfo.file.length == 0 ? '' : workInfo.file[0].raw
+          data.append('file', file)
           data.append('title', workInfo.title)
           data.append('description', workInfo.description)
           data.append('totalScore', workInfo.totalScore.toString())
@@ -98,7 +99,7 @@ export default {
             cancel()
           })
         } else {
-          ElMessage.warning('错误提交！！')
+          console.log('错误提交！！')
         }
       })
     }
@@ -107,7 +108,7 @@ export default {
       workInfo.description = ''
       workInfo.totalScore = 100
       workInfo.deadline = ''
-      workInfo.file = ''
+      workInfo.file = []
       context.emit('closeDialog', false)
     }
     return {

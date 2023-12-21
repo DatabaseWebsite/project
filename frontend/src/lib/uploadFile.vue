@@ -5,7 +5,7 @@
     drag
     :accept="accept"
     :auto-upload="false"
-    limit='1'
+    :limit='1'
     :file-list="submitFile"
     :on-exceed="handleExceed"
     :on-remove="handleRemove"

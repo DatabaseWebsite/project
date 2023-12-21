@@ -12,7 +12,7 @@
               <div class="name-time">
                 <p class="name">{{ item.title }}</p>
                 <p class="upload-time">总分：{{ item.totalScore }}</p>
-                <p class="upload-time">提交截止时间：{{ item.deadline }}</p>
+                <p class="upload-time">提交截止时间：{{ displayTime(item.deadline) }}</p>
               </div>
             </div>
             <div class="right-section">
@@ -55,7 +55,7 @@
           <el-button type="text" @click="removeSelectedFile" style="margin-left: 20px; color: red">删除</el-button>
         </div>
       </el-form-item>
-      <el-form-item label="作业总分" prop="totalScore">
+      <el-form-item label="作业总分" prop="totalScore" style="width: 300px;">
         <el-input v-model="selectedWork.totalScore" placeholder="请输入作业总分"></el-input>
       </el-form-item>
       <el-form-item label="截止时间" prop="deadline">
@@ -85,6 +85,7 @@ import MdEditor from "@/components/markdown/mdEditor.vue";
 import UploadFile from "@/lib/uploadFile.vue";
 import {saveAs} from "file-saver";
 import {registerUser} from "@/components/userManage/registerForm.ts";
+import {useRoute, useRouter} from "vue-router";
 
 interface ModifyWorkRuleForm {
   id: number
@@ -118,6 +119,9 @@ export default {
     }
   },
   methods: {
+    displayTime(date:Date) {
+      return date.toLocaleString().replaceAll('/', '-')
+    },
     closeCreateWork(e) {
       this.createWorkVisible = e
     },
@@ -134,9 +138,6 @@ export default {
     },
     download(fileUrl, fileName) {
       saveAs(fileUrl, fileName)
-    },
-    goWorkDetail(id) {
-      this.$router.push({path: `/homework/workdetail`, query:{id: id} })
     }
   },
   setup(props, context) {
@@ -150,7 +151,8 @@ export default {
       totalScore: 100,
       deadline: '',
     })
-    const submitFile = reactive<SubmitFile>({ file: '' })
+    const router = useRouter()
+    const submitFile = reactive<SubmitFile>({ file: [] })
     const editWork = (work) => {
       modifyWorkVisible.value = true
       selectedWork.id = work.id
@@ -180,10 +182,10 @@ export default {
         if (valid) {
           const data:FormData = new FormData()
           data.append('id', selectedWork.id.toString())
-          if (submitFile.file !== '')
+          if (submitFile.file.length != 0)
             data.append('file', submitFile.file[0].raw)
-          else if (selectedWork.file === '')
-            data.append('removeFile', 'removeFile')
+          else
+            data.append('file', selectedWork.file)
           data.append('title', selectedWork.title)
           data.append('description', selectedWork.description)
           data.append('totalScore', selectedWork.totalScore.toString())
@@ -196,6 +198,9 @@ export default {
         }
       })
     }
+    const goWorkDetail = (id) => {
+      router.push({path: `/homework/workdetail`, query:{id: id} })
+    }
     return {
       submitFile,
       modifyWorkFormRef,
@@ -204,7 +209,8 @@ export default {
       modifyWorkVisible,
       submitForm,
       editWork,
-      removeSelectedFile
+      removeSelectedFile,
+      goWorkDetail
     }
   },
   created() {
