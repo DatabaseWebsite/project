@@ -64,7 +64,7 @@
           try {
             //const res = await all_course_info_api();
             //this.course_info = res.data.result;
-            this.course_info = [{course_id:2,name:"gsj"},{course_id:1,name:"byc"}];
+            this.course_info = (await all_course_info_api()).data.result;
             console.log("all course_info API call successful", this.course_info);
           } catch (error) {
             console.error("Error calling API:", error);
@@ -73,8 +73,9 @@
         async addCourse() {
           await this.$refs.courseRef.validate(async (valid) => {
             if (valid) {
+              
+              await create_course_api(this.course.name);
               console.log("success addCourse", this.course.name);
-              //await create_course_api(this.course.name);
               await this.handleLogin();
             } else {
               console.log('提交失败');

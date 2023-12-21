@@ -1,5 +1,6 @@
 import cookies from "@/lib/cookies.ts";
 import axios from "@/api/axios.ts";
+import { Data } from "@icon-park/vue-next";
 
 /**
  * @api {get} /user/refresh-token 刷新token
@@ -256,7 +257,21 @@ export const create_course_api = (name: string) => {
 export const all_course_info_api = () => {
   return axios.get('api/userManage/all-course-info/')
 }
-
+export const all_participants_api = (course_id:string, page:string) => {
+  const data = new URLSearchParams();
+  data.append('course_id', course_id);
+  data.append('page',page);
+  return axios.post('api/course/all-participants/',data)
+}
+export const add_course_user_api = (personId: string, username: string, identity: string,email:string,course_id: string) => {
+  let data = new URLSearchParams();
+  data.append('person_id', personId)
+  data.append('username', username) // 密码默认为personId
+  data.append('email', email)
+  data.append('course_id', course_id)
+  data.append('identity', identity)
+  return axios.post('api/userManage/create-single-user/', data)
+}
 /*
  * title: string
  * file: file
