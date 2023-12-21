@@ -174,7 +174,6 @@ const handlePageChange = (newPage) => {
   justify-content: center;  
   align-items: center;  
 }  
-
 .card-header {  
   display: flex;  
   justify-content: space-between;  

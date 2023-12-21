@@ -499,13 +499,6 @@ export default {
       onExport,
       changePage
     }
-  },
-  async mounted() {
-    await get_all_courses_api().then(res => {
-      this.courseInfo = res.data['result']
-    })
-    this.getRequest()
-    //await this.queryUsers()
   }
 }
 </script>

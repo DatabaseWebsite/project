@@ -12,7 +12,18 @@
         </div>
       </div>
       <div class="right-section">
-        <icon-down-load :size="30" @click="download(item.url, item.name)" />
+        <icon-down-load :size="30" style="margin: 20px" @click="download(item.url, item.fileName)" />
+        <el-popconfirm
+          confirm-button-text="确定"
+          cancel-button-text="取消"
+          title="确定删除该资料吗？"
+          @confirm="handleDelete(item.id)"
+          style="margin: 20px"
+        >
+          <template #reference>
+            <el-button v-if="power" type="text"><icon-delete :size="30" style="color:darkred"/></el-button>
+          </template>
+        </el-popconfirm>
       </div>
     </div>
     <el-divider style="margin: 0; padding: 0"/>
@@ -23,15 +34,16 @@
 <script lang="ts">
 import UploadMaterials from "@/components/materials/uploadMaterials.vue";
 import useAuthStore from "@/store/user.ts";
-import {computed, inject, onMounted, reactive, ref, toRefs} from "vue";
-import {get_materials_api} from "@/api/api.ts";
+import {del_material_api, get_materials_api} from "@/api/api.ts";
 import {
   Download as IconDownLoad,
+  Delete as IconDelete,
 } from "@icon-park/vue-next";
+import {saveAs} from "file-saver";
 
 export default {
   name: "reference",
-  components: {UploadMaterials, IconDownLoad},
+  components: {UploadMaterials, IconDownLoad, IconDelete},
   data() {
     return {
       materialData: [{
@@ -125,6 +137,8 @@ export default {
 }
 
 .right-section {
+  display: flex;
   text-align: right;
+  align-items: center;
 }
 </style>

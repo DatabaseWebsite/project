@@ -80,14 +80,16 @@ axios.interceptors.response.use(async function (response) {
       ElMessage.error(dataAxios.data['error'])
       break
   }
-  await record(response.config, response)
+  // if (response.config.url !== 'api/record-login-log/' && response.config.url !== 'api/record-operation-log/')
+  //   await record(response.config, response)
   return response
 }, async function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
   console.log(error)
   endLoading()
-  await record(error.config, error.response)
+  // if (error.response.config.url !== 'api/record-login-log/' && error.response.config.url !== 'api/record-operation-log/')
+  //   await record(error.config, error.response)
   const {status} = error.response
   switch (status) {
     case 401:

@@ -12,17 +12,11 @@ import discussionBoard from "@/components/discussion/discussionBoard.vue"
 export default {
   name: "discussionArea",
   components: {MdPreview, MdEditor,discussionBoard},
-  data() {
-    return {
-      text: '',
-    }
-  },
-  methods: {
     submit() {
 
     }
   }
-}
+
 </script>
 
 <style scoped>
