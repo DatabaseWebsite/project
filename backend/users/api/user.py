@@ -30,12 +30,12 @@ def login_user(request):
         token = generate_token(user)
         refresh_token = generate_refresh_token(user)
         return JsonResponse(
-            {"msg": "Login successful.", 'access': token, 'refresh': refresh_token, 'userId': username, 'code': 200},
+            {"msg": "Login successful.", 'access': token, 'refresh': refresh_token, 'userId': username, 'username': user.name,  'code': 200},
             status=200)
     elif User.objects.filter(username=username).exists():
-        return JsonResponse({"error": "密码错误", 'code': 401}, status=201)
+        return JsonResponse({"error": "密码错误", 'code': 401, "personId": username}, status=201)
     else:
-        return JsonResponse({"error": "用户不存在", 'code': 401}, status=201)
+        return JsonResponse({"error": "用户不存在", 'code': 401, "personId": username}, status=201)
 
 
 @require_POST
@@ -80,6 +80,8 @@ def create_single_user(request):
         course_id = request.POST.get('course_id')
         course = Course.objects.filter(pk=course_id).first()
 
+    print(">>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<")
+    print(course.name)
     if User.objects.filter(username=new_user_username).exists():
         registered_user = User.objects.filter(username=new_user_username).first()
         if CourseSelectionRecord.objects.filter(user=registered_user, selected_course=course).exists():
@@ -94,7 +96,8 @@ def create_single_user(request):
                 type=new_user_category
             )
             courseSelectedRecord.save()
-            return JsonResponse({"message": "成功将用户{}加入课程{}".format(new_user_username, course.name)}, status=200)
+            return JsonResponse({"message": "成功将用户{}加入课程{}".format(new_user_username, course.name)},
+                                status=200)
     else:
         new_user = User.objects.create_user(
             username=new_user_username,
@@ -110,7 +113,9 @@ def create_single_user(request):
             type=new_user_category
         )
         courseSelectedRecord.save()
-        return JsonResponse({"message": "成功创建用户{}，并加入课程{}".format(new_user_username, course.name)}, status=200)
+        print("((((((((((()))))))))))))")
+        return JsonResponse({"message": "成功创建用户{}，并加入课程{}".format(new_user_username, course.name)},
+                            status=200)
 
 
 @jwt_auth()
@@ -143,11 +148,13 @@ def delete_user(request):
 @require_POST
 def delete_users(request):
     user = request.user
-    current_user_type = CourseSelectionRecord.objects.filter(user=user,
-                                                             selected_course=user.current_course).first().type
+    current_user_type = ""
+    if not user.is_admin:
+        current_user_type = CourseSelectionRecord.objects.filter(user=user,
+                                                                 selected_course=user.current_course).first().type
     if user.is_admin or current_user_type == "TEACHER" or current_user_type == "ASSISTANT":
-        deleted_ids = request.POST.getlist('ids')
-        print(deleted_ids)
+        id_str = str(request.POST.get('ids'))
+        deleted_ids = id_str.split(",")
         count = 0
         for deleted_id in deleted_ids:
             if not User.objects.filter(pk=deleted_id).exists():
@@ -189,7 +196,8 @@ def update_avatar(request):
     if avatar:
         if avatar.size > 1024 * 1024 * 2:
             return JsonResponse({"error": "图片大小不能超过2MB"}, status=405)
-        if user.avatar.name != 'avatar/default.png':
+        if user.avatar.name != 'avatars/default.png':
+            print(user.avatar.name)
             user.avatar.delete()
 
         timestamp = str(int(time.time()))
@@ -238,11 +246,19 @@ def update_current_course(request):
             else:
                 user.current_course = new_course
                 user.save()
-                return JsonResponse({"message": "修改课程成功，您当前浏览的课程为{}".format(new_course.name)}, status=200)
+                return JsonResponse({
+                    "message": "修改课程成功，您当前浏览的课程为{}".format(new_course.name),
+                    "identity": str(
+                        CourseSelectionRecord.objects.filter(user=user, selected_course=new_course).first().type)
+                }, status=200)
         else:
             user.current_course = new_course
             user.save()
-            return JsonResponse({"message": "修改课程成功"}, status=200)
+            return JsonResponse({
+                "message": "修改课程成功",
+                "identity": str(
+                    CourseSelectionRecord.objects.filter(user=user, selected_course=new_course).first().type)
+            }, status=200)
     else:
         return JsonResponse({"error": "未查询到此课程"}, status=405)
 
@@ -299,7 +315,7 @@ def xlsx_create_users(request):
     xlsx_file = request.FILES.get('xlsxFile')
     workbook = openpyxl.load_workbook(xlsx_file)
     worksheet = workbook.active
-    new_users_category = request.POST.get('type')
+    new_users_category = request.POST.get('identity')
 
     # 确定课程
     request_user = request.user
@@ -376,20 +392,28 @@ def user_list(request):
     except EmptyPage:
         return JsonResponse({'error': 'Page not found'}, status=404)
 
+    courses = {}
+    for user in all_users:
+        records = CourseSelectionRecord.objects.filter(user=user)
+        course = ""
+        for record in records:
+            course = course + str(record.selected_course.name) + "(" + str(record.type) + "),"
+        courses[user] = course[:-1]
+
     serialized_data = [
         {
             'id': user.id,
             'person_id': user.username,
             'username': user.name,
-            'courses': user.current_course.name if user.current_course else '',
+            'courses': courses[user]
         }
         for user in current_page_data
     ]
-    print(serialized_data)
+
     return JsonResponse({
         'result': serialized_data,
         'total_pages': paginator.num_pages,
-        'current_page': current_page_data.number})
+        'current_page': current_page_data.number}, status=200)
 
 
 @jwt_auth()
@@ -423,24 +447,26 @@ def search_users(request):
     user_ids_filtered_course_select_records = filtered_course_select_records.values_list('user__id', flat=True)
     filtered_users = filtered_users.filter(id__in=user_ids_filtered_course_select_records)
 
-    result_ = [
-        {
-            "id": filtered_user.id,
-            "person_id": filtered_user.username,
-            "username": filtered_user.name,
-            "grade": filtered_user.grade,
-            "courses": ''
-        }
+    result_ = {
+        filtered_user:
+            {
+                "id": filtered_user.id,
+                "person_id": filtered_user.username,
+                "username": filtered_user.name,
+                "grade": filtered_user.grade,
+                "courses": ''
+            }
         for filtered_user in filtered_users
-    ]
+    }
 
-    i = 0
     for filtered_user in filtered_users:
         selected_courses_records = CourseSelectionRecord.objects.filter(user=filtered_user)
         for record in selected_courses_records:
-            result_.get('courses').append(record.selected_course.name + '(' + record.type + ')')
+            result_[filtered_user]['courses'] = (result_[filtered_user]['courses'] +
+                                                 str(record.selected_course.name) + '(' + str(record.type) + '),')
+        result_[filtered_user]['courses'] = result_[filtered_user]['courses'][:-1]
 
-    paginator = Paginator(result_, ITEMS_PER_PAGE)
+    paginator = Paginator(list(result_.values()), ITEMS_PER_PAGE)
 
     try:
         current_page_data = paginator.page(page)
@@ -456,3 +482,36 @@ def search_users(request):
             'current_page': current_page_data.number
         }, status=200
     )
+
+
+@jwt_auth()
+@require_POST
+def reset_user_password(request):
+    user_id = request.POST.get('id')
+    user = User.objects.get(pk=user_id)
+    username = user.username
+    print(username)
+    new_password = make_password(username)
+    user.password = new_password
+    user.save()
+    return JsonResponse({"massage": "密码成功重置为学号"}, status=200)
+
+
+@jwt_auth()
+@require_POST
+def modify_identity(request):
+    user_id = request.POST.get('user_id')
+    user = User.objects.get(pk=user_id)
+    new_identity = request.POST.get('new_identity')
+
+    if request.user.is_admin:
+        course_id = request.POST.get('course_id')
+        course = Course.objects.get(pk=course_id)
+    else:
+        course = request.user.current_course
+
+    courseSelectionRecord = CourseSelectionRecord.objects.filter(user=user, course=course).first()
+    courseSelectionRecord.type = new_identity
+    courseSelectionRecord.save()
+
+    return JsonResponse({"message": "成功修改"}, status=200)

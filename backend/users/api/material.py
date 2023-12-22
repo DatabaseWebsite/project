@@ -26,7 +26,7 @@ from users.settings import ITEMS_PER_PAGE
 def upload_material(request):
     files = request.FILES.getlist('files')
     user = request.user
-
+    print("<<<<<<<<<<<<<<<<>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<>")
     if user.is_admin:
         course_id = request.POST.get('course_id')
         course = Course.objects.get(pk=course_id)
@@ -34,6 +34,7 @@ def upload_material(request):
         course = user.current_course
 
     for file in files:
+        print(file.name)
         material = Material(user=user, course=course, file=file, file_name=file.name)
         material.save()
 
@@ -46,27 +47,39 @@ def material_list(request):
     all_materials = Material.objects.all()
     page_number = request.GET.get('page', 1)
 
-    paginator = Paginator(all_materials, ITEMS_PER_PAGE)
+    paginator = Paginator(all_materials, all_materials.count())
     try:
         current_page_data = paginator.page(page_number)
     except EmptyPage:
-        return JsonResponse({'error': 'Page not found'}, status=404)
-
+        return JsonResponse({'error': 'Page not found'}, status=405)
+    print(all_materials.count())
     serialized_data = [
         {
             'id': material.id,
-            'file_name': material.file_name,
-            'url': material.get_file_url()
+            'name': os.path.splitext(material.file_name)[0],
+            'fileName': material.file_name,
+            'url': material.get_file_url(),
+            'uploadTime': material.created_at
         }
         for material in current_page_data
     ]
+    print(serialized_data)
     return JsonResponse(
         {
-            'results': serialized_data,
+            'result': serialized_data,
             'total_pages': paginator.num_pages,
             'current_page': current_page_data.number
         }
     )
+
+
+@jwt_auth()
+@require_POST
+def delete_material(request):
+    material_id = request.POST.get("material_id")
+    material = Material.objects.get(pk=material_id)
+    material.delete()
+    return JsonResponse({"message": "成功删除"}, status=200)
 
 
 @jwt_auth()

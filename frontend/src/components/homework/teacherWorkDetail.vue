@@ -7,7 +7,7 @@
         <el-tag v-else type="danger"> 已截止 </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="截止时间">
-        {{workData.deadline}}
+        {{displayTime(workData.deadline)}}
       </el-descriptions-item>
       <el-descriptions-item label="作业总分">
         {{workData.totalScore}}
@@ -29,7 +29,7 @@
       <el-table-column prop="studentID" label="学号" min-width="140" sortable/>
       <el-table-column prop="studentName" label="姓名" min-width="160"/>
       <el-table-column prop="submitTime" label="提交时间" min-width="180" sortable/>
-      <el-table-column prop="score" label="批改分数" min-width="160" sortable/>
+      <el-table-column prop="score" label="得分" min-width="160" sortable/>
       <el-table-column prop="markingPerson" label="批改人" min-width="180"/>
       <el-table-column fixed="right" label="操作" width="100">
         <template #default="scope">
@@ -40,7 +40,7 @@
       </el-table-column>
     </el-table>
     <div>
-      <el-pagination layout="prev, pager, next" :page-count="totalPage" :current-page="curPage" page-size=10 @current-change="changePage" style="margin: 10px;"/>
+      <el-pagination layout="prev, pager, next" :page-count="totalPage" :current-page="curPage" :page-size='10' @current-change="changePage" style="margin: 10px;"/>
     </div>
   </div>
   <el-dialog
@@ -49,12 +49,20 @@
     width="70%"
   >
     <div>
-      <div v-if="selectedInfo.file !== undefined">
-<!--        <pdf-preview :pdf-url="selectedInfo.file.url"/>-->
+      <div v-if="selectedInfo.file != undefined">
+        <pdf-preview v-if="selectedInfo.file.url.endsWith('pdf')" :pdf="selectedInfo.file.url"/>
+        <docx-preview
+          v-else-if="selectedInfo.file.url.endsWith('docx') || selectedInfo.file.url.endsWith('doc')"
+          :docx="selectedInfo.file.url"/>
+        <excel-preview
+          v-else-if="selectedInfo.file.url.endsWith('xlsx') || selectedInfo.file.url.endsWith('xls')"
+          :excel="selectedInfo.file.url"/>
+        <div v-else>
+          <el-link :underline="true" type="primary" @click="download(selectedInfo.file.url, selectedInfo.file.name)"> {{ selectedInfo.file.name }} </el-link>
+          暂不支持该文件类型预览
+        </div>
       </div>
-      <div v-if="selectedInfo.context !== ''">
-        <md-preview :text="selectedInfo.context" :navigation-visible="false"/>
-      </div>
+
       <el-form>
         <el-form-item label="分数">
           <el-input-number v-model="selectedInfo.score" :min="0" :max="workData.totalScore" :step="1"/>
@@ -71,16 +79,20 @@
 
 <script lang="ts">
 import {
-  get_one_work_api,
+  get_one_work_api, get_work_submission_by_id_api,
   get_work_submissions_api, submit_work_score_api,
 } from "@/api/api.ts";
 import MdPreview from "@/components/markdown/mdPreview.vue";
 import {saveAs} from "file-saver";
 import {ElMessage} from "element-plus";
+import {useRoute} from "vue-router";
+import PdfPreview from "@/lib/pdfPreview.vue";
+import DocxPreview from "@/lib/docxPreview.vue";
+import ExcelPreview from "@/lib/excelPreview.vue";
 
 export default {
   name: "teacherWorkDetail",
-  components: {MdPreview},
+  components: {ExcelPreview, DocxPreview, PdfPreview, MdPreview},
   data() {
     return {
       id: 1,
@@ -116,8 +128,8 @@ export default {
         id: 2,
         file: {
           id: 2,
-          name: '1fe',
-          url: 'efwg',
+          name: 'test6',
+          url: 'http://static.shanhuxueyuan.com/test6.docx',
         },
         context: 'sfgd',
         score: null,
@@ -126,6 +138,9 @@ export default {
     }
   },
   methods: {
+    displayTime(date:Date) {
+      return date.toLocaleString().replaceAll('/', '-')
+    },
     download(url: string, name: string) {
       saveAs(url, name)
     },
@@ -136,11 +151,10 @@ export default {
         })
     },
     async handleCorrect(index: number, row: any) {
-      // await get_work_submissions_by_id_api(row['id']).then(res => {
-      //   this.selectedInfo = res.data['result']
-      //   this.correctVisible = true
-      // })
-      this.correctVisible = true
+      await get_work_submission_by_id_api(row['id']).then(res => {
+        this.selectedInfo = res.data['result']
+        this.correctVisible = true
+      })
     },
     changePage(page: number) {
       this.curPage = page
@@ -155,9 +169,9 @@ export default {
     }
   },
   async mounted() {
-    this.id = this.$router.query.id
+    this.id = useRoute().query.id
     await get_one_work_api(this.id).then(res => {
-      this.workData = res.data.result
+       this.workData = res.data.result
     })
     await this.querySubmit()
   }
@@ -169,15 +183,24 @@ export default {
   font-family: 'Arial', sans-serif;
   font-size: 2em;
   font-weight: bold;
-  color: transparent;
-  text-align: center;
   position: relative;
   display: inline-block;
-  background: linear-gradient(to bottom, #003366 50%, #66ccff 50%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: scaleUp 2s infinite alternate;
+  padding-bottom: 5px;
+}
+.work-title:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(100% + 100px);
+  height: 3px; /* 初始下边框的高度 */
+  background: linear-gradient(to right, #000 50%, rgba(0, 0, 0, 0) 100%); /* 渐变黑线 */
+  transition: all 0.3s ease; /* 添加过渡效果 */
+}
+
+.work-title:hover:after {
+  height: 3px; /* 悬停时下边框变细 */
+  background: linear-gradient(to right, #000 50%, rgba(0, 0, 0, 0.3) 100%); /* 悬停时下边框变浅 */
 }
 .title2 {
   font-family: 'Arial', sans-serif;

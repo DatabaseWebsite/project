@@ -309,7 +309,7 @@ export default {
       }
       if (!query.indexOf('personId')) {
         isSearching.value = false
-        curPage.value = result['page'] || 1
+        curPage.value = Number(result['page'])
       } else {
         searchInfo.value['personId'] = result['personId']
         searchInfo.value['username'] = result['username']
@@ -317,7 +317,7 @@ export default {
         searchInfo.value['course'] = result['course']
         searchInfo.value['identity'] = result['identity']
         isSearching.value = true
-        curPage.value = result['page']
+        curPage.value = Number(result['page'])
       }
     }
     async function queryUsers() {
@@ -328,8 +328,7 @@ export default {
           totPage.value = res.data['total_page']
         })
       } else {
-        const page = curPage.value || 1
-        window.location.href = `/#/userManage?page=${page}`
+        window.location.href = `/#/userManage?page=${curPage.value}`
         await get_user_list_api(curPage.value).then(res => {
           tableData.value = res.data['result']
           totPage.value = res.data['total_page']

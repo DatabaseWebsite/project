@@ -17,6 +17,7 @@ def create_course(request):
     course_name = request.POST.get('course_name')
     user = request.user
     if user.is_admin:
+        print(course_name)
         course = Course(name=course_name)
         course.save()
         return JsonResponse({"message": "创建成功"}, status=200)
@@ -27,6 +28,7 @@ def create_course(request):
         if user_category != 'TEACHER':
             return JsonResponse({"error": "您没有此权限"}, status=405)
         else:
+            print(course_name)
             course = Course(name=course_name)
             course.save()
             return JsonResponse({"message": "创建成功"}, status=200)
@@ -44,6 +46,7 @@ def all_course_info(request):
     if user.is_admin or user_category == "TEACHER" or user_category == "ASSISTANT":
         courses = Course.objects.all()
         data = [{'course_id': course.id, 'name': course.name} for course in courses]
+        # print(data)
         return JsonResponse({"result": data}, status=status.HTTP_200_OK)
     else:
         return JsonResponse({"error": "您没有此权限"}, status=405)

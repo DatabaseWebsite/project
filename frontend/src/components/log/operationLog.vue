@@ -39,8 +39,10 @@
     </el-header>
     <el-main>
       <el-table :data="tableData" border>
-        <el-table-column prop="id" label="序号" width="70"/>
-        <el-table-column prop="requestModule" label="请求模块" min-width="140"/>
+        <el-table-column label="序号" width="70" v-slot="{ row, $index }">
+          {{ $index + 1 }}
+        </el-table-column>
+        <el-table-column prop="request_module" label="请求模块" min-width="140"/>
         <el-table-column prop="api" label="请求地址" min-width="160"/>
         <el-table-column prop="operation" label="请求方法" min-width="180"/>
         <el-table-column prop="ip" label="IP地址" min-width="160"/>
@@ -51,7 +53,7 @@
         <el-table-column fixed="right" prop="time" label="登录时间" min-width="180"/>
       </el-table>
       <div>
-        <el-pagination layout="prev, pager, next" :page-count="totalPage" :current-page="curPage" page-size=10 @current-change="changePage" style="margin: 10px;"/>
+        <el-pagination layout="prev, pager, next" :page-count="totalPage" v-model:currentPage="curPage" :page-size="10" @current-change="changePage" style="margin: 10px;"/>
       </div>
     </el-main>
   </el-container>
@@ -66,39 +68,15 @@ export default {
   components: {Search, Refresh},
   data() {
     return {
-      requestModules: {
-        1: '登录模块',
-        2: '课程公告模块',
-        3: '课程管理模块',
-        4: '课程资料模块',
-        5: '课程作业模块',
-        6: '讨论区',
-        7: '用户管理模块',
-        8: '日志管理模块',
-        9: '用户中心模块'
-      },
       searchInfo: {
         requestModule: '',
         api: '',
         operation: '',
         username: '',
         ip: '',
-        duration: [],
+        duration: null,
       },
-      tableData: [
-        { // operationLog
-          id: 1,
-          requestModule: '登录模块',
-          api: '/api/login',
-          operation: 'POST',
-          ip: '214134',
-          browser: 'Chrome 119.0.0',
-          status: 200,
-          code: '{message:"登录成功"}',
-          username: 'admin',
-          time: '2021-01-01 14:00:00',
-        }
-      ],
+      tableData: [],
       curPage: 1,
       totalPage: 1,
       isSearching: false,
@@ -112,7 +90,6 @@ export default {
         const queryArr = query.split('&')
         queryArr.forEach(item => {
           const value = decodeURIComponent(item.split('=')[1])
-          console.log(value)
           const key = item.split('=')[0]
           const results = result as any
           results[key] = value
@@ -125,12 +102,15 @@ export default {
         this.searchInfo.requestModule = result['requestModule']
         this.searchInfo.ip = result['ip']
         this.searchInfo.username = result['username']
-        this.searchInfo.duration[0] = this.stringToDate(result['startTime'])
-        this.searchInfo.duration[1] = this.stringToDate(result['endTime'])
-        this.curPage = result['page']
+        if (result['startTime'] != null && result['endTime'] != null) {
+          this.searchInfo.duration = []
+          this.searchInfo.duration[0] = this.stringToDate(result['startTime'])
+          this.searchInfo.duration[1] = this.stringToDate(result['endTime'])
+        }
+        this.curPage = Number(result['page'])
       } else {
         this.isSearching = false
-        this.curPage = result['page']
+        this.curPage = Number(result['page']) || 1
       }
     },
     dateToString(date: Date) {
@@ -157,22 +137,26 @@ export default {
     },
     async queryLog() {
       if (this.isSearching) {
-        window.location.href = `/#/operationLog?requestModule=${this.searchInfo.requestModule}&api=${this.searchInfo.api}&operation=${this.searchInfo.operation}&username=${this.searchInfo.username}&ip=${this.searchInfo.ip}&startTime=${this.dateToString(this.searchInfo.duration[0])}&endTime=${this.dateToString(this.searchInfo.duration[1])}&page=${this.curPage}`
-        await search_operation_log_api(this.searchInfo.requestModule, this.searchInfo.api, this.searchInfo.ip, this.searchInfo.username, this.searchInfo.operation, this.dateToString(this.searchInfo.duration[0]), this.dateToString(this.searchInfo.duration[1]), this.curPage).then(res => {
+        if (this.searchInfo.duration === null)
+          history.pushState(null, null, `/#/operationLog?requestModule=${this.searchInfo.requestModule}&api=${this.searchInfo.api}&operation=${this.searchInfo.operation}&username=${this.searchInfo.username}&ip=${this.searchInfo.ip}&page=${this.curPage}`)
+        else
+          history.pushState(null, null, `/#/operationLog?requestModule=${this.searchInfo.requestModule}&api=${this.searchInfo.api}&operation=${this.searchInfo.operation}&username=${this.searchInfo.username}&ip=${this.searchInfo.ip}&startTime=${this.dateToString(this.searchInfo.duration[0])}&endTime=${this.dateToString(this.searchInfo.duration[1])}&page=${this.curPage}`)
+        const startTime = this.searchInfo.duration === null ? '' : this.dateToString(this.searchInfo.duration[0])
+        const endTime = this.searchInfo.duration === null ? '' : this.dateToString(this.searchInfo.duration[1])
+        await search_operation_log_api(this.searchInfo.requestModule, this.searchInfo.api, this.searchInfo.ip, this.searchInfo.username, this.searchInfo.operation, startTime, endTime, this.curPage).then(res => {
           this.tableData = res.data['result']
-          this.totalPage = res.data['total_page']
+          this.totalPage = Number(res.data['total_pages'])
         })
       } else {
-        const page = this.curPage || 1
-        window.location.href = `/#/operationLog?page=${page}`
-        await get_operation_log_api(page).then(res => {
+        history.pushState(null, null, `/#/operationLog?page=${this.curPage}`);
+        await get_operation_log_api(this.curPage).then(res => {
           this.tableData = res.data['result']
-          this.totalPage = res.data['total_page']
+          this.totalPage = Number(res.data['total_pages'])
         })
       }
     },
     async submitSearchForm() {
-      if (this.searchInfo.api=='' && this.searchInfo.operation=='' && this.searchInfo.username=='' && this.searchInfo.ip=='' && this.searchInfo.duration==[] && this.searchInfo.requestModule=='' ) {
+      if (this.searchInfo.api=='' && this.searchInfo.operation=='' && this.searchInfo.username=='' && this.searchInfo.ip=='' && this.searchInfo.duration==null && this.searchInfo.requestModule=='' ) {
         ElMessage.warning({
           message: '查询条件不能全为空',
           type: 'warning'
