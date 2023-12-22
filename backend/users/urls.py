@@ -47,4 +47,28 @@ urlpatterns = [
     path('log/search-operation-log/', api.search_operation_log),
     path('log/record-operation-log/', api.record_operation_log),
 
+    path('notice/create-notice/', api.create_notice),
+    path('notice/delete-notice/', api.delete_notice),
+    path('notice/notice-list/', api.notice_list),
+
+    path('message/send-message/', api.send_message_),
+    path('message/get-message/', api.get_message),
+
+    path('forum/create-post/', api.create_post),
+    path('forum/post-list', api.post_list),
+    path('forum/delete-post/', api.delete_post),
+    path('forum/create-reply/', api.create_reply),
+    path('forum/get-post/', api.get_post),
+    path('forum/topping-post/', api.topping_post),
+    path('forum/cancel-topping-post/', api.cancel_topping_post),
+    path('forum/subscribe-post/', api.subscribe_post),
+    path('forum/cancel-subscribe-post/', api.cancel_subscribe_post),
+    path('forum/like-reply/', api.like_reply),
+    path('forum/dislike-reply/', api.dislike_reply),
+    path('forum/like-post/', api.like_post),
+    path('forum/dislike-post/', api.dislike_post),
+    path('forum/search-posts/', api.search_posts),
+
+    path('userManage/modify-identity/', api.modify_identity),
+
 ]

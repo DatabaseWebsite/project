@@ -18,7 +18,7 @@ class NormalHomeworkSubmit(models.Model):
         null=True
     )
     submit_time = models.DateTimeField(verbose_name='提交时间', auto_now_add=True)
-    file = models.FileField(upload_to='homework/')
+    file = models.FileField(upload_to='homework_submit/')
 
     def get_file_url(self):
         return MEDIA_ADDRESS + str(self.file)

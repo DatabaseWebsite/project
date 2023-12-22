@@ -26,12 +26,12 @@ def create_notice(request):
     content = request.POST.get('content')
 
     if not request.user.is_admin:
-        notice = Notice(user=request.user, title=title, content=content, course=request.user.current_course)
+        notice = Notice(sender=request.user, title=title, content=content, course=request.user.current_course)
         notice.save()
     else:
         course_id = request.POST.get('course_id')
         course = Course.objects.get(pk=course_id)
-        notice = Notice(user=request.user, title=title, content=content, course=course)
+        notice = Notice(sender=request.user, title=title, content=content, course=course)
         notice.save()
 
     return JsonResponse({"message": "创建成功"}, status=200)

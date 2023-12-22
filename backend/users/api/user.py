@@ -316,8 +316,7 @@ def xlsx_create_users(request):
     workbook = openpyxl.load_workbook(xlsx_file)
     worksheet = workbook.active
     new_users_category = request.POST.get('identity')
-    print("((((((())))))))))))))))))))(((")
-    print(new_users_category)
+
     # 确定课程
     request_user = request.user
     if request_user.is_admin:
@@ -496,3 +495,23 @@ def reset_user_password(request):
     user.password = new_password
     user.save()
     return JsonResponse({"massage": "密码成功重置为学号"}, status=200)
+
+
+@jwt_auth()
+@require_POST
+def modify_identity(request):
+    user_id = request.POST.get('user_id')
+    user = User.objects.get(pk=user_id)
+    new_identity = request.POST.get('new_identity')
+
+    if request.user.is_admin:
+        course_id = request.POST.get('course_id')
+        course = Course.objects.get(pk=course_id)
+    else:
+        course = request.user.current_course
+
+    courseSelectionRecord = CourseSelectionRecord.objects.filter(user=user, course=course).first()
+    courseSelectionRecord.type = new_identity
+    courseSelectionRecord.save()
+
+    return JsonResponse({"message": "成功修改"}, status=200)

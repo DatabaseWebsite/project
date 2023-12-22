@@ -22,23 +22,29 @@ from users.settings import ITEMS_PER_PAGE
 
 @jwt_auth()
 @require_POST
-def send_message(request):
-    sender = request.user
+def send_message_(request):
+    sender = request.user.id
     title = request.POST.get('title')
     content = request.POST.get('content')
     receiver_id = request.POST.get('receiver_id')
-    receiver = User.objects.get(pk=receiver_id)
 
     if sender.is_admin:
         course_id = request.POST.get('course_id')
-        course = Course.objects.get(pk=course_id)
     else:
-        course = sender.current_course
+        course_id = sender.current_course.id
 
-    message = Message(sender=sender, receiver=receiver, title=title, content=content, course=course)
-    message.save()
+    send_message(sender, [receiver_id], content, course_id, title)
 
     return JsonResponse({"message": "发送成功"}, status=200)
+
+
+def send_message(sender_id, receiver_ids, content, course_id, title=""):
+    course = Course.objects.get(pk=course_id)
+    sender = User.objects.get(pk=sender_id)
+    for receiver_id in receiver_ids:
+        receiver = User.objects.get(pk=receiver_id)
+        message = Message(sender=sender, receiver=receiver, title=title, content=content, course=course)
+        message.save()
 
 
 @jwt_auth()

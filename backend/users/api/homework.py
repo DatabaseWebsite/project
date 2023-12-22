@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 
 from users.api.auth import jwt_auth
+from users.api.message import send_message
 from users.models import Course
 from users.models.course_selection_record import CourseSelectionRecord
 from users.models.normal_homework import NormalHomework
@@ -28,24 +29,23 @@ def create_homework(request):
                                                              selected_course=user.current_course).first().type
 
     if user.is_admin or user_category == 'TEACHER' or user_category == 'ASSISTANT':
-        data = json.loads(request.body.decode('utf-8'))
-        start_time_str = data.get('start_time')
-        end_time_str = data.get('end_time')
-        start_time = pytz.utc.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M:%S'))
-        end_time = pytz.utc.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M:%S'))
-        title = data.get('title')
-        content = data.get('content')
+        end_time_str = request.POST.get('deadline')
+        print(end_time_str)
+        end_time = pytz.utc.localize(datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M:%S.%fZ'))
+        title = request.POST.get('title')
+        content = request.POST.get('description')
         if user.is_admin:
-            belong_to_course_id = data.get('course_id')
+            belong_to_course_id = request.POST.get('course_id')
             belong_to_course = Course.objects.get(pk=belong_to_course_id)
         else:
             belong_to_course = user.current_course
+        file = request.FILES.get('file')
         normalHomework = NormalHomework(
-            start_time=start_time,
             end_time=end_time,
             title=title,
             content=content,
-            belong_to_course=belong_to_course
+            belong_to_course=belong_to_course,
+            file=file
         )
         normalHomework.save()
         return JsonResponse({"massage": "作业成功创建"}, status=200)
@@ -114,6 +114,7 @@ def submit_homework(request):
 @jwt_auth()
 @require_POST
 def submit_score(request):
+    user = request.user
     score = request.POST.get('score')
     submit_id = request.POST.get('submit_id')
 
@@ -121,6 +122,8 @@ def submit_score(request):
     submit.score = score
     submit.save()
 
+    send_message(user.id, submit.user.id, "{}作业老师批改已完成，请查看作答情况".format(submit.homework.title),
+                 user.current_course.id, "作业批改通知")
     return JsonResponse({"massage": "成功批改"}, status=200)
 
 
