@@ -8,29 +8,36 @@
             <div class="name-time">
               <p class="name">{{ item.title }}</p>
               <p class="upload-time">总分：{{ item.totalScore }}</p>
-              <p class="upload-time">提交截止时间：{{ item.deadline }}</p>
+              <p class="upload-time">提交截止时间：{{ displayTime(item.deadline) }}</p>
             </div>
           </div>
           <div class="right-section">
-            <p v-if="item.score != ''" style="margin-right: 10px"> 得分:
+            <div v-if="item.score != ''" style="margin-right: 10px">
+              <i style="font-family: 'Times New Roman', Times, serif; font-size: 14px;color: gray;"> 得分: </i>
               <i style="font-weight: bold;color: red; font-size: large">{{ item.score }}</i>
-            </p>
-            <el-tag v-if="item.status === '已提交'" type="success"> {{ item.status }} </el-tag>
-            <el-tag v-else-if="item.status === '未提交'" type="warning"> {{ item.status }} </el-tag>
-            <el-tag v-else-if="item.status === '已截止'" type="danger"> {{item.status}} </el-tag>
+            </div>
           </div>
         </div>
+        <span class="status-tag">
+          <el-tag v-if="item.upStatus == 1 || item.upStatus == 3" type="success"> <i style="padding: 5px; font-size: 15px">{{ displayStatus(item.upStatus) }}</i> </el-tag>
+          <el-tag v-else-if="item.upStatus == 0" type="warning"> <i style="padding: 5px; font-size: 15px">{{ displayStatus(item.upStatus) }}</i> </el-tag>
+          <el-tag v-else-if="item.upStatus == 2" type="danger"> <i style="padding: 5px; font-size: 15px">{{ displayStatus(item.upStatus) }}</i> </el-tag>
+        </span>
       </template>
       <div>
-        <h2 style="background-color: #cdd1d3">作业描述：</h2>
-        <md-preview :text="selectedData.description" :navigation-visible="true"/>
-        <el-link
-          v-if="selectedData.file != null"
-          type="primary"
-          @click="download(selectedData.file.url, selectedData.file.name)"
-        >作业内容附件：{{selectedData.file.name}}</el-link>
-        <h2 style="background-color: #cdd1d3">我的提交：</h2>
-        <md-editor v-model="selectedData.submitContext"/>
+        <p class="work-title">作业要求：</p>
+        <md-preview :text="selectedData.description" :navigation-visible="false"/>
+        <div>
+          <i style="font-size: 15px">作业内容附件：</i>
+          <el-link
+            v-if="selectedData.file != null"
+            type="primary"
+            @click="download(selectedData.file.url, selectedData.file.name)"
+          >{{selectedData.file.name}}</el-link>
+        </div>
+        <p class="work-title">我的提交：</p>
+        <md-editor v-if="selectedData.status == 0" v-model="selectedData.submitContext"/>
+        <md-preview v-else :text="selectedData.submitContext" :navigation-visible="false"/>
         <h3>已提交的文件：</h3>
         <el-link
           v-if="selectedData.submitFile != null"
@@ -65,9 +72,10 @@ export default {
       workData: [{ // 学生
         id: 1,
         title: '第一次作业',
+        status: 1,
+        upStatus: null,
         totalScore: 100,
         deadline: new Date(),
-        status: '已提交',
         score: 80,
       }],
       selectedData: {
@@ -75,8 +83,8 @@ export default {
         title: '第一次作业',
         totalScore: 100,
         deadline: new Date(),
-        status: '已提交',
         score: 80,
+        status: 0,
         description: 'asfdh',
         file: {
           id: 1,
@@ -92,9 +100,43 @@ export default {
         }
       },
       submitFile: '',
+      timer: null,
     }
   },
   methods: {
+    displayTime(date:Date) {
+      return date.toLocaleString().replaceAll('/', '-')
+    },
+    updateStatus() {
+      const curTime = new Date()
+      this.workData.forEach((item) => {
+        if (item.deadline < curTime) {
+          item.upStatus = item.status === 1 ? 3 : 2
+        } else {
+          item.upStatus = item.status == 1 ? 1 : 0
+        }
+      })
+    },
+    updateSelectedStatus() {
+      const curTime = new Date()
+      if (this.selectedData.deadline < curTime) {
+        this.selectedData.status = 1
+      } else {
+        this.selectedData.upStatus = 0
+      }
+    },
+    displayStatus(status) {
+      switch (status) {
+        case 0:
+          return '进行中(未提交)'
+        case 1:
+          return '进行中(已提交)'
+        case 2:
+          return '已截止(未提交)'
+        case 3:
+          return '已截止(已提交)'
+      }
+    },
     async getWorksData() {
       await get_works_info_api().then((res) => {
         this.workData = res.data.result
@@ -123,6 +165,14 @@ export default {
   },
   mounted() {
     // this.getWorksData()
+    this.timer = setInterval(() => {
+      this.updateStatus()
+      if (this.selectedData.id !== undefined)
+        this.updateSelectedStatus()
+    }, 1000)
+  },
+  beforeDestroy() {
+    clearInterval(this.timer);
   }
 }
 </script>
@@ -172,5 +222,31 @@ export default {
   display: flex;
   text-align: right;
   align-items: center;
+}
+.status-tag {
+  margin-left: auto;
+}
+.work-title {
+  font-family: 'Arial', sans-serif;
+  font-size: 1.5em;
+  font-weight: bold;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+.work-title:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(100% + 80px);
+  height: 3px; /* 初始下边框的高度 */
+  background: linear-gradient(to right, #000 50%, rgba(0, 0, 0, 0) 100%); /* 渐变黑线 */
+  transition: all 0.3s ease; /* 添加过渡效果 */
+}
+
+.work-title:hover:after {
+  height: 3px; /* 悬停时下边框变细 */
+  background: linear-gradient(to right, #000 50%, rgba(0, 0, 0, 0.3) 100%); /* 悬停时下边框变浅 */
 }
 </style>

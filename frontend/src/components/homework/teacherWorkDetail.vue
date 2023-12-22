@@ -49,12 +49,20 @@
     width="70%"
   >
     <div>
-      <div v-if="selectedInfo.file !== undefined">
-<!--        <pdf-preview :pdf-url="selectedInfo.file.url"/>-->
+      <div v-if="selectedInfo.file != undefined">
+        <pdf-preview v-if="selectedInfo.file.url.endsWith('pdf')" :pdf="selectedInfo.file.url"/>
+        <docx-preview
+          v-else-if="selectedInfo.file.url.endsWith('docx') || selectedInfo.file.url.endsWith('doc')"
+          :docx="selectedInfo.file.url"/>
+        <excel-preview
+          v-else-if="selectedInfo.file.url.endsWith('xlsx') || selectedInfo.file.url.endsWith('xls')"
+          :excel="selectedInfo.file.url"/>
+        <div v-else>
+          <el-link :underline="true" type="primary" @click="download(selectedInfo.file.url, selectedInfo.file.name)"> {{ selectedInfo.file.name }} </el-link>
+          暂不支持该文件类型预览
+        </div>
       </div>
-      <div v-if="selectedInfo.context !== ''">
-        <md-preview :text="selectedInfo.context" :navigation-visible="false"/>
-      </div>
+
       <el-form>
         <el-form-item label="分数">
           <el-input-number v-model="selectedInfo.score" :min="0" :max="workData.totalScore" :step="1"/>
@@ -71,17 +79,20 @@
 
 <script lang="ts">
 import {
-  get_one_work_api,
+  get_one_work_api, get_work_submission_by_id_api,
   get_work_submissions_api, submit_work_score_api,
 } from "@/api/api.ts";
 import MdPreview from "@/components/markdown/mdPreview.vue";
 import {saveAs} from "file-saver";
 import {ElMessage} from "element-plus";
 import {useRoute} from "vue-router";
+import PdfPreview from "@/lib/pdfPreview.vue";
+import DocxPreview from "@/lib/docxPreview.vue";
+import ExcelPreview from "@/lib/excelPreview.vue";
 
 export default {
   name: "teacherWorkDetail",
-  components: {MdPreview},
+  components: {ExcelPreview, DocxPreview, PdfPreview, MdPreview},
   data() {
     return {
       id: 1,
@@ -117,8 +128,8 @@ export default {
         id: 2,
         file: {
           id: 2,
-          name: '1fe',
-          url: 'efwg',
+          name: 'test6',
+          url: 'http://static.shanhuxueyuan.com/test6.docx',
         },
         context: 'sfgd',
         score: null,
@@ -140,11 +151,10 @@ export default {
         })
     },
     async handleCorrect(index: number, row: any) {
-      // await get_work_submissions_by_id_api(row['id']).then(res => {
-      //   this.selectedInfo = res.data['result']
-      //   this.correctVisible = true
-      // })
-      this.correctVisible = true
+      await get_work_submission_by_id_api(row['id']).then(res => {
+        this.selectedInfo = res.data['result']
+        this.correctVisible = true
+      })
     },
     changePage(page: number) {
       this.curPage = page
@@ -161,7 +171,7 @@ export default {
   async mounted() {
     this.id = useRoute().query.id
     await get_one_work_api(this.id).then(res => {
-      this.workData = res.data.result
+       this.workData = res.data.result
     })
     await this.querySubmit()
   }

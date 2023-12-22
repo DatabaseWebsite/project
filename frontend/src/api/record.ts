@@ -11,7 +11,6 @@ export const record = async (config, response) => {
   let requestModule = ''
   let status = response.status
   let code = response.data.error || response.error || response.statusText || ''
-  console.log(response)
   let username = useAuthStore().getUser.username || response.data.username || response.data.personId || ''
   if (api.startsWith('api/user/login/'))
     requestModule = '登录模块'
