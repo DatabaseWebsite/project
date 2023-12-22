@@ -24,12 +24,16 @@
       <p class="title2">作业描述：</p>
       <md-preview :text="workData.description" :navigation-visible="true"/>
     </div>
-    <el-table :data="submitData" border>
+    <el-table
+      :data="paginateData"
+      @sort-change="sortChange"
+      border
+    >
       <el-table-column prop="id" label="序号" width="70"/>
-      <el-table-column prop="studentID" label="学号" min-width="140" sortable/>
+      <el-table-column prop="studentID" label="学号" min-width="140" sortable="custom"/>
       <el-table-column prop="studentName" label="姓名" min-width="160"/>
-      <el-table-column prop="submitTime" label="提交时间" min-width="180" sortable/>
-      <el-table-column prop="score" label="得分" min-width="160" sortable/>
+      <el-table-column prop="submitTime" label="提交时间" min-width="180" sortable="custom"/>
+      <el-table-column prop="score" label="得分" min-width="160" sortable="custom"/>
       <el-table-column prop="markingPerson" label="批改人" min-width="180"/>
       <el-table-column fixed="right" label="操作" width="100">
         <template #default="scope">
@@ -39,9 +43,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <div>
-      <el-pagination layout="prev, pager, next" :page-count="totalPage" :current-page="curPage" :page-size='10' @current-change="changePage" style="margin: 10px;"/>
-    </div>
+    <el-pagination layout="prev, pager, next" :current-page="curPage" :page-size='10' :total="total" @current-change="changePage" style="margin: 10px;"/>
   </div>
   <el-dialog
     v-model="correctVisible"
@@ -89,91 +91,130 @@ import {useRoute} from "vue-router";
 import PdfPreview from "@/lib/pdfPreview.vue";
 import DocxPreview from "@/lib/docxPreview.vue";
 import ExcelPreview from "@/lib/excelPreview.vue";
+import {onMounted, reactive, ref} from "vue";
 
 export default {
   name: "teacherWorkDetail",
   components: {ExcelPreview, DocxPreview, PdfPreview, MdPreview},
-  data() {
-    return {
+  setup() {
+    const id = ref(1)
+    const workData = ref({
       id: 1,
-      workData: {
+      title: '第一次作业',
+      totalScore: 100,
+      deadline: new Date(),
+      status: '已截止',
+      file: {
         id: 1,
-        title: '第一次作业',
-        totalScore: 100,
-        deadline: new Date(),
-        status: '已截止',
-        file: {
-          id: 1,
-          name: 'dfa',
-          url: 'wewg',
-        },
-        description: 'abadfjfqgerqg',
-        submitPeople: 100,
-        totalPeople: 110,
+        name: 'dfa',
+        url: 'wewg',
       },
-      submitData: [
-        {
-          id: 1, // 提交id
-          studentID: 21373032,
-          studentName: '张三',
-          submitTime: '2023-10-24 12:00:00',
-          score: 100, // 为空表示未批改
-          markingPerson: '李四',
-        }
-      ],
-      curPage: 1,
-      pageSize: 10,
-      totalPage: 1,
-      selectedInfo: {
+      description: 'abadfjfqgerqg',
+      submitPeople: 100,
+      totalPeople: 110,
+    })
+    const submitData = ref([
+      {
+        id: 1, // 提交id
+        studentID: 21373032,
+        studentName: '张三',
+        submitTime: '2023-10-24 12:00:00',
+        score: 100, // 为空表示未批改
+        markingPerson: '李四',
+      }
+    ])
+    const paginateData = ref([])
+    const total = ref(0)
+    const curPage = ref(1)
+    const selectedInfo = ref({
+      id: 2,
+      file: {
         id: 2,
-        file: {
-          id: 2,
-          name: 'test6',
-          url: 'http://static.shanhuxueyuan.com/test6.docx',
-        },
-        context: 'sfgd',
-        score: null,
+        name: 'test6',
+        url: 'http://static.shanhuxueyuan.com/test6.docx',
       },
-      correctVisible: false,
+      context: 'sfgd',
+      score: null,
+    })
+    const correctVisible = ref(false)
+    const querySubmit = async () => {
+      await get_work_submissions_api(id.value).then(res => {
+        submitData.value = res.data['result']
+        total.value = submitData.value.length
+        initTable()
+      })
+    }
+    const initTable = () => {
+      const res = submitData.value
+      let start = curPage.value > 1 ? (curPage.value - 1) * 10 : 0
+      let end = curPage.value * 10
+      paginateData.value = res.slice(start, end)
+    }
+    const handleCorrect = async (index: number, row: any) => {
+      await get_work_submission_by_id_api(row['id']).then(res => {
+        selectedInfo.value = res.data['result']
+        correctVisible.value = true
+      })
+    }
+    const changePage = (page: number) => {
+      curPage.value = page
+      initTable()
+    }
+    const sortChange = ({prop, order}) => {
+      function compare(pr: any) {
+        // 默认传入两个参数，即为数组中要比较的两项
+        return function (a: any, b: any) {
+          const value1 = a[pr];
+          const value2 = b[pr];
+          return value1 - value2;
+        }
+      }
+      submitData.value.sort(compare(prop))
+      if (order === 'descending') {
+        submitData.value.reverse()
+      }
+      initTable()
+    }
+    const submitCorrect = async () => {
+      await submit_work_score_api(selectedInfo.value.id, selectedInfo.value.score).then(res => {
+        ElMessage.success('批改成功')
+        this.correctVisible = false
+        querySubmit()
+      })
+    }
+    onMounted(async () => {
+      id.value = Number(useRoute().query.id)
+      initTable()
+      await get_one_work_api(id.value).then(res => {
+        workData.value = res.data.result
+      })
+      await querySubmit()
+    })
+    return {
+      id,
+      workData,
+      submitData,
+      paginateData,
+      total,
+      curPage,
+      selectedInfo,
+      correctVisible,
+      querySubmit,
+      initTable,
+      handleCorrect,
+      changePage,
+      submitCorrect,
+      sortChange,
     }
   },
+
   methods: {
     displayTime(date:Date) {
       return date.toLocaleString().replaceAll('/', '-')
     },
     download(url: string, name: string) {
       saveAs(url, name)
-    },
-    async querySubmit() {
-        await get_work_submissions_api(this.id, this.curPage).then(res => {
-          this.submitData = res.data['result']
-          this.totalPage = res.data['total_page']
-        })
-    },
-    async handleCorrect(index: number, row: any) {
-      await get_work_submission_by_id_api(row['id']).then(res => {
-        this.selectedInfo = res.data['result']
-        this.correctVisible = true
-      })
-    },
-    changePage(page: number) {
-      this.curPage = page
-      this.querySubmit()
-    },
-    async submitCorrect() {
-      await submit_work_score_api(this.selectedInfo.id, this.selectedInfo.score).then(res => {
-        ElMessage.success('批改成功')
-        this.correctVisible = false
-        this.querySubmit()
-      })
     }
-  },
-  async mounted() {
-    this.id = useRoute().query.id
-    await get_one_work_api(this.id).then(res => {
-       this.workData = res.data.result
-    })
-    await this.querySubmit()
   }
 }
 </script>

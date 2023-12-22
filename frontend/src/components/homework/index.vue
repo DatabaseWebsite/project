@@ -1,5 +1,5 @@
 <template>
-  <work-manage v-if="!power"/>
+  <work-manage v-if="power"/>
   <student-index v-else/>
 </template>
 

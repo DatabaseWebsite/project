@@ -28,7 +28,7 @@
         <p class="work-title">作业要求：</p>
         <md-preview :text="selectedData.description" :navigation-visible="false"/>
         <div>
-          <i style="font-size: 15px">作业内容附件：</i>
+          <h3>作业内容附件：</h3>
           <el-link
             v-if="selectedData.file != null"
             type="primary"
@@ -44,9 +44,9 @@
           type="primary"
           @click="download(selectedData.submitFile.url, selectedData.submitFile.name)"
         >{{selectedData.submitFile.name}}</el-link>
-        <upload-file v-model="submitFile" :file-size="10"/>
+        <upload-file v-if="selectedData.status == 0" v-model="submitFile" :file-size="10"/>
       </div>
-      <el-button type="primary" @click="submit"> 提交作业 </el-button>
+      <el-button v-if="selectedData.status == 0" type="primary" @click="submit"> 提交作业 </el-button>
     </el-collapse-item>
   </el-collapse>
 </template>
@@ -99,7 +99,7 @@ export default {
           url: 'ewqfgr',
         }
       },
-      submitFile: '',
+      submitFile: [],
       timer: null,
     }
   },
@@ -122,7 +122,7 @@ export default {
       if (this.selectedData.deadline < curTime) {
         this.selectedData.status = 1
       } else {
-        this.selectedData.upStatus = 0
+        this.selectedData.Status = 0
       }
     },
     displayStatus(status) {
@@ -146,7 +146,8 @@ export default {
       saveAs(fileUrl, fileName)
     },
     async submit() {
-      await student_submit_work_api(this.selectedData.id, this.selectedData.submitContext, this.submitFile).then(async res => {
+      const submitFile = this.submitFile.length == 0 ? '' : this.submitFile[0]
+      await student_submit_work_api(this.selectedData.id, this.selectedData.submitContext, submitFile).then(async res => {
         ElMessage.success('提交成功')
         await student_get_work_detail_api(this.activeID).then((res) => {
           this.selectedData = res.data.result
@@ -155,16 +156,14 @@ export default {
     }
   },
   watch: {
-    activeID: {
-      updateWorkDetail: async function (newVal, oldVal) {
-        await student_get_work_detail_api(newVal).then((res) => {
-          this.selectedData = res.data.result
-        })
-      }
+    activeID: async function (newVal, oldVal) {
+      // await student_get_work_detail_api(newVal).then((res) => {
+      //   this.selectedData = res.data.result
+      // })
     }
   },
   mounted() {
-    // this.getWorksData()
+    this.getWorksData()
     this.timer = setInterval(() => {
       this.updateStatus()
       if (this.selectedData.id !== undefined)

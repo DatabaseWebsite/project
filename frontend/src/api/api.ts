@@ -298,10 +298,9 @@ export const get_one_work_api = (id: number) => {
   return axios.post('api/homework/work-detail/', data)
 }
 
-export const get_work_submissions_api = (id: number, page: number) => {
+export const get_work_submissions_api = (id: number) => {
   let data = new URLSearchParams()
   data.append('id', id.toString())
-  data.append('page', page.toString())
   return axios.post('api/homework/work-submissions/', data)
 }
 

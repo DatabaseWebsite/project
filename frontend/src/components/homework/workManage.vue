@@ -220,7 +220,7 @@ export default {
     this.fileType.slice(0, this.fileType.length - 2)
   },
   mounted() {
-    // this.getWorkList()
+    this.getWorkList()
   }
 }
 </script>

@@ -41,7 +41,7 @@ export default {
       default: () => 20,
     },
     submitFile: {
-      default: ''
+      default: []
     }
   },
   data() {
