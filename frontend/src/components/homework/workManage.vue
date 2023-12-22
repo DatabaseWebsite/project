@@ -182,10 +182,13 @@ export default {
         if (valid) {
           const data:FormData = new FormData()
           data.append('id', selectedWork.id.toString())
-          if (submitFile.file.length != 0)
+          let fileOperation = 2 // 没有修改文件
+          if (submitFile.file.length != 0) { // 覆盖新文件
+            fileOperation = 0
             data.append('file', submitFile.file[0].raw)
-          else
-            data.append('file', selectedWork.file)
+          } else if (selectedWork.file === '') // 删除旧文件
+              fileOperation = 1
+          data.append('file_operation', fileOperation.toString())
           data.append('title', selectedWork.title)
           data.append('description', selectedWork.description)
           data.append('totalScore', selectedWork.totalScore.toString())
