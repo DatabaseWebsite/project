@@ -119,7 +119,19 @@ router.beforeEach((to, from,next) =>{
     // 若用户已登录且前往登录页，则跳转到首页
     isLogin ? next("/") : next()
   } else { // 拦截
-    isLogin ? next() : next("/login")
+    if (!isLogin) next('/login')
+    else {
+      if (to.path === "/userManagement") {
+        if (identity === "ADMIN") next()
+        else next("/")
+      } else if (to.path === "/log") {
+        if (identity === "ADMIN") next()
+        else next("/")
+      } else if (to.path === "/courseManagement") {
+        if (identity !== "STUDENT") next()
+        else next("/")
+      } else next()
+    }
   }
 })
 

@@ -23,7 +23,7 @@
           <el-icon><Notification /></el-icon>
           <template #title><span>课程公告</span></template>
         </el-menu-item>
-        <el-menu-item index="/courseManagement">
+        <el-menu-item v-if="user['identity'] !== 'STUDENT'" index="/courseManagement">
           <el-icon><Grid /></el-icon>
           <template #title><span>课程管理</span></template>
         </el-menu-item>
@@ -39,11 +39,11 @@
           <el-icon><ChatSquare /></el-icon>
           <template #title><span>讨论区</span></template>
         </el-menu-item>
-        <el-menu-item index="/userManage">
+        <el-menu-item v-if="user['identity'] === 'ADMIN'" index="/userManage">
           <el-icon><Tools /></el-icon>
           <template #title><span>用户管理</span></template>
         </el-menu-item>
-        <el-sub-menu>
+        <el-sub-menu v-if="user['identity'] === 'ADMIN'">
           <template #title>
             <el-icon><Management /></el-icon>
             <span>日志管理</span>
