@@ -49,7 +49,7 @@
       </el-form>
         <template #footer>  
           <span class="dialog-footer">  
-            <el-button type="primary" @click="submitCreate">  确认添加  </el-button>
+            <el-button type="primary" @click="submitCreate(courseRef)">  确认添加  </el-button>
           </span>  
         </template>  
     </el-dialog>
