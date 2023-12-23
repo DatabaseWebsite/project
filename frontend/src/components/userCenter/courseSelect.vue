@@ -51,7 +51,7 @@ export default {
     async submit() {
       console.log(this.selected)
       await user_select_course_api(this.selected['course_id']).then(res => {
-        useAuthStore().setCourse(this.selected['name'])
+        useAuthStore().setCourse(this.selected['course_id'], this.selected['name'])
         // location.reload()
         this.closeCourseSelect()
       })

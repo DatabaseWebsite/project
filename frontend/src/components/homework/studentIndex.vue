@@ -157,9 +157,9 @@ export default {
   },
   watch: {
     activeID: async function (newVal, oldVal) {
-      // await student_get_work_detail_api(newVal).then((res) => {
-      //   this.selectedData = res.data.result
-      // })
+      await student_get_work_detail_api(newVal).then((res) => {
+        this.selectedData = res.data.result
+      })
     }
   },
   mounted() {

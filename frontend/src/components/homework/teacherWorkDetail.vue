@@ -52,6 +52,7 @@
   >
     <div>
       <div v-if="selectedInfo.file != undefined">
+        <md-preview v-if="selectedInfo.context !== ''" :text="selectedInfo.context"/>
         <pdf-preview v-if="selectedInfo.file.url.endsWith('pdf')" :pdf="selectedInfo.file.url"/>
         <docx-preview
           v-else-if="selectedInfo.file.url.endsWith('docx') || selectedInfo.file.url.endsWith('doc')"
@@ -178,13 +179,11 @@ export default {
     const submitCorrect = async () => {
       await submit_work_score_api(selectedInfo.value.id, selectedInfo.value.score).then(res => {
         ElMessage.success('批改成功')
-        this.correctVisible = false
         querySubmit()
       })
     }
     onMounted(async () => {
       id.value = Number(useRoute().query.id)
-      initTable()
       await get_one_work_api(id.value).then(res => {
         workData.value = res.data.result
       })

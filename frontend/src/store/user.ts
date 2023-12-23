@@ -6,7 +6,7 @@ export const useAuthStore = defineStore('auth', {
     state: () => {
         return {
             isAuthenticated:ref(false), // 登录状态，默认为未登录
-            user: reactive({"username": '', "personID": '', "avatar":'', "identity": '', "course": ''}) // 存储用户信息
+            user: reactive({"username": '', "personID": '', "avatar":'', "identity": '', 'course_id': null, "course": ''}) // 存储用户信息
         }
     },
 
@@ -24,16 +24,18 @@ export const useAuthStore = defineStore('auth', {
             this.user['personID'] = user['personID']
             this.user['avatar'] = user['avatar']
             this.user['identity'] = user['identity']
+            this.user['course_id'] = user['course_id']
             this.user['course'] = user['course']
         },
         logout() {
             this.isAuthenticated = false
-            this.user = {"username": '', "personID": '', "avatar":'', "identity": '', "course": ''}
+            this.user = {"username": '', "personID": '', "avatar":'', "identity": '', course_id: null, "course": ''}
         },
         setAvatar(avatar:string) {
             this.user['avatar'] = avatar
         },
-        setCourse(course:string) {
+        setCourse(course_id: Number, course:string) {
+            this.user['course_id'] = course_id
             this.user['course'] = course
         }
     }

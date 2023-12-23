@@ -10,9 +10,12 @@ import UserManage from "@/components/userManage/index.vue";
 import LoginLog from "@/components/log/loginLog.vue";
 import OperationLog from "@/components/log/operationLog.vue";
 import Announcement from "@/views/announcement.vue"
-import Course_management from "@/views/course_management.vue";
+import CourseManagement from "@/components/courseManagement/courseManagement.vue";
 import Homework from "@/components/homework/index.vue";
 import TeacherWorkDetail from "@/components/homework/teacherWorkDetail.vue";
+import PostDetail from "@/views/PostDetail.vue";
+import CourseDetail from "@/components/courseManagement/courseDetail.vue"
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -46,9 +49,14 @@ const routes: RouteRecordRaw[] = [
         component: Announcement,
       },
       {
-        path: 'course_management',
-        name: 'course_management',
-        component: Course_management,
+        path: 'courseManagement',
+        name: 'courseManagement',
+        component: CourseManagement,
+      },
+      {
+        path: 'courseManagement/course',
+        name: 'courseDetail',
+        component: CourseDetail
       },
       {
         path: 'userManage',
@@ -74,6 +82,16 @@ const routes: RouteRecordRaw[] = [
         path: 'homework/workdetail',
         name: 'workdetail',
         component: TeacherWorkDetail,
+      },
+      {
+        path: 'discussionArea',
+        name: 'discussionArea',
+        component: DiscussionArea,
+      },
+      {
+        path: 'discussionArea/post/:id',
+        name: 'PostDetail',
+        component: PostDetail,
       }
     ]
   },

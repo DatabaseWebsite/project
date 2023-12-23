@@ -9,10 +9,10 @@
         <el-collapse-item :name="index">
           <template #title>
             <div class="header">
-              <span style="font-size: 18px; font-weight: bold">{{item.title}}</span>
-              <div style="margin-left: auto">
-                <icon-edit :size="20" @click.stop="handleEdit(item)"/>
-                <icon-delete :size="20" @click.stop="handleDelete(item)"/>
+              <span style="font-size: 18px; font-weight: bold;display: flex; align-items: center;">{{item.title}}</span>
+              <div v-if="identity" style="display: flex; margin-left: 3vw; align-items: center;">
+                <icon-edit :size="20" style="margin-right: 2vw; color: cornflowerblue" @click.stop="editVisible=true; handleEdit(item)"/>
+                <icon-delete :size="20" style="color: cornflowerblue" @click.stop="handleDelete(item)"/>
               </div>
             </div>
           </template>
@@ -23,6 +23,16 @@
       </el-collapse>
     </el-timeline-item>
   </el-timeline>
+  <el-dialog v-model="editVisible" title="编辑公告" width="70%">
+    <div>
+      <span style="font-size: 18px; font-weight: bold;">标题</span>
+      <el-input v-model="editItem['title']" placeholder="请输入标题" style="margin-bottom: 10px;"/>
+    </div>
+    <md-editor v-model="editItem['content']"/>
+    <div style="margin-top: 3vh">
+      <el-button type="primary" @click="submit">确认修改</el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <script lang="ts">
@@ -32,9 +42,11 @@ import {
 } from "@icon-park/vue-next";
 import announceForm from "@/components/announce/announceForm.vue";
 import MdPreview from "@/components/markdown/mdPreview.vue";
+import useAuthStore from "@/store/user.ts";
+import MdEditor from "@/components/markdown/mdEditor.vue";
 export default {
   name: "announcement",
-  components: {MdPreview, announceForm, IconEdit, IconDelete},
+  components: {MdEditor, MdPreview, announceForm, IconEdit, IconDelete},
   data() {
     return {
       arr2:[
@@ -44,9 +56,15 @@ export default {
       ],
       text: '',
       activeID: 0,
+      editVisible: false,
+      editItem: {},
     }
   },
   methods: {
+    identity() {
+      const user = useAuthStore()
+      return user.getUser['identify'] !== 'STUDENT'
+    },
     displayTime(date: Date) {
       return date.toLocaleString().replaceAll('/', '-')
     },
@@ -54,7 +72,7 @@ export default {
 
     },
     handleEdit(item) {
-
+      this.editItem = item;
     },
     handleDelete(item) {
 

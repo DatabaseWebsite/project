@@ -45,7 +45,7 @@ export const get_user_select_course_api = () => {
 }
 
 export const user_select_course_api = (courseId: number) => {
- let data = new URLSearchParams();
+  let data = new URLSearchParams();
   data.append('course_id', courseId.toString());
   return axios.post('api/user/update-current-course/', data)
 }
@@ -95,7 +95,7 @@ export const upload_image_api = (image: FormData) => {
   * @return result: 每条信息包含id, personId, username, grade, course, courses:{course_name, identity}
  */
 export const get_user_list_api = (page:number=1) => {
-return axios.get('api/userManage/user-list/?page=' + page.toString())
+  return axios.get('api/userManage/user-list/?page=' + page.toString())
 }
 
 export const get_all_user_list_api = () => {
@@ -256,7 +256,21 @@ export const create_course_api = (name: string) => {
 export const all_course_info_api = () => {
   return axios.get('api/userManage/all-course-info/')
 }
-
+export const all_participants_api = (course_id:string, page:string) => {
+  const data = new URLSearchParams();
+  data.append('course_id', course_id);
+  data.append('page',page);
+  return axios.post('api/course/all-participants/',data)
+}
+export const add_course_user_api = (personId: string, username: string, identity: string,email:string,course_id: string) => {
+  let data = new URLSearchParams();
+  data.append('person_id', personId)
+  data.append('username', username) // 密码默认为personId
+  data.append('email', email)
+  data.append('course_id', course_id)
+  data.append('identity', identity)
+  return axios.post('api/userManage/create-single-user/', data)
+}
 /*
  * title: string
  * file: file

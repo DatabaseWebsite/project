@@ -1,27 +1,22 @@
 <template>
-  <el-button @click="submit"> 提交 </el-button>
+  <!-- <el-button @click="submit"> 提交 </el-button>
   <md-editor v-model="text" />
-  <md-preview :text="text" :navigation-visible="true"/>
+  <md-preview :text="text" :navigation-visible="true"/> -->
+  <discussionBoard/>
 </template>
 
 <script>
 import MdEditor from "@/components/markdown/mdEditor.vue";
 import MdPreview from "@/components/markdown/mdPreview.vue";
-
+import discussionBoard from "@/components/discussion/discussionBoard.vue"
 export default {
   name: "discussionArea",
-  components: {MdPreview, MdEditor},
-  data() {
-    return {
-      text: '',
-    }
-  },
-  methods: {
-    submit() {
+  components: {MdPreview, MdEditor,discussionBoard},
+  submit() {
 
-    }
   }
 }
+
 </script>
 
 <style scoped>

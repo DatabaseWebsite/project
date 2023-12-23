@@ -78,14 +78,13 @@ import {
   FileRemoval as IconFileRemoval,
   Delete as IconDelete,
 } from "@icon-park/vue-next";
-import {delete_work_api, get_all_courses_api, get_works_info_api, modify_work_api} from "@/api/api.ts";
+import {delete_work_api, get_works_info_api, modify_work_api} from "@/api/api.ts";
 import {ElMessage, FormInstance} from "element-plus";
-import {reactive, ref, watch} from "vue";
+import {reactive, ref} from "vue";
 import MdEditor from "@/components/markdown/mdEditor.vue";
 import UploadFile from "@/lib/uploadFile.vue";
 import {saveAs} from "file-saver";
-import {registerUser} from "@/components/userManage/registerForm.ts";
-import {useRoute, useRouter} from "vue-router";
+import {useRouter} from "vue-router";
 
 interface ModifyWorkRuleForm {
   id: number
@@ -105,15 +104,7 @@ export default {
   data() {
     return {
       createWorkVisible: false,
-      workData: [ // admin，老师，助教
-        {
-          id: 1,
-          title: '第一次作业',
-          totalScore: 100,
-          deadline: new Date(),
-          status: '已截止',
-        }
-      ],
+      workData: [], // admin，老师，助教
       fileType: ['.doc', '.docx', '.pdf', '.ppt', '.txt', '.xls','.xlsx', '.zip', '.rar'],
       accept: '',
     }
@@ -124,6 +115,7 @@ export default {
     },
     closeCreateWork(e) {
       this.createWorkVisible = e
+      this.getWorkList()
     },
     async deleteWork(id) {
       await delete_work_api(id).then(res => {
@@ -134,6 +126,9 @@ export default {
     async getWorkList() {
       await get_works_info_api().then(res => {
         this.workData = res.data.result
+        this.workData.forEach(el => {
+          el.deadline = new Date(el.deadline)
+        })
       })
     },
     download(fileUrl, fileName) {
@@ -188,6 +183,7 @@ export default {
             data.append('file', submitFile.file[0].raw)
           } else if (selectedWork.file === '') // 删除旧文件
               fileOperation = 1
+          console.log(selectedWork.deadline.toISOString())
           data.append('file_operation', fileOperation.toString())
           data.append('title', selectedWork.title)
           data.append('description', selectedWork.description)
