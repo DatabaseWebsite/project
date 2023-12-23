@@ -129,6 +129,10 @@ export default {
         const endTime = this.searchInfo.duration === null ? '' : this.dateToString(this.searchInfo.duration[1])
         await search_login_log_api(this.searchInfo.username, this.searchInfo.ip, startTime, endTime, this.curPage).then(res => {
           this.tableData = res.data['result']
+          this.tableData.forEach(el => {
+            el.time = el.time.replaceAll('T', ' ')
+            el.time = el.time.replaceAll('Z', '')
+          })
           this.totalPage = res.data['total_pages']
         })
       } else {
@@ -136,6 +140,10 @@ export default {
         history.pushState(null, null, `/#/loginLog?page=${page}`)
         await get_login_log_api(page).then(res => {
           this.tableData = res.data['result']
+          this.tableData.forEach(el => {
+            el.time = el.time.replaceAll('T', ' ')
+            el.time = el.time.replaceAll('Z', '')
+          })
           this.totalPage = res.data['total_pages']
         })
       }

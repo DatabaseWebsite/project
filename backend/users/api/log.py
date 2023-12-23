@@ -71,6 +71,7 @@ def login_log(request):
 
     serialized_data = [
         {
+            "id": log.id,
             "ip": log.ip,
             "address": log.address,
             "browser": log.browser,
@@ -94,7 +95,7 @@ def operation_log(request):
     if page_number == "":
         items_per_page = all_operation_log.count()
         page_number = 1
-    print("???????????????")
+
     paginator = Paginator(all_operation_log, items_per_page)
     try:
         current_page_data = paginator.page(page_number)
@@ -103,6 +104,7 @@ def operation_log(request):
     print(all_operation_log.count())
     serialized_data = [
         {
+            "id": log.id,
             "request_module": log.request_module,
             "api": log.api,
             "operation": log.operation,
@@ -126,10 +128,16 @@ def operation_log(request):
 def search_login_log(request):
     ip = request.POST.get('ip')
     address = request.POST.get('address')
+
     start_time_str = str(request.POST.get('start_time'))
     end_time_str = str(request.POST.get('end_time'))
-    start_time = pytz.utc.localize(datetime.strptime(start_time_str, '%Y-%m-%dA%H:%M:%S'))
-    end_time = pytz.utc.localize(datetime.strptime(end_time_str, '%Y-%m-%dA%H:%M:%S'))
+    start_time = None
+    if start_time_str != "":
+        start_time = pytz.utc.localize(datetime.strptime(start_time_str, '%Y-%m-%dA%H:%M:%S'))
+    end_time = None
+    if end_time_str != "":
+        end_time = pytz.utc.localize(datetime.strptime(end_time_str, '%Y-%m-%dA%H:%M:%S'))
+
     username = request.POST.get('username')
     page = int(request.POST.get('page'))
 
@@ -183,8 +191,12 @@ def search_operation_log(request):
 
     start_time_str = str(request.POST.get('start_time'))
     end_time_str = str(request.POST.get('end_time'))
-    start_time = pytz.utc.localize(datetime.strptime(start_time_str, '%Y-%m-%dA%H:%M:%S'))
-    end_time = pytz.utc.localize(datetime.strptime(end_time_str, '%Y-%m-%dA%H:%M:%S'))
+    start_time = None
+    if start_time_str != "":
+        start_time = pytz.utc.localize(datetime.strptime(start_time_str, '%Y-%m-%dA%H:%M:%S'))
+    end_time = None
+    if end_time_str != "":
+        end_time = pytz.utc.localize(datetime.strptime(end_time_str, '%Y-%m-%dA%H:%M:%S'))
 
     page = int(request.POST.get('page'))
 

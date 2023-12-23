@@ -80,8 +80,6 @@ def create_single_user(request):
         course_id = request.POST.get('course_id')
         course = Course.objects.filter(pk=course_id).first()
 
-    print(">>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<")
-    print(course.name)
     if User.objects.filter(username=new_user_username).exists():
         registered_user = User.objects.filter(username=new_user_username).first()
         if CourseSelectionRecord.objects.filter(user=registered_user, selected_course=course).exists():
@@ -113,7 +111,6 @@ def create_single_user(request):
             type=new_user_category
         )
         courseSelectedRecord.save()
-        print("((((((((((()))))))))))))")
         return JsonResponse({"message": "成功创建用户{}，并加入课程{}".format(new_user_username, course.name)},
                             status=200)
 

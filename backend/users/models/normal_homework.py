@@ -4,6 +4,7 @@ from django.db import models
 from django.utils import timezone
 
 from users.models import Course
+from users.settings import MEDIA_ADDRESS
 
 
 class NormalHomework(models.Model):
@@ -11,6 +12,9 @@ class NormalHomework(models.Model):
     end_time = models.DateTimeField(verbose_name='作业结束时间')
     title = models.CharField(max_length=100, verbose_name='作业题目', default='无题目')
     content = models.CharField(max_length=1000, verbose_name='作业内容')
+    totalScore = models.IntegerField(verbose_name='作业总分', default=100)
     belong_to_course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='隶属课程')
     file = models.FileField(upload_to="homework/", blank=True, null=True)
 
+    def get_file_url(self):
+        return MEDIA_ADDRESS + str(self.file)

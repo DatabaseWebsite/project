@@ -27,9 +27,16 @@ urlpatterns = [
     path('course/all-participants/', api.all_participants),
 
     path('homework/create-homework/', api.create_homework),
-    path('homework/homework-list/', api.homework_list),
-    path('homework/submit-homework/', api.submit_homework),
-    path('homework/submit-score/', api.submit_score),
+    path('homework/modify-work/', api.modify_work),
+    path('homework/remove-work/', api.delete_work),
+    path('homework/works-info/', api.works_info),
+    path('homework/work-detail/', api.work_detail),
+    path('homework/work-submissions/', api.work_submissions),
+    path('homework/work-submissions-detail/', api.work_submissions_detail),
+    path('homework/submit-work-score/', api.submit_score),
+    path('homework/student-work-detail/', api.student_work_detail),
+    path('homework/student-submit-work/', api.student_submit_work),
+
 
     path('material/upload-materials/', api.upload_material),
     path('material/material-list/', api.material_list),

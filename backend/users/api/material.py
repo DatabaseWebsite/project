@@ -45,15 +45,8 @@ def upload_material(request):
 @require_GET
 def material_list(request):
     all_materials = Material.objects.all()
-    page_number = request.GET.get('page', 1)
 
-    paginator = Paginator(all_materials, all_materials.count())
-    try:
-        current_page_data = paginator.page(page_number)
-    except EmptyPage:
-        return JsonResponse({'error': 'Page not found'}, status=405)
-    print(all_materials.count())
-    serialized_data = [
+    result = [
         {
             'id': material.id,
             'name': os.path.splitext(material.file_name)[0],
@@ -61,16 +54,10 @@ def material_list(request):
             'url': material.get_file_url(),
             'uploadTime': material.created_at
         }
-        for material in current_page_data
+        for material in all_materials
     ]
-    print(serialized_data)
-    return JsonResponse(
-        {
-            'result': serialized_data,
-            'total_pages': paginator.num_pages,
-            'current_page': current_page_data.number
-        }
-    )
+
+    return JsonResponse({'result': result}, status=200)
 
 
 @jwt_auth()

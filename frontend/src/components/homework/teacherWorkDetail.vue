@@ -99,44 +99,12 @@ export default {
   components: {ExcelPreview, DocxPreview, PdfPreview, MdPreview},
   setup() {
     const id = ref(1)
-    const workData = ref({
-      id: 1,
-      title: '第一次作业',
-      totalScore: 100,
-      deadline: new Date(),
-      status: '已截止',
-      file: {
-        id: 1,
-        name: 'dfa',
-        url: 'wewg',
-      },
-      description: 'abadfjfqgerqg',
-      submitPeople: 100,
-      totalPeople: 110,
-    })
-    const submitData = ref([
-      {
-        id: 1, // 提交id
-        studentID: 21373032,
-        studentName: '张三',
-        submitTime: '2023-10-24 12:00:00',
-        score: 100, // 为空表示未批改
-        markingPerson: '李四',
-      }
-    ])
+    const workData = ref({})
+    const submitData = ref([])
     const paginateData = ref([])
     const total = ref(0)
     const curPage = ref(1)
-    const selectedInfo = ref({
-      id: 2,
-      file: {
-        id: 2,
-        name: 'test6',
-        url: 'http://static.shanhuxueyuan.com/test6.docx',
-      },
-      context: 'sfgd',
-      score: null,
-    })
+    const selectedInfo = ref({})
     const correctVisible = ref(false)
     const querySubmit = async () => {
       await get_work_submissions_api(id.value).then(res => {
@@ -186,6 +154,7 @@ export default {
       id.value = Number(useRoute().query.id)
       await get_one_work_api(id.value).then(res => {
         workData.value = res.data.result
+        workData.value.deadline = new Date(workData.value.deadline)
       })
       await querySubmit()
     })
@@ -209,7 +178,7 @@ export default {
 
   methods: {
     displayTime(date:Date) {
-      return date.toLocaleString().replaceAll('/', '-')
+      return date === undefined ? '' : date.toLocaleString().replaceAll('/', '-')
     },
     download(url: string, name: string) {
       saveAs(url, name)

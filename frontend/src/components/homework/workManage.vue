@@ -21,7 +21,7 @@
                 confirm-button-text="确定"
                 cancel-button-text="取消"
                 title="确定删除该作业吗？"
-                @confirm.stop="deleteWork(item.id)"
+                @confirm="deleteWork(item.id)"
                 style="margin: 20px">
                 <template #reference>
                   <el-button type="text" @click.stop><icon-file-removal :size="30" style="color:darkred"/></el-button>
@@ -118,6 +118,7 @@ export default {
       this.getWorkList()
     },
     async deleteWork(id) {
+      console.log(id)
       await delete_work_api(id).then(res => {
         ElMessage.success('删除成功')
         this.getWorkList()

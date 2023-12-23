@@ -145,12 +145,20 @@ export default {
         const endTime = this.searchInfo.duration === null ? '' : this.dateToString(this.searchInfo.duration[1])
         await search_operation_log_api(this.searchInfo.requestModule, this.searchInfo.api, this.searchInfo.ip, this.searchInfo.username, this.searchInfo.operation, startTime, endTime, this.curPage).then(res => {
           this.tableData = res.data['result']
+          this.tableData.forEach(el => {
+            el.time = el.time.replaceAll('T', ' ')
+            el.time = el.time.replaceAll('Z', '')
+          })
           this.totalPage = Number(res.data['total_pages'])
         })
       } else {
         history.pushState(null, null, `/#/operationLog?page=${this.curPage}`);
         await get_operation_log_api(this.curPage).then(res => {
           this.tableData = res.data['result']
+          this.tableData.forEach(el => {
+            el.time = el.time.replaceAll('T', ' ')
+            el.time = el.time.replaceAll('Z', '')
+          })
           this.totalPage = Number(res.data['total_pages'])
         })
       }
