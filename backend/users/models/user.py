@@ -32,7 +32,7 @@ class User(AbstractUser):
     )
 
     grade = models.CharField(
-        max_length=100,
+        max_length=1000,
         verbose_name='年级',
         blank=True
     )

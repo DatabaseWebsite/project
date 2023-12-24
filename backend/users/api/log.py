@@ -48,7 +48,7 @@ def record_operation_log(request):
     username = request.POST.get('username')
 
     _operation_log = OperationLog(request_module=request_module, api=api, operation=operation, ip=ip, browser=browser,
-                                 status=operation_status, code=code, time=operation_time, username=username)
+                                  status=operation_status, code=code, time=operation_time, username=username)
     _operation_log.save()
 
     return JsonResponse({"message": "success"}, status=200)

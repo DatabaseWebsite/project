@@ -18,7 +18,6 @@ class Post(models.Model):
     top = models.BooleanField(default=False, verbose_name="是否置顶")
     likes = models.IntegerField(default=0, verbose_name="点赞数")
     elite = models.BooleanField(default=False, verbose_name="精华帖")
-    search_vector = SearchVectorField(null=True, blank=True)
 
 
 class Reply(models.Model):
@@ -28,16 +27,5 @@ class Reply(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name="隶属帖子")
     reply_to = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name="回复对象", blank=True, null=True)
     likes = models.IntegerField(default=0, verbose_name="点赞数")
-    search_vector = SearchVectorField(null=True, blank=True)
 
 
-@receiver(post_save, sender=Post)
-def update_post_search_vector(sender, instance, **kwargs):
-    instance.search_vector = SearchVector('title', 'content')
-    instance.save()
-
-
-@receiver(post_save, sender=Reply)
-def update_post_search_vector(sender, instance, **kwargs):
-    instance.search_vector = SearchVector( 'content')
-    instance.save()

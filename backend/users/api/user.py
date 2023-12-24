@@ -116,6 +116,45 @@ def create_single_user(request):
 
 
 @jwt_auth()
+@require_POST
+def add_user_to_course(request):
+    username = request.POST.get('person_id')
+    category = request.POST.get('identity')
+
+    if User.objects.filter(username=username).exists():
+        user = User.objects.filter(username=username).first()
+        if not CourseSelectionRecord.objects.filter(user=user, selected_course=request.user.current_course).exists():
+            record = CourseSelectionRecord(user=user, selected_course=request.user.current_course, type=category)
+            record.save()
+            return JsonResponse({"massage": "成功加入本课程"}, status=200)
+        else:
+            return JsonResponse({"massage": "该学生已加入加入本课程"}, status=200)
+    else:
+        return JsonResponse({"massage": "未查询到该学生"}, status=405)
+
+
+@jwt_auth()
+@require_POST
+def del_user_from_course(request):
+    username = request.POST.get('person_id')
+
+    if User.objects.filter(username=username).exists():
+        user = User.objects.filter(username=username).first()
+        if CourseSelectionRecord.objects.filter(user=user, selected_course=request.user.current_course).exists():
+            record = CourseSelectionRecord.objects.filter(user=user, selected_course=request.user.current_course).first()
+            record.delete()
+
+            if CourseSelectionRecord.objects.filter(user=user).count() == 0:
+                if user.avatar.name != 'avatar/default.jpg':
+                    user.avatar.delete()
+
+                user.delete()
+            return JsonResponse({"massage": "成功移出本课程"}, status=200)
+    else:
+        return JsonResponse({"massage": "未查询到该学生"}, status=405)
+
+
+@jwt_auth()
 @require_GET
 def logout_user(request):
     logout(request)
@@ -125,20 +164,14 @@ def logout_user(request):
 @jwt_auth()
 @require_POST
 def delete_user(request):
-    user = request.user
-    current_user_type = CourseSelectionRecord.objects.filter(user=user,
-                                                             selected_course=user.current_course).first().type
-    if user.is_admin or current_user_type == "TEACHER" or current_user_type == "ASSISTANT":
-        deleted_user_id = request.POST.get('id')
-        deleted_user = User.objects.get(pk=deleted_user_id)
+    deleted_user_id = request.POST.get('id')
+    deleted_user = User.objects.get(pk=deleted_user_id)
 
-        if deleted_user.avatar.name != 'avatar/default.jpg':
-            deleted_user.avatar.delete()
+    if deleted_user.avatar.name != 'avatar/default.jpg':
+        deleted_user.avatar.delete()
 
-        deleted_user.delete()
-        return JsonResponse({"message": "注销成功"}, status=200)
-    else:
-        return JsonResponse({"error": "您无此权限"}, status=405)
+    deleted_user.delete()
+    return JsonResponse({"message": "注销成功"}, status=200)
 
 
 @jwt_auth()
@@ -146,27 +179,22 @@ def delete_user(request):
 def delete_users(request):
     user = request.user
     current_user_type = ""
-    if not user.is_admin:
-        current_user_type = CourseSelectionRecord.objects.filter(user=user,
-                                                                 selected_course=user.current_course).first().type
-    if user.is_admin or current_user_type == "TEACHER" or current_user_type == "ASSISTANT":
-        id_str = str(request.POST.get('ids'))
-        deleted_ids = id_str.split(",")
-        count = 0
-        for deleted_id in deleted_ids:
-            if not User.objects.filter(pk=deleted_id).exists():
-                continue
 
-            deleted_user = User.objects.get(pk=deleted_id)
+    id_str = str(request.POST.get('ids'))
+    deleted_ids = id_str.split(",")
+    count = 0
+    for deleted_id in deleted_ids:
+        if not User.objects.filter(pk=deleted_id).exists():
+            continue
 
-            if deleted_user.avatar.name != 'avatar/default.jpg':
-                deleted_user.avatar.delete()
+        deleted_user = User.objects.get(pk=deleted_id)
 
-            deleted_user.delete()
-            count = count + 1
-        return JsonResponse({"massage": "总计{}个用户已被删除".format(count)}, status=200)
-    else:
-        return JsonResponse({"error": "您无此权限"}, status=405)
+        if deleted_user.avatar.name != 'avatar/default.jpg':
+            deleted_user.avatar.delete()
+
+        deleted_user.delete()
+        count = count + 1
+    return JsonResponse({"massage": "总计{}个用户已被删除".format(count)}, status=200)
 
 
 @jwt_auth()
@@ -264,16 +292,8 @@ def update_current_course(request):
 @require_GET
 def get_user_info(request):
     user = request.user
-    if user.current_course is None:
-        if user.is_admin:
-            course_name = "管理员无课程"
-            identity = "ADMIN"
-        else:
-            course_name = ""
-            identity = ""
-    else:
-        course_name = user.current_course.name
-        identity = CourseSelectionRecord.objects.filter(user=user, selected_course=user.current_course).first().type
+    course_name = user.current_course.name
+    identity = CourseSelectionRecord.objects.filter(user=user, selected_course=user.current_course).first().type
 
     return JsonResponse({
         "personID": user.username,
@@ -292,18 +312,16 @@ def get_user_info(request):
 @require_GET
 def user_selected_course(request):
     user = request.user
-    if user.is_admin:
-        return JsonResponse({"error": "您为网站管理员"}, status=405)
-    else:
-        courseSelectionRecords = CourseSelectionRecord.objects.filter(user=user).all()
-        data = [
-            {
-                "course_id": record.selected_course.id,
-                "name": record.selected_course.name
-            }
-            for record in courseSelectionRecords
-        ]
-        return JsonResponse({"result": data}, status=status.HTTP_200_OK)
+
+    courseSelectionRecords = CourseSelectionRecord.objects.filter(user=user).all()
+    data = [
+        {
+            "course_id": record.selected_course.id,
+            "name": record.selected_course.name
+        }
+        for record in courseSelectionRecords
+    ]
+    return JsonResponse({"result": data}, status=status.HTTP_200_OK)
 
 
 @jwt_auth()
@@ -316,16 +334,7 @@ def xlsx_create_users(request):
 
     # 确定课程
     request_user = request.user
-    if request_user.is_admin:
-        course_id = request.POST.get('course_id')
-        course = Course.objects.get(pk=course_id)
-    else:
-        request_user_type = CourseSelectionRecord.objects.filter(user=request_user,
-                                                                 selected_course=request_user.current_course).first().type
-        if request_user_type == 'STUDENT':
-            return JsonResponse({"error": "抱歉，您无此权限"}, status=200)
-        else:
-            course = request_user.current_course
+    course = request_user.current_course
 
     # 新建用户
     count = 0
@@ -487,7 +496,6 @@ def reset_user_password(request):
     user_id = request.POST.get('id')
     user = User.objects.get(pk=user_id)
     username = user.username
-    print(username)
     new_password = make_password(username)
     user.password = new_password
     user.save()
@@ -501,11 +509,7 @@ def modify_identity(request):
     user = User.objects.get(pk=user_id)
     new_identity = request.POST.get('new_identity')
 
-    if request.user.is_admin:
-        course_id = request.POST.get('course_id')
-        course = Course.objects.get(pk=course_id)
-    else:
-        course = request.user.current_course
+    course = request.user.current_course
 
     courseSelectionRecord = CourseSelectionRecord.objects.filter(user=user, course=course).first()
     courseSelectionRecord.type = new_identity

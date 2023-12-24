@@ -86,9 +86,9 @@ export default {
       await formEl.validate(async (valid, fields) => {
         if (valid) {
           // 调用api
-          await create_course_api(course.name);
-          console.log("success addCourse", course.name);
-          await getCoursesInfo()
+          await create_course_api(course.name,course.description,course.duration[0],course.duration[1]);
+          console.log("success addCourse", course.name,course.description,course.duration[0],course.duration[1]);
+          await getCoursesInfo();
         } else {
           console.log('错误提交！！')
         }

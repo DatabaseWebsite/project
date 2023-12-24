@@ -7,6 +7,7 @@ class Category(models.TextChoices):
     TEACHER = 't', "老师"
     ASSISTANT = 'a', "助教"
     STUDENT = 's', "学生"
+    ADMIN = 'd', '管理员'
 
 
 class CourseSelectionRecord(models.Model):
@@ -26,7 +27,7 @@ class CourseSelectionRecord(models.Model):
 
     type = models.CharField(
         verbose_name="人员类型",
-        max_length=1,
+        max_length=10,
         choices=Category.choices,
         null=False,
         blank=False

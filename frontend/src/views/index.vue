@@ -4,9 +4,9 @@
       <div>
         <i>{{menuTitle}}</i>
       </div>
-      <div>
+      <div style="display: flex; align-items: center;">
         <i>{{currentTime}} {{timeState}}好，{{user['username']}}</i>
-        <icon-comments :size="30" style="padding: 0; margin-left: 15px; margin-right: 10px;"/>
+        <message/>
       </div>
     </div>
     <el-divider style="margin: 0; padding: 0;"/>
@@ -90,10 +90,12 @@ import {
   Comments as IconComments,
 } from "@icon-park/vue-next";
 import useAuthStore from "@/store/user.ts";
+import Message from "@/components/Message/message.vue";
 
 export default {
   name: "index",
   components: {
+    Message,
     Tools, ArrowRightBold, ArrowRight, ArrowLeftBold, User, List, ChatSquare, Document, Grid, Notification, Files, Management, DocumentChecked, IconComments },
   data() {
     return {
@@ -136,7 +138,7 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
     setInterval(() => {
       let timeNow = new Date()
       this.currentTime = timeNow.toLocaleString().replaceAll('/', '-');
@@ -145,7 +147,7 @@ export default {
       else if (hours > 10 && hours <= 14) this.timeState = '中午'
       else if (hours > 14 && hours <= 18) this.timeState = '下午'
       else this.timeState = '晚上'
-    }, 1000);
+    }, 1000)
   },
 }
 

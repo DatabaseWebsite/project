@@ -22,6 +22,8 @@ urlpatterns = [
     path('userManage/search-users/', api.search_users),
     path('userManage/user-list/', api.user_list),
     path('userManage/all-course-info/', api.all_course_info),
+    path('userManage/add-user-to-course/', api.add_user_to_course),
+    path('userMange/del-user-from-course/', api.del_user_from_course),
 
     path('course/create-course/', api.create_course),
     path('course/all-participants/', api.all_participants),
@@ -36,7 +38,6 @@ urlpatterns = [
     path('homework/submit-work-score/', api.submit_score),
     path('homework/student-work-detail/', api.student_work_detail),
     path('homework/student-submit-work/', api.student_submit_work),
-
 
     path('material/upload-materials/', api.upload_material),
     path('material/material-list/', api.material_list),
@@ -55,14 +56,17 @@ urlpatterns = [
     path('log/record-operation-log/', api.record_operation_log),
 
     path('notice/create-notice/', api.create_notice),
+    path('notice/edit-notice/', api.create_notice),
     path('notice/delete-notice/', api.delete_notice),
     path('notice/notice-list/', api.notice_list),
 
     path('message/send-message/', api.send_message_),
-    path('message/get-message/', api.get_message),
+    path('message/message-list/', api.get_message),
+    path('message/read-message/', api.read_message),
+    path('message/unread-messages-count/', api.message_number),
 
     path('forum/create-post/', api.create_post),
-    path('forum/post-list', api.post_list),
+    path('forum/post-list/', api.post_list),
     path('forum/delete-post/', api.delete_post),
     path('forum/create-reply/', api.create_reply),
     path('forum/get-post/', api.get_post),
@@ -70,6 +74,8 @@ urlpatterns = [
     path('forum/cancel-topping-post/', api.cancel_topping_post),
     path('forum/subscribe-post/', api.subscribe_post),
     path('forum/cancel-subscribe-post/', api.cancel_subscribe_post),
+    path('forum/elite-post/', api.elite_post),
+    path('forum/cancel-elite-post/', api.cancel_elite_post),
     path('forum/like-reply/', api.like_reply),
     path('forum/dislike-reply/', api.dislike_reply),
     path('forum/like-post/', api.like_post),

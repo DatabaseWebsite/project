@@ -23,36 +23,25 @@ from users.settings import ITEMS_PER_PAGE
 @require_POST
 def create_homework(request):
     user = request.user
-    if user.is_admin:
-        user_category = "ADMIN"
-    else:
-        user_category = CourseSelectionRecord.objects.filter(user=user,
-                                                             selected_course=user.current_course).first().type
+    end_time_str = request.POST.get('deadline')
+    end_time = pytz.utc.localize(datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    title = request.POST.get('title')
+    content = request.POST.get('description')
+    total_score = request.POST.get('totalScore')
+    belong_to_course = user.current_course
+    file = request.FILES.get('file')
 
-    if user.is_admin or user_category == 'TEACHER' or user_category == 'ASSISTANT':
-        end_time_str = request.POST.get('deadline')
-        end_time = pytz.utc.localize(datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M:%S.%fZ'))
-        title = request.POST.get('title')
-        content = request.POST.get('description')
-        total_score = request.POST.get('totalScore')
-        if user.is_admin:
-            belong_to_course_id = request.POST.get('course_id')
-            belong_to_course = Course.objects.get(pk=belong_to_course_id)
-        else:
-            belong_to_course = user.current_course
-        file = request.FILES.get('file')
-        normalHomework = NormalHomework(
-            end_time=end_time,
-            title=title,
-            content=content,
-            belong_to_course=belong_to_course,
-            file=file,
-            totalScore=total_score
-        )
-        normalHomework.save()
-        return JsonResponse({"massage": "作业成功创建"}, status=200)
-    else:
-        return JsonResponse({"error": "您无此权限"}, status=405)
+    normalHomework = NormalHomework(
+        end_time=end_time,
+        title=title,
+        content=content,
+        belong_to_course=belong_to_course,
+        file=file,
+        totalScore=total_score
+    )
+    normalHomework.save()
+
+    return JsonResponse({"massage": "作业成功创建"}, status=200)
 
 
 @jwt_auth()
@@ -65,7 +54,7 @@ def modify_work(request):
     title = request.POST.get('title')
     content = request.POST.get('description')
     total_score = request.POST.get('totalScore')
-    op = int(request.POST.get('op'))
+    op = int(request.POST.get('file_operation'))
     file = request.FILES.get('file')
 
     homework.end_time = end_time
@@ -107,10 +96,7 @@ def works_info(request):
         if my_type == "TEACHER" or my_type == "ASSISTANT":
             flag = True
 
-    if request.user.is_admin:
-        all_homeworks = NormalHomework.objects.all()
-    else:
-        all_homeworks = NormalHomework.objects.filter(belong_to_course=request.user.current_course)
+    all_homeworks = NormalHomework.objects.filter(belong_to_course=request.user.current_course)
 
     count = 0
     result = []
@@ -144,7 +130,6 @@ def works_info(request):
                     result[count]['score'] = str(score)
         count = count + 1
 
-    print(result)
     return JsonResponse({'result': result}, status=200)
 
 
@@ -234,8 +219,10 @@ def work_submissions(request):
             result[count]['markingPerson'] = ""
         else:
             result[count]['score'] = submit.score
-            result[count]['markingPerson'] = submit.markingPerson
+            result[count]['markingPerson'] = submit.markingPerson.name
+        count = count + 1
 
+    print(result)
     return JsonResponse({"result": result}, status=200)
 
 
@@ -267,10 +254,7 @@ def work_submissions_detail(request):
 @jwt_auth()
 @require_POST
 def student_work_detail(request):
-    print("??????????????????????")
     homework_id = int(request.POST.get('id'))
-
-    print(request.POST.get('id'))
 
     homework = NormalHomework.objects.get(pk=homework_id)
 
@@ -303,7 +287,7 @@ def student_work_detail(request):
             result['score'] = submit.score
     else:
         result['status'] = 0
-
+    print(result)
     return JsonResponse({"result": result}, status=200)
 
 
@@ -313,14 +297,15 @@ def submit_score(request):
     user = request.user
     score = request.POST.get('score')
     submit_id = request.POST.get('id')
-
+    print("?????????????????????????????????????????????s")
+    print(submit_id)
     submit = NormalHomeworkSubmit.objects.get(pk=submit_id)
     submit.score = score
     submit.markingPerson = user
     submit.save()
 
-    send_message(user.id, submit.user.id, "{}作业老师批改已完成，请查看作答情况".format(submit.homework.title),
-                 user.current_course.id, "作业批改通知")
+    send_message(user.id, [submit.user.id], "{}作业老师批改已完成，请查看作答情况".format(submit.homework.title),
+                 user.current_course.id, "WORK", "作业批改通知")
     return JsonResponse({"massage": "成功批改"}, status=200)
 
 
@@ -329,8 +314,9 @@ def submit_score(request):
 def upload_image(request):
     image = request.FILES.get("image")
     timestamp = str(int(time.time()))
+    print(image)
     _, extension = os.path.splitext(image.name)
-    image.name = f"{image.username}_{timestamp}{extension}"
+    image.name = f"{request.user.username}_{timestamp}{extension}"
     picture = Picture(picture=image)
     picture.save()
     return JsonResponse({"url": picture.get_pic_url()}, status=200)

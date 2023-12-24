@@ -1,5 +1,5 @@
 <template>
-  <el-collapse v-model="activeID" accordion>
+  <el-collapse v-model="activeID" @change="handleChange" accordion>
     <el-collapse-item v-for="item in workData" :key="item.id" :name="item.id">
       <template #title>
         <div class="work-item" style="height: 200px">
@@ -13,7 +13,7 @@
           </div>
           <div class="right-section">
             <div v-if="item.score != ''" style="margin-right: 10px">
-              <i style="font-family: 'Times New Roman', Times, serif; font-size: 14px;color: gray;"> 得分: </i>
+              <i style="font-size: 14px;color: gray;"> 得分: </i>
               <i style="font-weight: bold;color: red; font-size: large">{{ item.score }}</i>
             </div>
           </div>
@@ -44,7 +44,7 @@
           type="primary"
           @click="download(selectedData.submitFile.url, selectedData.submitFile.name)"
         >{{selectedData.submitFile.name}}</el-link>
-        <upload-file v-if="selectedData.status == 0" v-model="submitFile" :file-size="10"/>
+        <upload-file v-if="selectedData.status == 0" v-model:submitFile="submitFile" :file-size="10"/>
       </div>
       <el-button v-if="selectedData.status == 0" type="primary" @click="submit"> 提交作业 </el-button>
     </el-collapse-item>
@@ -140,6 +140,9 @@ export default {
     async getWorksData() {
       await get_works_info_api().then((res) => {
         this.workData = res.data.result
+        this.workData.forEach((item) => {
+          item.deadline = new Date(item.deadline)
+        })
       })
     },
     download(fileUrl, fileName) {
@@ -147,26 +150,28 @@ export default {
     },
     async submit() {
       const submitFile = this.submitFile.length == 0 ? '' : this.submitFile[0]
+      console.log(this.submitFile)
       await student_submit_work_api(this.selectedData.id, this.selectedData.submitContext, submitFile).then(async res => {
         ElMessage.success('提交成功')
         await student_get_work_detail_api(this.activeID).then((res) => {
           this.selectedData = res.data.result
         })
+        await this.getWorksData()
       })
-    }
-  },
-  watch: {
-    activeID: async function (newVal, oldVal) {
-      await student_get_work_detail_api(newVal).then((res) => {
-        this.selectedData = res.data.result
-      })
+    },
+    async handleChange(val) {
+      if (val !== '') {
+        await student_get_work_detail_api(val).then((res) => {
+          this.selectedData = res.data.result
+        })
+      }
     }
   },
   mounted() {
     this.getWorksData()
     this.timer = setInterval(() => {
       this.updateStatus()
-      if (this.selectedData.id !== undefined)
+      if (this.activeID !== '')
         this.updateSelectedStatus()
     }, 1000)
   },

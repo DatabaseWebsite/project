@@ -27,23 +27,19 @@ def send_message_(request):
     title = request.POST.get('title')
     content = request.POST.get('content')
     receiver_id = request.POST.get('receiver_id')
+    course_id = sender.current_course.id
 
-    if sender.is_admin:
-        course_id = request.POST.get('course_id')
-    else:
-        course_id = sender.current_course.id
-
-    send_message(sender, [receiver_id], content, course_id, title)
+    send_message(sender, [receiver_id], content, course_id, "OTHER", title)
 
     return JsonResponse({"message": "发送成功"}, status=200)
 
 
-def send_message(sender_id, receiver_ids, content, course_id, title=""):
+def send_message(sender_id, receiver_ids, content, course_id, m_type, title=""):
     course = Course.objects.get(pk=course_id)
     sender = User.objects.get(pk=sender_id)
     for receiver_id in receiver_ids:
         receiver = User.objects.get(pk=receiver_id)
-        message = Message(sender=sender, receiver=receiver, title=title, content=content, course=course)
+        message = Message(sender=sender, receiver=receiver, title=title, content=content, course=course, type=m_type)
         message.save()
 
 
@@ -51,29 +47,52 @@ def send_message(sender_id, receiver_ids, content, course_id, title=""):
 @require_POST
 def get_message(request):
     user = request.user
-
-    if user.is_admin:
-        messages = Message.objects.all()
-        result = [
-            {
-                "sender": message.sender.name,
-                "title": message.title,
-                "content": message.content,
-                "send_time": message.send_time,
-                "course": message.course.name
-            }
-            for message in messages
-        ]
-    else:
+    message_type = request.POST.get('type')
+    if message_type is None:
         messages = Message.objects.filter(receiver=user, course=user.current_course)
-        result = [
-            {
-                "sender": message.sender.name,
-                "title": message.title,
-                "content": message.content,
-                "send_time": message.send_time
-            }
-            for message in messages
-        ]
+    else:
+        messages = Message.objects.filter(receiver=user, course=user.current_course, type=message_type)
+
+    result = [
+        {
+            "id": message.id,
+            "sender": message.sender.name,
+            "title": message.title,
+            "content": message.content,
+            "time": message.send_time,
+            "type": message.type,
+            "unread": ~message.read
+        }
+        for message in messages
+    ]
 
     return JsonResponse({"result": result}, status=200)
+
+
+@jwt_auth()
+@require_POST
+def read_message(request):
+    message_id = request.POST.get('id')
+    message = Message.objects.get(pk=message_id)
+    message.read = True
+    message.save()
+    return JsonResponse({"message": "已阅读"}, status=200)
+
+
+@jwt_auth()
+@require_GET
+def message_number(request):
+    user = request.user
+    course = user.current_course
+    total = Message.objects.filter(receiver=user, course=course, read=False).count()
+    CLASS = Message.objects.filter(receiver=user, course=course, read=False, type="class").count()
+    WORK = Message.objects.filter(receiver=user, course=course, read=False, type="work").count()
+    DISCUSSION = Message.objects.filter(receiver=user, course=course, read=False, type="discussion").count()
+    return JsonResponse(
+        {
+            "result": {"total": total,
+                       "class": CLASS,
+                       "work": WORK,
+                       "discussion": DISCUSSION}
+        }, status=200
+    )

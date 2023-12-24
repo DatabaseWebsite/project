@@ -247,9 +247,12 @@ export const record_operation_log_api = (requestModule:string, api: string, ip: 
   return axios.post('api/log/record-operation-log/', data)
 }
 
-export const create_course_api = (name: string) => {
+export const create_course_api = (name: string,description:string, start_time:string,end_time:string) => {
   const data = new URLSearchParams();
-  data.append('course_name', name)
+  data.append('course_name', name);
+  data.append('course_description', description);
+  data.append('start_time',start_time);
+  data.append('ent_time',end_time);
   return axios.post('api/course/create-course/', data)
 }
 
@@ -290,12 +293,12 @@ export const create_work_api = (data : FormData) => {
  * deadline: string // 后端：datetime.fromisoformat(deadline)
  */
 export const modify_work_api = (data : FormData) => {
-  return axios.post('api/homework/modify-work', data)
+  return axios.post('api/homework/modify-work/', data)
 }
 export const delete_work_api = (id : number) => {
   let data = new URLSearchParams()
   data.append('id', id.toString())
-  return axios.post('api/homework/remove-work', data)
+  return axios.post('api/homework/remove-work/', data)
 }
 /*
  * 根据身份判断返回信息
@@ -303,7 +306,7 @@ export const delete_work_api = (id : number) => {
  * 学生：返回id,title, totalScore, deadline, status, score
  */
 export const get_works_info_api = () => {
-  return axios.get('api/homework/works-info')
+  return axios.get('api/homework/works-info/')
 }
 
 export const get_one_work_api = (id: number) => {
@@ -334,7 +337,7 @@ export const submit_work_score_api = (id: number, score: number) => {
 export const student_get_work_detail_api = (id: number) => {
   let data = new URLSearchParams()
   data.append('id', id.toString())
-  return axios.post('api/homework/student-work-detail', data)
+  return axios.post('api/homework/student-work-detail/', data)
 }
 
 export const student_submit_work_api = (id: number, context: string, file: any) => {
@@ -342,5 +345,134 @@ export const student_submit_work_api = (id: number, context: string, file: any) 
   data.append('id', id.toString())
   data.append('context', context)
   data.append('file', file.raw)
-  return axios.post('api/homework/student-submit-work', data)
+  return axios.post('api/homework/student-submit-work/', data)
+}
+
+export const create_notice_api = (title:string, content: string) => {
+  let data = new URLSearchParams()
+  data.append('title', title)
+  data.append('content', content)
+  return axios.post('api/notice/create-notice/', data)
+}
+
+export const delete_notice_api = (notice_id:string) => {
+  let data = new URLSearchParams()
+  data.append('notice_id', notice_id)
+  return axios.post('api/notice/delete-notice/', data)
+}
+
+export const notice_list_api = () => {
+  return axios.get('api/notice/notice-list/')
+}
+
+export const create_post_api = (title:string, content:string) => {
+  let data = new URLSearchParams()
+  data.append("title", title)
+  data.append("content", content)
+  return axios.post('api/forum/create-post/', data)
+}
+
+export const post_list_api = () => {
+  return axios.get('api/forum/post-list/')
+}
+
+export const delete_post_api = (post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/delete-post/', data)
+}
+
+export const create_reply_api = (post_id:string, content:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  //data.append('reply_id', reply_id)
+  data.append('content', content)
+  return axios.post('api/forum/create-reply/', data)
+}
+
+export const get_post_api = (post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/get-post/', data)
+}
+
+export const topping_post_api = (post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/topping-post/', data)
+}
+
+export const cancel_topping_post_api = (post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/cancel-topping-post/', data)
+}
+
+export const subscribe_post_api = (post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/subscribe-post/', data)
+}
+
+export const cancel_subscribe_post_api =(post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/cancel-subscribe-post/', data)
+}
+
+export const like_reply_api = (reply_id:string) => {
+  let data = new URLSearchParams()
+  data.append('reply_id', reply_id)
+  return axios.post('api/forum/like-reply/', data)
+}
+
+export const dislike_reply_api = (reply_id:string) => {
+  let data = new URLSearchParams()
+  data.append('reply_id', reply_id)
+  return axios.post('api/forum/dislike-reply/', data)
+}
+
+export const like_post_api = (post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/like-post/', data)
+}
+
+export const dislike_post_api = (post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/dislike-post/', data)
+}
+export const elite_post_api = (post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/elite-post/', data)
+}
+
+export const cancel_elite_post_api = (post_id:string) => {
+  let data = new URLSearchParams()
+  data.append('post_id', post_id)
+  return axios.post('api/forum/cancel-elite-post/', data)
+}
+export const search_posts_api = (query_content:string) => {
+  let data = new URLSearchParams()
+  data.append('q', query_content)
+  return axios.post('api/forum/search-posts/', data)
+}
+
+
+export const get_unread_messages_count_api = () => {
+  return axios.get('api/message/unread-messages-count/')
+}
+
+export const get_messages_api = (type: string) => {
+  let data = new URLSearchParams()
+  data.append('type', type)
+  return axios.post('api/message/message-list/', data)
+}
+
+export const read_message_by_id = (id: number) => {
+  let data = new URLSearchParams()
+  data.append('id', id.toString())
+  return axios.post('api/message/read-message/', data)
 }

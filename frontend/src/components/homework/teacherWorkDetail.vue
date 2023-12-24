@@ -74,7 +74,7 @@
     </div>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="primary" @click="correctVisible = false; submitCorrect"> 提交批改 </el-button>
+        <el-button type="primary" @click="submitCorrect"> 提交批改 </el-button>
       </span>
     </template>
   </el-dialog>

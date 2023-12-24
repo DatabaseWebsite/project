@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'users',
     'corsheaders',#跨域请求
     'rest_framework',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -85,9 +86,14 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
+
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',  # 默认
+        'NAME': 'databaseProject',  # 连接的数据库  #一定要存在的数据库名
+        'HOST': '101.43.220.45',  # mysql的ip地址
+        'PORT': 3306,  # mysql的端口
+        'USER': 'remote',  # mysql的用户名
+        'PASSWORD': 'qw12QW!@'  # mysql的密码
     }
 }
 

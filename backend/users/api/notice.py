@@ -25,14 +25,8 @@ def create_notice(request):
     title = request.POST.get('title')
     content = request.POST.get('content')
 
-    if not request.user.is_admin:
-        notice = Notice(sender=request.user, title=title, content=content, course=request.user.current_course)
-        notice.save()
-    else:
-        course_id = request.POST.get('course_id')
-        course = Course.objects.get(pk=course_id)
-        notice = Notice(sender=request.user, title=title, content=content, course=course)
-        notice.save()
+    notice = Notice(sender=request.user, title=title, content=content, course=request.user.current_course)
+    notice.save()
 
     return JsonResponse({"message": "创建成功"}, status=200)
 
@@ -40,7 +34,7 @@ def create_notice(request):
 @jwt_auth()
 @require_POST
 def delete_notice(request):
-    notice_id = request.POST.get('notice_id')
+    notice_id = int(request.POST.get('notice_id'))
     notice = Notice.objects.get(pk=notice_id)
     notice.delete()
     return JsonResponse({"message": "删除成功"}, status=200)
@@ -51,29 +45,19 @@ def delete_notice(request):
 def notice_list(request):
     user = request.user
     result = []
-    if user.is_admin:
-        notices = Notice.objects.all()
-        for notice in notices:
-            result.append(
-                {
-                    "sender": notice.sender.name,
-                    "title": notice.title,
-                    "content": notice.content,
-                    "create_time": notice.create_time,
-                    "course": notice.course.name
-                }
-            )
-    else:
-        course = user.current_course
-        notices = Notice.objects.filter(course=course)
-        for notice in notices:
-            result.append(
-                {
-                    "sender": notice.sender.name,
-                    "title": notice.title,
-                    "content": notice.content,
-                    "create_time": notice.create_time,
-                    "course": notice.course.name
-                }
-            )
+    course = user.current_course
+
+    notices = Notice.objects.filter(course=course)
+
+    for notice in notices:
+        result.append(
+            {
+                "sender": notice.sender.name,
+                "title": notice.title,
+                "content": notice.content,
+                "create_time": notice.create_time,
+                "course": notice.course.name
+            }
+        )
+
     return JsonResponse({'result': result}, status=200)

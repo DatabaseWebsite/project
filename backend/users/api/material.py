@@ -26,12 +26,7 @@ from users.settings import ITEMS_PER_PAGE
 def upload_material(request):
     files = request.FILES.getlist('files')
     user = request.user
-    print("<<<<<<<<<<<<<<<<>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<>")
-    if user.is_admin:
-        course_id = request.POST.get('course_id')
-        course = Course.objects.get(pk=course_id)
-    else:
-        course = user.current_course
+    course = user.current_course
 
     for file in files:
         print(file.name)

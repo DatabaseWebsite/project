@@ -1,3 +1,4 @@
+import json
 import os
 import time
 
@@ -29,12 +30,7 @@ def create_post(request):
     poster = request.user
     title = request.POST.get('title')
     content = request.POST.get('content')
-
-    if poster.is_admin:
-        course_id = request.POST.get('course_id')
-        course = Course.objects.get(pk=course_id)
-    else:
-        course = poster.current_course
+    course = poster.current_course
 
     post = Post(poster=poster, title=title, content=content, course=course, top=False, likes=0, elite=False)
     post.save()
@@ -51,36 +47,26 @@ def post_list(request):
     user_subscribe_post_set = set(
         SubscriptionRecord.objects.filter(user=user).values('post').values_list('post', flat=True))
 
-    if user.is_admin:
-        posts = Post.objects.all().order_by('-top', '-post_time')
-        result = [
-            {
-                "sender": post.poster.id,
-                "title": post.title,
-                "content": post.content,
-                "send_time": post.post_time,
-                "course": post.course.id,
-                "top": post.top,
-                "like": post in user_like_post_set,
-                "subscribe": post in user_subscribe_post_set
-            }
-            for post in posts
-        ]
-    else:
-        posts = Post.objects.filter(course=user.current_course).order_by('-top', '-post_time')
-        result = [
-            {
-                "sender": post.poster.id,
-                "title": post.title,
-                "content": post.content,
-                "send_time": post.post_time,
-                "top": post.top,
-                "like": post in user_like_post_set,
-                "subscribe": post in user_subscribe_post_set
-            }
-            for post in posts
-        ]
-
+    print(user_like_post_set)
+    print(user_subscribe_post_set)
+    posts = Post.objects.filter(course=user.current_course).order_by('-top', '-post_time')
+    result = [
+        {
+            "id": post.id,
+            "authorAvatar": post.poster.get_avatar_url(),
+            "author": post.poster.name,
+            "title": post.title,
+            "summary": post.content,
+            "timestamp": post.post_time,
+            "top": post.top,
+            "elite": post.elite,
+            "likes": post.likes,
+            "like": post.id in user_like_post_set,
+            "subscribe": post.id in user_subscribe_post_set
+        }
+        for post in posts
+    ]
+    print(result)
     return JsonResponse({"result": result}, status=200)
 
 
@@ -113,20 +99,20 @@ def create_reply(request):
     reply.save()
 
     subscribe_list = SubscriptionRecord.objects.filter(post=post).values_list('user_id', flat=True)
-    send_message(OFFICIAL_ID, subscribe_list, "您关注的帖子\"{}\"已更新".format(post.title), post.course.id,
-                 title="帖子更新通知")
+    send_message(OFFICIAL_ID, subscribe_list, "您关注的帖子\"{}\"已更新".format(post.title), post.course.id
+                 , "DISCUSSION", title="帖子更新通知")
 
     return JsonResponse({"message": "成功创建"}, status=200)
 
 
 @jwt_auth()
-@require_GET
+@require_POST
 def get_post(request):
     user = request.user
-    post_id = request.GET.get('post_id', 1)
+    post_id = request.POST.get('post_id')
     _post = Post.objects.get(pk=post_id)
     _replies = Reply.objects.filter(post=_post)
-
+    print(post_id)
     user_like_post_set = set(
         PostLikeRecord.objects.filter(user=user).values_list('post', flat=True))
     user_subscribe_post_set = set(
@@ -136,26 +122,32 @@ def get_post(request):
 
     result = {
         "post": {
-            "url": _post.poster.get_avatar_url(),
-            "sender": _post.poster.id,
+            "id": _post.id,
+            "authorAvatar": _post.poster.get_avatar_url(),
+            "author": _post.poster.name,
             "title": _post.title,
             "content": _post.content,
-            "send_time": _post.post_time,
+            "timestamp": _post.post_time,
             "top": _post.top,
-            "like": _post in user_like_post_set,
-            "subscribe": _post in user_subscribe_post_set
+            "elite": _post.elite,
+            "likes": _post.likes,
+            "like": _post.id in user_like_post_set,
+            "subscribe": _post.id in user_subscribe_post_set
         },
         "replies": []
     }
+    print(result)
     count = 0
     for reply in _replies:
         result["replies"].append(
             {
-                "url": reply.replier.get_avatar_url(),
-                "replier": reply.replier.id,
+                "id": reply.id,
+                "authorAvatar": reply.replier.get_avatar_url(),
+                "author": reply.replier.name,
                 "content": reply.content,
-                "reply_time": reply.reply_time,
-                "like": reply in user_like_reply_set
+                "timestamp": reply.reply_time,
+                "likes": reply.likes,
+                "like": reply.id in user_like_reply_set
             }
         )
         if reply.reply_to is not None:
@@ -183,6 +175,24 @@ def cancel_topping_post(request):
     post = Post.objects.get(pk=post_id)
     post.top = False
     return JsonResponse({"message": "取消置顶成功"}, status=200)
+
+
+@jwt_auth()
+@require_POST
+def elite_post(request):
+    post_id = request.POST.get("post_id")
+    post = Post.objects.get(pk=post_id)
+    post.elite = True
+    return JsonResponse({"message": "加精成功"}, status=200)
+
+
+@jwt_auth()
+@require_POST
+def cancel_elite_post(request):
+    post_id = request.POST.get("post_id")
+    post = Post.objects.get(pk=post_id)
+    post.elite = False
+    return JsonResponse({"message": "取消加精成功"}, status=200)
 
 
 @jwt_auth()
@@ -226,6 +236,8 @@ def like_reply(request):
     else:
         replyLikeRecord = ReplyLikeRecord(reply=reply, user=user)
         replyLikeRecord.save()
+        reply.likes = reply.likes + 1
+        reply.save()
         return JsonResponse({"message": "喜欢评论成功"}, status=200)
 
 
@@ -239,6 +251,8 @@ def dislike_reply(request):
     if ReplyLikeRecord.objects.filter(reply=reply, user=user).exists():
         replyLikeRecord = ReplyLikeRecord.objects.filter(reply=reply, user=user)
         replyLikeRecord.delete()
+        reply.likes = reply.likes - 1
+        reply.save()
 
     return JsonResponse({"message": "成功取消喜欢"}, status=200)
 
@@ -247,6 +261,7 @@ def dislike_reply(request):
 @require_POST
 def like_post(request):
     post_id = request.POST.get("post_id")
+    print(post_id)
     post = Post.objects.get(pk=post_id)
     user = request.user
 
@@ -255,6 +270,8 @@ def like_post(request):
     else:
         postLikeRecord = PostLikeRecord(post=post, user=user)
         postLikeRecord.save()
+        post.likes = post.likes + 1
+        post.save()
         return JsonResponse({"message": "喜欢帖子成功"}, status=200)
 
 
@@ -268,6 +285,8 @@ def dislike_post(request):
     if PostLikeRecord.objects.filter(post=post, user=user).exists():
         postLikeRecord = PostLikeRecord.objects.filter(post=post, user=user)
         postLikeRecord.delete()
+        post.likes = post.likes - 1
+        post.save()
 
     return JsonResponse({"message": "成功取消喜欢"}, status=200)
 
@@ -276,7 +295,6 @@ def dislike_post(request):
 @require_POST
 def search_posts(request):
     query_string = request.POST.get("q")
-    search_query = SearchQuery(query_string)
 
     user = request.user
     user_like_post_set = set(
@@ -284,9 +302,14 @@ def search_posts(request):
     user_subscribe_post_set = set(
         SubscriptionRecord.objects.filter(user=user).values('post').values_list('post', flat=True))
 
-    posts = Post.objects.annotate(
-        rank=SearchRank(F('search_vector'), search_query)
-    ).filter(search_vector=search_query).order_by('-rank', '-top', '-post_time')
+    matching_posts = set(Post.objects.filter(
+        Q(title__contains=query_string) | Q(content__contains=query_string)
+    ))
+
+    matching_replies = set(Reply.objects.filter(Q(content__contains=query_string)))
+
+    for reply in matching_replies:
+        matching_posts.add(reply.post)
 
     result = [
         {
@@ -298,7 +321,7 @@ def search_posts(request):
             "like": post in user_like_post_set,
             "subscribe": post in user_subscribe_post_set
         }
-        for post in posts
+        for post in matching_posts
     ]
 
     return JsonResponse({"result": result}, status=200)

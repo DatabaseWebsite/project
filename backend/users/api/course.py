@@ -1,12 +1,14 @@
 import json
+from datetime import datetime
 
+import pytz
 from django.core.paginator import Paginator, EmptyPage
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from rest_framework import status
 
 from users.api.auth import jwt_auth
-from users.models import Course
+from users.models import Course, User
 from users.models.course_selection_record import CourseSelectionRecord
 from users.settings import ITEMS_PER_PAGE
 
@@ -15,41 +17,34 @@ from users.settings import ITEMS_PER_PAGE
 @require_POST
 def create_course(request):
     course_name = request.POST.get('course_name')
-    user = request.user
-    if user.is_admin:
-        print(course_name)
-        course = Course(name=course_name)
-        course.save()
-        return JsonResponse({"message": "创建成功"}, status=200)
-    else:
-        user_category = CourseSelectionRecord.objects.filter(user=user,
-                                                             selected_course=user.current_course).first().type
+    start_time_str = request.POST.get('start_time')
+    start_time = datetime.strptime(start_time_str, "%a %b %d %Y %H:%M:%S GMT%z (%Z)")
+    start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
+    end_time_str = request.POST.get('end_time')
+    end_time = datetime.strptime(end_time_str, "%a %b %d %Y %H:%M:%S GMT%z (%Z)")
+    end_time = end_time.strftime("%Y-%m-%d %H:%M:%S")
+    description = request.POST.get('course_description')
 
-        if user_category != 'TEACHER':
-            return JsonResponse({"error": "您没有此权限"}, status=405)
-        else:
-            print(course_name)
-            course = Course(name=course_name)
-            course.save()
-            return JsonResponse({"message": "创建成功"}, status=200)
+    course = Course(name=course_name, startTime=start_time, endTime=end_time, description=description)
+    course.save()
+
+    all_admins = User.objects.filter(is_admin=True)
+    for admin in all_admins:
+        record = CourseSelectionRecord(user=admin, selected_course=course, type="ADMIN")
+        record.save()
+        if admin.current_course is None:
+            admin.current_course = course
+            admin.save()
+
+    return JsonResponse({"message": "新建成功"}, status=200)
 
 
 @jwt_auth()
 @require_GET
 def all_course_info(request):
-    user = request.user
-    if user.is_admin:
-        user_category = "ADMIN"
-    else:
-        user_category = CourseSelectionRecord.objects.filter(user=user,
-                                                             selected_course=user.current_course).first().type
-    if user.is_admin or user_category == "TEACHER" or user_category == "ASSISTANT":
-        courses = Course.objects.all()
-        data = [{'course_id': course.id, 'name': course.name} for course in courses]
-        # print(data)
-        return JsonResponse({"result": data}, status=status.HTTP_200_OK)
-    else:
-        return JsonResponse({"error": "您没有此权限"}, status=405)
+    courses = Course.objects.all()
+    data = [{'course_id': course.id, 'name': course.name} for course in courses]
+    return JsonResponse({"result": data}, status=status.HTTP_200_OK)
 
 
 @jwt_auth()
