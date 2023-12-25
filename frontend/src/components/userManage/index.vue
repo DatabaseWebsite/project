@@ -45,7 +45,6 @@
         <el-table-column prop="id" label="序号" width="70"></el-table-column>
         <el-table-column prop="person_id" label="学号" width="140"></el-table-column>
         <el-table-column prop="username" label="姓名" min-width="100"></el-table-column>
-        <el-table-column prop="grade" label="年级" width="80"></el-table-column>
         <el-table-column prop="courses" label="参与课程及身份" min-width="300"></el-table-column>
         <el-table-column fixed="right" label="操作" width="200">
           <template #default="scope">
@@ -60,7 +59,7 @@
         </el-table-column>
       </el-table>
       <div>
-       <el-pagination layout="prev, pager, next" :page-count="totPage" :current-page="curPage" page-size=10 @current-change="changePage" style="margin: 10px;"/>
+       <el-pagination layout="prev, pager, next" :page-count="totPage" :current-page="curPage" :page-size='10' @current-change="changePage" style="margin: 10px;"/>
       </div>
     </el-main>
   </el-container>
@@ -99,7 +98,7 @@
     </el-form>
   </el-dialog>
   <el-dialog title="批量创建用户" v-model="batchCreationVisible">
-    <upload-file v-model:submitFile="batchCreationInfo.file" :file-type="xlsxFileType" :file-size="10"/>
+    <upload-excel/>
     <el-form v-model="batchCreationInfo" label-width="80">
       <el-form-item label="加入课程" prop="course">
         <el-select v-model="batchCreationInfo.course_id" placeholder="请选择课程" clearable>
@@ -168,7 +167,7 @@ import {onMounted, reactive, ref, watch} from "vue";
 import {registerRules, registerUser} from "@/components/userManage/registerForm.ts";
 import {editRules, editUserInfo} from "@/components/userManage/EditUserInfo.ts";
 import {exportExcel} from "@/components/userManage/exportExcel.ts";
-import UploadFile from "@/lib/uploadFile.vue";
+import uploadExcel from "@/components/userManage/uploadExcel.vue";
 interface BatchCreation {
   file: any,
   course_id: string,
@@ -176,11 +175,6 @@ interface BatchCreation {
 }
 export default {
   name: "userManage",
-  data() {
-    return {
-      xlsxFileType: ['.xlsx', '.xls']
-    }
-  },
   computed: {
     editRules() {
       return editRules
@@ -196,7 +190,7 @@ export default {
     }
   },
   components: {
-    UploadFile,
+    uploadExcel,
     IconEditName, IconAddUser, IconPeopleDeleteOne,
     Delete, Download, UploadFilled, Search, Refresh
   },
@@ -255,16 +249,13 @@ export default {
           console.log(editUserInfo)
           await update_userinfo_api(editUserInfo.id, editUserInfo.personId, editUserInfo.username, editUserInfo.grade).then(async res => {
             ElMessage.success('修改成功！')
-            isSearching.value = false
-            curPage.value = 1
-            searchInfo.value = {
-              personId: '',
-              username: '',
-              grade: '',
-              course: '',
-              identity: ''
-            }
-            await queryUsers()
+            tableData.value.forEach(item => {
+              if (item['id'] === editUserInfo.id) {
+                item['person_id'] = editUserInfo.personId
+                item['username'] = editUserInfo.username
+                item['grade'] = editUserInfo.grade
+              }
+            })
             editVisible.value = false
           })
         } else {
@@ -325,13 +316,13 @@ export default {
         window.location.href = `/#/userManage?personId=${searchInfo.value.personId}&username=${searchInfo.value.username}&grade=${searchInfo.value.grade}&course=${searchInfo.value.course}&identity=${searchInfo.value.identity}&page=${curPage.value}`
         await search_user_api(searchInfo.value.personId, searchInfo.value.username, searchInfo.value.grade, searchInfo.value.course, searchInfo.value.identity, curPage.value).then(res => {
           tableData.value = res.data['result']
-          totPage.value = res.data['total_page']
+          totPage.value = Number(res.data['total_page'])
         })
       } else {
         window.location.href = `/#/userManage?page=${curPage.value}`
         await get_user_list_api(curPage.value).then(res => {
           tableData.value = res.data['result']
-          totPage.value = res.data['total_page']
+          totPage.value = Number(res.data['total_pages'])
         })
       }
     }

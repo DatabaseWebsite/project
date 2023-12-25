@@ -7,22 +7,26 @@
     :close-on-press-escape="false"
     width="500px"
   >
-    <el-radio-group v-model="selected">
-     <el-radio
-       v-for="item in courses"
-       :label="item"
-       >{{item['name']}}</el-radio>
-    </el-radio-group>
-    <el-button @click="closeCourseSelect"> 取消 </el-button>
-    <el-button
-      @click="submit"
-    >确认</el-button>
+    <el-select v-model="selected" placeholder="请选择课程">
+      <el-option
+        v-for="item in courses"
+        :key="item['course_id']"
+        :label="item['name']"
+        :value="item['course_id']"
+      ></el-option>
+    </el-select>
+    <template #footer>
+      <el-button @click="closeCourseSelect"> 取消 </el-button>
+      <el-button
+        @click="submit"
+      >确认</el-button>
+    </template>
   </el-dialog>
 </template>
 
 <script lang="ts">
 
-import {get_user_select_course_api, user_select_course_api} from "@/api/api.ts";
+import {get_course_list_api, get_user_select_course_api, user_select_course_api} from "@/api/api.ts";
 import useAuthStore from "@/store/user.ts";
 
 export default {
@@ -36,12 +40,7 @@ export default {
   data() {
     return {
       courses: [],
-      selected: {}
-    }
-  },
-  watch: {
-    selected(val) {
-      console.log(val)
+      selected: ''
     }
   },
   methods: {
@@ -49,7 +48,11 @@ export default {
       this.$parent.closeCourseSelect()
     },
     async submit() {
-      console.log(this.selected)
+      this.courses.forEach(item => {
+        if (item['course_id'] === this.selected) {
+          this.selected = item
+        }
+      })
       await user_select_course_api(this.selected['course_id']).then(res => {
         useAuthStore().setCourse(this.selected['course_id'], this.selected['name'])
         // location.reload()
@@ -58,9 +61,8 @@ export default {
     }
   },
   mounted() {
-    get_user_select_course_api().then(res => {
+    get_course_list_api().then(res => {
       this.courses = res.data.result
-      console.log(this.courses)
     })
   }
 }

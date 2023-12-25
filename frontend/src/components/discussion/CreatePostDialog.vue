@@ -48,7 +48,7 @@
   </script>
   <style scoped>
   .create-post-container {
-    padding: 20px;
+    padding: 30px;
     background: #f9f9f9;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);

@@ -7,25 +7,6 @@ import useAuthStore from "@/store/user.ts";
 import {record} from "@/api/record.ts";
 
 let loading: any;
-const startLoading = () => {
-
-  interface Options {
-    lock: boolean;
-    text: string;
-    background: string;
-  }
-
-  const options: Options = {
-    lock: true,
-    text: "加载中...",
-    background: 'rgba(0,0,0,0.7)'
-  }
-  loading = ElLoading.service(options);
-}
-
-const endLoading = () => {
-  loading.close();
-}
 
 // 设置接口超时时间
 axios.defaults.timeout = 60000;
@@ -34,7 +15,6 @@ axios.defaults.baseURL = 'http://127.0.0.1:8000/';
 // http request 拦截器
 axios.interceptors.request.use(function (config){
   // 在发送请求前做些什么
-  startLoading();
   let token = cookies.get('token')
   config.headers.Authorization = "Bearer " + token
   console.log(config)
@@ -49,7 +29,6 @@ axios.interceptors.request.use(function (config){
 axios.interceptors.response.use(async function (response) {
   // 2xx 范围内的状态码都会触发该函数。
   // 对响应数据做点什么
-  endLoading()
   let dataAxios = response || null;
   // 这个状态码是和后端约定的
   let status = response.status
@@ -88,7 +67,6 @@ axios.interceptors.response.use(async function (response) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
   console.log(error)
-  endLoading()
   if (!error.response.config.url.startsWith('api/log/'))
     await record(error.config, error.response)
   const {status} = error.response

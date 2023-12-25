@@ -403,7 +403,8 @@ def user_list(request):
         records = CourseSelectionRecord.objects.filter(user=user)
         course = ""
         for record in records:
-            course = course + str(record.selected_course.name) + "(" + str(record.type) + "),"
+            type = str(record.type) == "STUDENT" and "学生" or str(record.type) == "TEACHER" and "老师" or str(record.type) == "ASSISTANT" and "助教" or str(record.type) == "ADMIN" and "管理员"
+            course = course + str(record.selected_course.name) + "(" + type + "),"
         courses[user] = course[:-1]
 
     serialized_data = [
@@ -415,7 +416,7 @@ def user_list(request):
         }
         for user in current_page_data
     ]
-
+    print(serialized_data)
     return JsonResponse({
         'result': serialized_data,
         'total_pages': paginator.num_pages,

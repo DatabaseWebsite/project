@@ -5,7 +5,7 @@
         v-model="searchUser.personId"
         class="w-50 m-2"
         style="width: 150px; margin-right: 20px"
-        placeholder="请输入待添加学生的学号"
+        placeholder="请输入用户的学号"
       />
       <el-select style="width: 100px;" v-model="searchUser.identity" placeholder="请选择身份">
         <el-option label="学生" value="STUDENT" />
@@ -20,23 +20,11 @@
         <el-table-column prop="personId" label="学号"/>
         <el-table-column prop="name" label="姓名" />
         <el-table-column prop="identity" label="身份" />
-        <el-table-column prop="grade" label="年级" />
         <el-table-column fixed="right" label="操作" width="200">
           <template #default="scope">
-            <el-popconfirm
-              confirm-button-text="确定"
-              cancel-button-text="取消"
-              title="确认将该学生移除课程吗？"
-              @confirm="deleteStudent(scope.row)"
-              style="margin: 20px"
-            >
+            <el-popover placement="bottom" :width="400" :visible="scope.row['popoverVisible']">
               <template #reference>
-                <icon-people-delete @click="deleteStudent(scope.row)"/>
-              </template>
-            </el-popconfirm>
-            <el-popover placement="bottom" :width="400" trigger="click">
-              <template #reference>
-                <el-button type="text"><icon-edit-name/></el-button>
+                <el-button link type="primary" @click="scope.row['popoverVisible']=true"><icon-edit-name size="20"/></el-button>
               </template>
               <el-select v-model="changeInfo.identity" placeholder="请选择身份">
                 <el-option label="学生" value="STUDENT" />
@@ -45,12 +33,22 @@
               </el-select>
               <el-button type="primary" @click="submitChange(scope.row)"> 提交 </el-button>
             </el-popover>
+            <el-popconfirm
+              confirm-button-text="确定"
+              cancel-button-text="取消"
+              title="确认将该学生移除课程吗？"
+              @confirm="deleteStudent(scope.row)"
+            >
+              <template #reference>
+                <el-button link type="danger"><icon-people-delete size="20" @click="deleteStudent(scope.row)"/></el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
       <el-pagination
         layout="prev, pager, next"
-        :total="students.length"
+        :page-count="totPage"
         :page-size="10"
         :current-page="currentPage"
         @current-change="handlePageChange">
@@ -61,9 +59,10 @@
 
 <script lang="ts">
 import {ref, defineProps, watch, onMounted} from 'vue';
-import {all_participants_api, add_course_user_api} from "@/api/api.ts";
+import {all_participants_api, add_course_user_api, modify_identity_api} from "@/api/api.ts";
 import {useRoute} from "vue-router";
 import { EditName as IconEditName, PeopleDelete as IconPeopleDelete } from "@icon-park/vue-next";
+import useAuthStore from "@/store/user.ts";
 
 export default {
   name: 'courseDetail',
@@ -73,6 +72,7 @@ export default {
     const courseInfoVisible = ref(false);
     const deleteVisible = ref(false); // 确认删除的对话框状态
     const currentPage = ref(1);
+    const totPage = ref(1);
 // const students = ref([{ id: 1, name: 'gaosj', identity: '老师' }, { id: 2, name: 'byc', identity: '学生' }, { id: 2, name: 'byc', identity: '学生' },
 //  { id: 2, name: 'byc', identity: '学生' },{ id: 2, name: 'byc', identity: '学生' }, { id: 2, name: 'byc', identity: '学生' },{ id: 2, name: 'byc', identity: '学生' },
 //  { id: 2, name: 'byc', identity: '学生' }, { id: 2, name: 'byc', identity: '学生' },{ id: 2, name: 'byc', identity: '学生' },{ id: 2, name: 'byc', identity: '学生' },
@@ -82,7 +82,7 @@ export default {
     const changeInfo = ref({});
     const currentStudent = ref({}); // 当前选中的学生
     const searchUser = ref({})
-    const course = ref({})
+    const visible = ref(false);
 // 导入学生
     const submitCreate = async () => {
       // 将学号返回给后端，若不存在，报错等操作
@@ -106,12 +106,12 @@ export default {
     };
 
 // 提交身份修改
-    const submitChange = (row) => {
+    const submitChange = async (row) => {
       // 调用接口修改学生身份
-      const student = students.value.find(s => s.id === currentStudent.value.id);
-      if (student) {
-        student.identity = changeInfo.value.identity;
-      }
+      await modify_identity_api(row['id'], useAuthStore().getUser['course_id'], changeInfo.value['identity']).then(res => {
+        row['identity'] = changeInfo.value['identity'] === 'STUDENT' ? '学生' : changeInfo.value['identity'] === 'ASSISTANT' ? '助教' : changeInfo.value['identity'] === 'ADMIN' ? '系统管理员' : '老师';
+      })
+      row['popoverVisible'] = false;
     };
 
 // 取消对话框
@@ -131,30 +131,32 @@ export default {
     const handlePageChange = (newPage) => {
       currentPage.value = newPage;
     };
-    const fetchStudents = async (courseId, page) => {
-      try {
-        const response = await all_participants_api(courseId, page);
-        students.value = response.data; // 假设返回的数据在data属性中
-      } catch (error) {
-        console.error('Failed to fetch students:', error);
-        students.value = []; // 在错误情况下重置学生数组
-      }
+    const fetchStudents = async (courseId:Number, page:Number) => {
+      await all_participants_api(courseId.toString(), page.toString()).then((response) => {
+        students.value = response.data.result;
+        totPage.value = Number(response.data['total_pages'])
+        students.value.forEach((student) => {
+          student.popoverVisible = false;
+          student.identity = student.identity === 'STUDENT' ? '学生' : student.identity === 'ASSISTANT' ? '助教' : student.identity === 'ADMIN' ? '系统管理员' : '老师';
+        });
+      })
     };
 
 // 点击详细信息按钮时触发
     const showCourseInfo = async () => {
       courseInfoVisible.value = true;
-      console.log("showCourseInfo enter" , course.value.id,currentPage.value);
-      await fetchStudents(course.value.id, currentPage.value);
+      console.log("showCourseInfo enter" , id.value,currentPage.value);
+      await fetchStudents(id.value, currentPage.value);
     };
 
 // 监听currentPage变化，然后重新获取学生数据
     watch(currentPage, (newPage) => {
-      fetchStudents(course.value.id, newPage);
+      fetchStudents(id.value, newPage);
     });
     onMounted(async () => {
-      course.value.id = Number(useRoute().query.id)
+      id.value = Number(useRoute().query.id)
       // 调用接口获取课程相信信息
+      await fetchStudents(id.value, currentPage.value)
     })
     return {
       students,
@@ -168,6 +170,8 @@ export default {
       changeInfo,
       showCourseInfo,
       searchUser,
+      totPage,
+      visible,
     }
   }
 }

@@ -74,10 +74,6 @@ export default {
       createItem:{}
     }
   },
-  created() {
-      console.log("create start");
-      this.loadNotices();
-  },
   mounted() {
       console.log("mounted start");
       this.loadNotices();

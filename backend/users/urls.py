@@ -26,6 +26,7 @@ urlpatterns = [
     path('userMange/del-user-from-course/', api.del_user_from_course),
 
     path('course/create-course/', api.create_course),
+    path('course/course-list/', api.course_list),
     path('course/all-participants/', api.all_participants),
 
     path('homework/create-homework/', api.create_homework),
@@ -82,6 +83,6 @@ urlpatterns = [
     path('forum/dislike-post/', api.dislike_post),
     path('forum/search-posts/', api.search_posts),
 
-    path('userManage/modify-identity/', api.modify_identity),
+    path('courseManage/modify-identity/', api.modify_identity),
 
 ]

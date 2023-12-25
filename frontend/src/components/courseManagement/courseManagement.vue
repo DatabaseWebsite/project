@@ -56,7 +56,7 @@
   </template>  
     
 <script lang="ts">
-import {create_course_api, all_course_info_api} from "@/api/api.ts";
+import {create_course_api, all_course_info_api, get_course_list_api} from "@/api/api.ts";
 import courseForm from "@/components/courseManagement/courseDetail.vue";
 import {onMounted, reactive, ref} from "vue";
 import {FormInstance, FormRules} from "element-plus";
@@ -86,7 +86,7 @@ export default {
       await formEl.validate(async (valid, fields) => {
         if (valid) {
           // 调用api
-          await create_course_api(course.name,course.description,course.duration[0],course.duration[1]);
+          await create_course_api(course.name,course.description,course.duration[0].toISOString(),course.duration[1].toISOString());
           console.log("success addCourse", course.name,course.description,course.duration[0],course.duration[1]);
           await getCoursesInfo();
         } else {
@@ -95,9 +95,9 @@ export default {
       })
     }
     const getCoursesInfo = async () => {
-      await all_course_info_api().then(res => {
+      await get_course_list_api().then(res => {
         courseInfo.value = res.data.result
-        console.log(courseInfo.value)
+
       })
     }
     const showCourseInfo = (id) => {

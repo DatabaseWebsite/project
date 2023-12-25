@@ -252,12 +252,17 @@ export const create_course_api = (name: string,description:string, start_time:st
   data.append('course_name', name);
   data.append('course_description', description);
   data.append('start_time',start_time);
-  data.append('ent_time',end_time);
+  data.append('end_time',end_time);
+  console.log(data)
   return axios.post('api/course/create-course/', data)
 }
 
 export const all_course_info_api = () => {
   return axios.get('api/userManage/all-course-info/')
+}
+
+export const get_course_list_api = () => {
+  return axios.get('api/course/course-list/')
 }
 export const all_participants_api = (course_id:string, page:string) => {
   const data = new URLSearchParams();
@@ -475,4 +480,12 @@ export const read_message_by_id = (id: number) => {
   let data = new URLSearchParams()
   data.append('id', id.toString())
   return axios.post('api/message/read-message/', data)
+}
+
+export const modify_identity_api = (user_id: number, course_id:number, identity: string) => {
+  let data = new URLSearchParams()
+  data.append('user_id', user_id.toString())
+  data.append('course_id', course_id.toString())
+  data.append('identity', identity)
+  return axios.post('api/courseManage/modify-identity/', data)
 }

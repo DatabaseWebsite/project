@@ -18,7 +18,7 @@ export const record = async (config, response) => {
     requestModule = '用户中心模块'
   else if (api.startsWith('api/log/'))
     requestModule = '日志管理模块'
-  else if (api.startsWith('api/board/'))
+  else if (api.startsWith('api/notice/'))
     requestModule = '课程公告模块'
   else if (api.startsWith('api/course/'))
     requestModule = '课程管理模块'
@@ -30,6 +30,10 @@ export const record = async (config, response) => {
     requestModule = '讨论区模块'
   else if (api.startsWith('api/userManage/'))
     requestModule = '用户管理模块'
+  else if (api.startsWith('api/message/'))
+    requestModule = '消息模块'
+  else if (api.startsWith('api/forum/'))
+    requestModule = '讨论区模块'
   else
     requestModule = '其他模块'
   let userInfo = await getUserInfo()

@@ -56,8 +56,8 @@ def post_list(request):
             "authorAvatar": post.poster.get_avatar_url(),
             "author": post.poster.name,
             "title": post.title,
-            "summary": post.content,
-            "timestamp": post.post_time,
+            "content": post.content,
+            "timestamp": post.post_time.strftime("%Y-%m-%d %H:%M:%S"),
             "top": post.top,
             "elite": post.elite,
             "likes": post.likes,
@@ -313,12 +313,14 @@ def search_posts(request):
 
     result = [
         {
-            "sender": post.poster.id,
+            "author": post.poster.id,
             "title": post.title,
             "content": post.content,
-            "send_time": post.post_time,
+            "timestamp": post.post_time,
             "top": post.top,
             "like": post in user_like_post_set,
+            "likes": post.likes,
+            "elite": post.elite,
             "subscribe": post in user_subscribe_post_set
         }
         for post in matching_posts

@@ -4,7 +4,7 @@
    drag
    accept=".xls,.xlsx"
    :auto-upload="false"
-   limit="1"
+   :limit="1"
    :file-list="file"
    :on-change="handleChange"
   >
@@ -14,7 +14,7 @@
     </div>
     <template #tip>
       <div class="el-upload__tip">
-        支持xls、xlsx格式文件；文件大小不超过10M；excel内容包括：学号、姓名、年级，密码默认为学号
+        支持xls、xlsx格式文件；文件大小不超过10M；excel内容按列依次为：学号、姓名，不需要表头，密码默认为学号
       </div>
     </template>
   </el-upload>

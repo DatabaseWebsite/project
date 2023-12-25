@@ -18,13 +18,13 @@ from users.settings import ITEMS_PER_PAGE
 def create_course(request):
     course_name = request.POST.get('course_name')
     start_time_str = request.POST.get('start_time')
-    start_time = datetime.strptime(start_time_str, "%a %b %d %Y %H:%M:%S GMT%z (%Z)")
+    start_time = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M:%S.%fZ')
     start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
     end_time_str = request.POST.get('end_time')
-    end_time = datetime.strptime(end_time_str, "%a %b %d %Y %H:%M:%S GMT%z (%Z)")
+    print(end_time_str)
+    end_time = datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M:%S.%fZ')
     end_time = end_time.strftime("%Y-%m-%d %H:%M:%S")
     description = request.POST.get('course_description')
-
     course = Course(name=course_name, startTime=start_time, endTime=end_time, description=description)
     course.save()
 
@@ -46,6 +46,21 @@ def all_course_info(request):
     data = [{'course_id': course.id, 'name': course.name} for course in courses]
     return JsonResponse({"result": data}, status=status.HTTP_200_OK)
 
+@jwt_auth()
+def course_list(request):
+    user = request.user
+    if user.is_admin:
+        courses = Course.objects.all()
+        data = [{
+            'course_id': course.id,
+            'name': course.name,
+            'duration': course.startTime.strftime("%Y-%m-%d %H:%M:%S") + " 至 " + course.endTime.strftime("%Y-%m-%d %H:%M:%S"),
+            'description': course.description,
+        } for course in courses]
+        return JsonResponse({"result": data}, status=status.HTTP_200_OK)
+    else:
+        return JsonResponse({"error": "权限不足"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 @jwt_auth()
 @require_POST
@@ -64,9 +79,9 @@ def all_participants(request):
     result_ = [
         {
             "id": record.user.id,
-            "username": record.user.username,
+            "personId": record.user.username,
             "name": record.user.name,
-            "type": record.type
+            "identity": record.type
         }
         for record in courseSelectionRecords
     ]
