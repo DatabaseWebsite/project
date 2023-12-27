@@ -82,6 +82,7 @@ urlpatterns = [
     path('forum/like-post/', api.like_post),
     path('forum/dislike-post/', api.dislike_post),
     path('forum/search-posts/', api.search_posts),
+    path('forum/word-cloud-map/', api.gen_word_cloud_map),
 
     path('courseManage/modify-identity/', api.modify_identity),
 

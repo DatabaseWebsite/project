@@ -464,6 +464,9 @@ export const search_posts_api = (query_content:string) => {
   data.append('q', query_content)
   return axios.post('api/forum/search-posts/', data)
 }
+export const word_cloud_map_api = () => {
+  return axios.get('api/forum/word-cloud-map/')
+}
 
 
 export const get_unread_messages_count_api = () => {

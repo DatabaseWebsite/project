@@ -98,7 +98,8 @@
     </el-form>
   </el-dialog>
   <el-dialog title="批量创建用户" v-model="batchCreationVisible">
-    <upload-excel/>
+    <upload-file v-model:submitFile="batchCreationInfo.file" :file-type="xlsxFileType" :file-size="10"/>
+    <i style="font-size: 12px">excel内容按列依次为：学号、姓名，不需要表头，密码默认为学号.</i>
     <el-form v-model="batchCreationInfo" label-width="80">
       <el-form-item label="加入课程" prop="course">
         <el-select v-model="batchCreationInfo.course_id" placeholder="请选择课程" clearable>
@@ -167,7 +168,7 @@ import {onMounted, reactive, ref, watch} from "vue";
 import {registerRules, registerUser} from "@/components/userManage/registerForm.ts";
 import {editRules, editUserInfo} from "@/components/userManage/EditUserInfo.ts";
 import {exportExcel} from "@/components/userManage/exportExcel.ts";
-import uploadExcel from "@/components/userManage/uploadExcel.vue";
+import uploadFile from "@/lib/uploadFile.vue";
 interface BatchCreation {
   file: any,
   course_id: string,
@@ -175,6 +176,11 @@ interface BatchCreation {
 }
 export default {
   name: "userManage",
+  data() {
+    return {
+      xlsxFileType: ['.xlsx', '.xls']
+    }
+  },
   computed: {
     editRules() {
       return editRules
@@ -190,7 +196,7 @@ export default {
     }
   },
   components: {
-    uploadExcel,
+    uploadFile,
     IconEditName, IconAddUser, IconPeopleDeleteOne,
     Delete, Download, UploadFilled, Search, Refresh
   },

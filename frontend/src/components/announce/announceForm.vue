@@ -19,6 +19,8 @@
 <script lang="ts">
 
 
+import user, {useAuthStore} from "@/store/user.ts";
+
 export default {
   name: 'announceForm',
   props: {
@@ -28,7 +30,7 @@ export default {
   data() {
     return {
       text: '',
-      ritem: ''
+      ritem: '',
     }
   },
   mounted() {

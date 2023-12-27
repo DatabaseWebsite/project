@@ -22,6 +22,7 @@ from users.models.like_record import PostLikeRecord, ReplyLikeRecord
 from users.models.subsciption_record import SubscriptionRecord
 from users.models.user import User
 from users.settings import ITEMS_PER_PAGE, OFFICIAL_ID
+from util.word_cloud_map import make_word_cloud_map
 
 
 @jwt_auth()
@@ -34,7 +35,11 @@ def create_post(request):
 
     post = Post(poster=poster, title=title, content=content, course=course, top=False, likes=0, elite=False)
     post.save()
-
+    posts = Post.objects.filter(course=poster.current_course)
+    content = ""
+    for post in posts:
+        content += post.content
+    make_word_cloud_map(content)
     return JsonResponse({"message": "成功创建"}, status=200)
 
 
@@ -69,6 +74,11 @@ def post_list(request):
     print(result)
     return JsonResponse({"result": result}, status=200)
 
+
+@jwt_auth()
+@require_GET
+def gen_word_cloud_map(request):
+    return JsonResponse({"img_url": "http://127.0.0.1:8000/media/word_cloud_map.png"}, status=200)
 
 @jwt_auth()
 @require_POST

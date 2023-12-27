@@ -15,6 +15,7 @@
     </el-header>
       <!-- <el-button link type="primary" @click="showCreatePostDialog = true" class="create-post-btn">新建帖子</el-button> -->
     <el-main>
+      <el-image :src="wordCloudMap"/>
       <el-row :gutter="35">
         <el-col :span="8" v-for="post in posts" :key="post['id']">
           <el-card style="padding: 10px; height: 320px; margin-bottom: 40px" @click="goToPost(post['id'])">
@@ -46,7 +47,7 @@
       </el-row>
     </el-main> 
   </el-container>
-  <el-dialog v-model="showCreatePostDialog" title="编辑公告" width="70%">
+  <el-dialog v-model="showCreatePostDialog" title="发布帖子" width="70%">
     <div>
       <span style="font-size: 18px; font-weight: bold;">标题</span>
       <el-input v-model="createItem['title']" placeholder="请输入标题" style="margin-bottom: 10px;"/>
@@ -77,7 +78,7 @@
     search_posts_api,
     dislike_post_api,
     like_post_api,
-    cancel_subscribe_post_api, subscribe_post_api, delete_post_api
+    cancel_subscribe_post_api, subscribe_post_api, delete_post_api, word_cloud_map_api
   } from '@/api/api.ts';
   import useAuthStore from "@/store/user.ts";
   import {ElMessage, ElMessageBox} from "element-plus";
@@ -97,14 +98,16 @@
         showCreatePostDialog: false,
         createItem: { title: '', content: ''},
         searchInput:'',
-        identity: useAuthStore().getUser['identity']
+        identity: useAuthStore().getUser['identity'],
+        wordCloudMap: '',
       };
-    },
-    async created () {
-      await this.loadPosts();
     },
     async mounted() {
       await this.loadPosts();
+      await word_cloud_map_api().then(res => {
+        this.wordCloudMap = res.data['img_url']
+        console.log(this.wordCloudMap)
+      })
     },
     methods: {
       postLikesColor(likes) {

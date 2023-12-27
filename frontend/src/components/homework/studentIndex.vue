@@ -36,7 +36,7 @@
           >{{selectedData.file.name}}</el-link>
         </div>
         <p class="work-title">我的提交：</p>
-        <md-editor v-if="selectedData.status == 0" v-model="selectedData.submitContext"/>
+        <md-editor v-if="selectedData.status == 1" v-model="selectedData.submitContext"/>
         <md-preview v-else :text="selectedData.submitContext" :navigation-visible="false"/>
         <h3>已提交的文件：</h3>
         <el-link
@@ -44,9 +44,9 @@
           type="primary"
           @click="download(selectedData.submitFile.url, selectedData.submitFile.name)"
         >{{selectedData.submitFile.name}}</el-link>
-        <upload-file v-if="selectedData.status == 0" v-model:submitFile="submitFile" :file-size="10"/>
+        <upload-file v-if="selectedData.status == 1" v-model:submitFile="submitFile" :file-size="10"/>
       </div>
-      <el-button v-if="selectedData.status == 0" type="primary" @click="submit"> 提交作业 </el-button>
+      <el-button v-if="selectedData.status == 1" type="primary" @click="submit"> 提交作业 </el-button>
     </el-collapse-item>
   </el-collapse>
 </template>

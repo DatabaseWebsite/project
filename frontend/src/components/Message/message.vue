@@ -8,7 +8,7 @@
       :with-header="false"
       direction="ttb">
       <el-container>
-        <el-aside style="width: 130px">
+        <el-aside style="width: 150px; height: 300px">
           <el-menu @select="handleMenuSelect" default-active="1" style="margin: 0; padding: 0">
             <el-menu-item index="1">
               <el-badge :is-dot="unreadCounts['class'] > 0" style="margin-top: 10px">
@@ -108,6 +108,7 @@ export default {
         console.log(newVal)
         await get_messages_api('CLASS').then((res) => {
           data.value = res.data.result
+          console.log(data)
         })
       }
     })

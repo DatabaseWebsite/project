@@ -30,7 +30,7 @@
       border
     >
       <el-table-column prop="id" label="序号" width="70"/>
-      <el-table-column prop="studentID" label="学号" min-width="140" sortable="custom"/>
+      <el-table-column prop="studentId" label="学号" min-width="140" sortable="custom"/>
       <el-table-column prop="studentName" label="姓名" min-width="160"/>
       <el-table-column prop="submitTime" label="提交时间" min-width="180" sortable="custom"/>
       <el-table-column prop="score" label="得分" min-width="160" sortable="custom"/>
@@ -109,6 +109,9 @@ export default {
     const querySubmit = async () => {
       await get_work_submissions_api(id.value).then(res => {
         submitData.value = res.data['result']
+        submitData.value.forEach((item) => {
+          item.submitTime = new Date(item.submitTime).toLocaleString().replaceAll('/', '-')
+        })
         total.value = submitData.value.length
         initTable()
       })

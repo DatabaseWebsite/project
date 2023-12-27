@@ -52,6 +52,7 @@ def notice_list(request):
     for notice in notices:
         result.append(
             {
+                'id': notice.id,
                 "sender": notice.sender.name,
                 "title": notice.title,
                 "content": notice.content,

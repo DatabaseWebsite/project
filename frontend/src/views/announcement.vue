@@ -1,6 +1,6 @@
 <template>
   
-  <el-button type="primary" class="create-button" @click = "CreateVisible=true">新建公告</el-button>
+  <el-button v-if="identity" type="primary" class="create-button" @click = "CreateVisible=true">新建公告</el-button>
   <el-timeline>
     <el-timeline-item
       v-for="(item, index) in arr2"
@@ -71,7 +71,8 @@ export default {
       editVisible: false,
       CreateVisible : false,
       editItem: {},
-      createItem:{}
+      createItem:{},
+      identity: useAuthStore().getUser['identity'] !== 'STUDENT'
     }
   },
   mounted() {
@@ -79,11 +80,6 @@ export default {
       this.loadNotices();
   },
   methods: {
-    
-    identity() {
-      const user = useAuthStore()
-      return user.getUser['identify'] !== 'STUDENT'
-    },
     course_id() {
       const user = useAuthStore()
       return user.getUser['course_id'];
@@ -139,13 +135,9 @@ export default {
       });
     },
     async handleDelete(item) {
-      try {
-        console.log('信息已删除', item.id);
-        await delete_notice_api(item.notice_id);
-        //this.arr2 = this.arr2.filter((post) => post.id !== item.id);
-      } catch (error) {
-        console.error('删除信息失败', error);
-      }
+      console.log(item)
+      await delete_notice_api(item.id);
+      this.arr2 = this.arr2.filter((post) => post.id !== item.id);
     },
     async loadNotices() {
       console.log("loadNotices start");
