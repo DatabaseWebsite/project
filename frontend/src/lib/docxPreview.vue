@@ -2,7 +2,7 @@
   <vue-office-docx :src="docx" @rendered="rendered"/>
 </template>
 
-<script>
+<script lang="ts">
 import VueOfficeDocx from '@vue-office/docx'
 export default {
   name: "docxPreview",

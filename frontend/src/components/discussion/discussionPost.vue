@@ -31,7 +31,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import {
   like_post_api,
   dislike_post_api,

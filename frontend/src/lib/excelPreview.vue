@@ -2,7 +2,7 @@
   <vue-office-excel :src="excel" @rendered="rendered"/>
 </template>
 
-<script>
+<script lang="ts">
 import VueOfficeExcel from '@vue-office/excel'
 export default {
   name: "excelPreview",

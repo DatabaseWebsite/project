@@ -12,7 +12,7 @@
       <button @click="close" class="close-btn">关闭</button>
     </div>
   </template>
-  <script>
+  <script lang="ts">
   
   
   import MdEditor from "@/components/markdown/mdEditor.vue";

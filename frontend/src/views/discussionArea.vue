@@ -5,7 +5,7 @@
   <discussionBoard/>
 </template>
 
-<script>
+<script lang="ts">
 import MdEditor from "@/components/markdown/mdEditor.vue";
 import MdPreview from "@/components/markdown/mdPreview.vue";
 import discussionBoard from "@/components/discussion/discussionBoard.vue"

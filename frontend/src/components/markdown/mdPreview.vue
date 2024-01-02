@@ -2,7 +2,7 @@
   <VMdPreview :text="text"></VMdPreview>
 </template>
 
-<script>
+<script lang="ts">
 // 这是预览时引用的
 import VMdPreview from '@kangc/v-md-editor/lib/preview';
 import '@kangc/v-md-editor/lib/style/preview.css';

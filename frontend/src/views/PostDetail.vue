@@ -53,7 +53,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import {ref} from 'vue';
 import MdEditor from "@/components/markdown/mdEditor.vue";
 import MdPreview from "@/components/markdown/mdPreview.vue";
