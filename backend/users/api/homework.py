@@ -1,13 +1,16 @@
+import io
 import json
 import os
 import time
 from datetime import datetime
 import pytz
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.paginator import Paginator, EmptyPage
 
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_GET
+from matplotlib import pyplot as plt
 
 from users.api.auth import jwt_auth
 from users.api.message import send_message
@@ -111,10 +114,16 @@ def works_info(request):
         )
 
         if not flag:
-            if not NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).exists():
-                result[count]['status'] = 0
+            if timezone.now() < homework.end_time:
+                if not NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).exists():
+                    result[count]['status'] = 0
+                else:
+                    result[count]['status'] = 1
             else:
-                result[count]['status'] = 1
+                if not NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).exists():
+                    result[count]['status'] = 2
+                else:
+                    result[count]['status'] = 3
 
             if NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).exists():
                 score = NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).first().score
@@ -291,8 +300,6 @@ def submit_score(request):
     user = request.user
     score = request.POST.get('score')
     submit_id = request.POST.get('id')
-    print("?????????????????????????????????????????????s")
-    print(submit_id)
     submit = NormalHomeworkSubmit.objects.get(pk=submit_id)
     submit.score = score
     submit.markingPerson = user
@@ -314,3 +321,96 @@ def upload_image(request):
     picture = Picture(picture=image)
     picture.save()
     return JsonResponse({"url": picture.get_pic_url()}, status=200)
+
+
+@jwt_auth()
+@require_POST
+def get_pie(request):
+    hid = request.POST.get('id')
+    homework = NormalHomework.objects.get(pk=hid)
+    scores_ = NormalHomeworkSubmit.objects.filter(homework=homework).values_list('score', flat=True)
+    scores = [x for x in scores_ if scores_ is not None]
+    num = [0, 0, 0, 0, 0]
+    for s in scores:
+        if s < 60:
+            num[0] = num[0] + 1
+        elif 60 <= s <= 69:
+            num[1] = num[1] + 1
+        elif 70 <= s <= 79:
+            num[2] = num[2] + 1
+        elif 80 <= s <= 89:
+            num[3] = num[3] + 1
+        elif 90 <= s:
+            num[4] = num[4] + 1
+    labels = ['<60', '60-69', '70-79', '80-89', '>=90']
+
+    plt.pie(num, labels=labels, autopct='%1.1f%%', startangle=90)
+    plt.title('学生得分饼状图')
+
+    image_stream = io.BytesIO()
+    plt.savefig(image_stream, format='png')
+    plt.close()
+    image_stream.seek(0)
+
+    image_file = InMemoryUploadedFile(
+        image_stream,
+        None,
+        'chart.png',
+        'image/png',
+        image_stream.tell(),
+        None
+    )
+
+    pic = Picture(picture=image_file)
+    pic.save()
+
+    return JsonResponse({"url": pic.get_pic_url()}, status=200)
+
+
+@jwt_auth()
+@require_GET
+def get_avg(request):
+    course = request.user.current_course
+    homeworks = NormalHomework.objects.filter(belong_to_course=course)
+    values = list()
+    titles = list()
+    for work in homeworks:
+        scores = NormalHomeworkSubmit.objects.filter(homework=work).values_list('score', flat=True)
+        total = 0
+        count = 0
+        for s in scores:
+            if s is None:
+                continue
+            else:
+                total = total + s
+                count = count + 1
+        if count == 0:
+            values.append(0.0)
+        else:
+            values.append(total/count)
+        titles.append(work.title)
+
+    plt.bar(titles, values)
+
+    plt.title('作业平均分柱状图')
+    plt.xlabel('作业')
+    plt.ylabel('平均分')
+
+    image_stream = io.BytesIO()
+    plt.savefig(image_stream, format='png')
+    plt.close()
+    image_stream.seek(0)
+
+    image_file = InMemoryUploadedFile(
+        image_stream,
+        None,
+        'chart.png',
+        'image/png',
+        image_stream.tell(),
+        None
+    )
+
+    pic = Picture(picture=image_file)
+    pic.save()
+
+    return JsonResponse({"url": pic.get_pic_url()}, status=200)

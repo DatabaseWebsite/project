@@ -18,8 +18,8 @@ def make_word_cloud_map(content):
     wcobj = wc.WordCloud(
         font_path='util\\simkai.ttf',
         background_color='white',
-        width=800,
-        height=500,
+        width=900,
+        height=700,
         mask=mask,
         max_words=100,
         stopwords=stopwords

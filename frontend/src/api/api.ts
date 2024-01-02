@@ -353,6 +353,15 @@ export const student_submit_work_api = (id: number, context: string, file: any) 
   return axios.post('api/homework/student-submit-work/', data)
 }
 
+export const work_statistics_api = (id: number) => {
+  let data = new URLSearchParams()
+  data.append('id', id.toString())
+  return axios.post('api/homework/get-pie/', data)
+}
+export const works_statistics_api = () => {
+  return axios.get('api/homework/get-avg/')
+}
+
 export const create_notice_api = (title:string, content: string) => {
   let data = new URLSearchParams()
   data.append('title', title)
@@ -492,3 +501,4 @@ export const modify_identity_api = (user_id: number, course_id:number, identity:
   data.append('identity', identity)
   return axios.post('api/courseManage/modify-identity/', data)
 }
+

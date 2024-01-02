@@ -23,6 +23,8 @@ from users.models.subsciption_record import SubscriptionRecord
 from users.models.user import User
 from users.settings import ITEMS_PER_PAGE, OFFICIAL_ID
 from util.word_cloud_map import make_word_cloud_map
+import matplotlib.pyplot as plt
+import palettable
 
 
 @jwt_auth()
@@ -52,8 +54,6 @@ def post_list(request):
     user_subscribe_post_set = set(
         SubscriptionRecord.objects.filter(user=user).values('post').values_list('post', flat=True))
 
-    print(user_like_post_set)
-    print(user_subscribe_post_set)
     posts = Post.objects.filter(course=user.current_course).order_by('-top', '-post_time')
     result = [
         {
@@ -175,6 +175,7 @@ def topping_post(request):
     post_id = request.POST.get("post_id")
     post = Post.objects.get(pk=post_id)
     post.top = True
+    post.save()
     return JsonResponse({"message": "置顶成功"}, status=200)
 
 
@@ -184,6 +185,7 @@ def cancel_topping_post(request):
     post_id = request.POST.get("post_id")
     post = Post.objects.get(pk=post_id)
     post.top = False
+    post.save()
     return JsonResponse({"message": "取消置顶成功"}, status=200)
 
 
@@ -193,6 +195,7 @@ def elite_post(request):
     post_id = request.POST.get("post_id")
     post = Post.objects.get(pk=post_id)
     post.elite = True
+    post.save()
     return JsonResponse({"message": "加精成功"}, status=200)
 
 
@@ -202,6 +205,7 @@ def cancel_elite_post(request):
     post_id = request.POST.get("post_id")
     post = Post.objects.get(pk=post_id)
     post.elite = False
+    post.save()
     return JsonResponse({"message": "取消加精成功"}, status=200)
 
 
@@ -337,4 +341,5 @@ def search_posts(request):
     ]
 
     return JsonResponse({"result": result}, status=200)
+
 

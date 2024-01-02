@@ -44,6 +44,7 @@
       </el-table-column>
     </el-table>
     <el-pagination layout="prev, pager, next" :current-page="curPage" :page-size='10' :total="total" @current-change="changePage" style="margin: 10px;"/>
+    <el-image style="margin-top: 10px" :src="staticsUrl" fit="contain"/>
   </div>
   <el-dialog
     v-model="correctVisible"
@@ -83,7 +84,7 @@
 <script lang="ts">
 import {
   get_one_work_api, get_work_submission_by_id_api,
-  get_work_submissions_api, submit_work_score_api,
+  get_work_submissions_api, submit_work_score_api, work_statistics_api,
 } from "@/api/api.ts";
 import MdPreview from "@/components/markdown/mdPreview.vue";
 import {saveAs} from "file-saver";
@@ -106,6 +107,7 @@ export default {
     const curPage = ref(1)
     const selectedInfo = ref({})
     const correctVisible = ref(false)
+    const staticsUrl = ref('')
     const querySubmit = async () => {
       await get_work_submissions_api(id.value).then(res => {
         submitData.value = res.data['result']
@@ -160,6 +162,9 @@ export default {
         workData.value.deadline = new Date(workData.value.deadline)
       })
       await querySubmit()
+      await work_statistics_api(id.value).then(res => {
+        staticsUrl.value = res.data.url
+      })
     })
     return {
       id,
@@ -176,6 +181,7 @@ export default {
       changePage,
       submitCorrect,
       sortChange,
+      staticsUrl
     }
   },
 

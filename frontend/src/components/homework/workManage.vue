@@ -32,6 +32,9 @@
         </el-card>
       </div>
     </el-main>
+    <el-footer>
+      <el-image style="margin-top: 10px" :src="staticsURL" fit="contain"/>
+    </el-footer>
   </el-container>
   <create-work :createWorkVisible="createWorkVisible" @closeDialog="closeCreateWork"/>
 <!--  修改作业-->
@@ -78,7 +81,7 @@ import {
   FileRemoval as IconFileRemoval,
   Delete as IconDelete,
 } from "@icon-park/vue-next";
-import {delete_work_api, get_works_info_api, modify_work_api} from "@/api/api.ts";
+import {delete_work_api, get_works_info_api, modify_work_api, works_statistics_api} from "@/api/api.ts";
 import {ElMessage, FormInstance} from "element-plus";
 import {reactive, ref} from "vue";
 import MdEditor from "@/components/markdown/mdEditor.vue";
@@ -107,6 +110,7 @@ export default {
       workData: [], // admin，老师，助教
       fileType: ['.doc', '.docx', '.pdf', '.ppt', '.txt', '.xls','.xlsx', '.zip', '.rar'],
       accept: '',
+      staticsURL: '',
     }
   },
   methods: {
@@ -219,8 +223,11 @@ export default {
     })
     this.fileType.slice(0, this.fileType.length - 2)
   },
-  mounted() {
-    this.getWorkList()
+  async mounted() {
+    await this.getWorkList()
+    await works_statistics_api().then(res => {
+      this.staticsURL = res.data.url
+    })
   }
 }
 </script>

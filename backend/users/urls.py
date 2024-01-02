@@ -39,6 +39,8 @@ urlpatterns = [
     path('homework/submit-work-score/', api.submit_score),
     path('homework/student-work-detail/', api.student_work_detail),
     path('homework/student-submit-work/', api.student_submit_work),
+    path('homework/get-pie/', api.get_pie),
+    path('homework/get-avg/', api.get_avg),
 
     path('material/upload-materials/', api.upload_material),
     path('material/material-list/', api.material_list),

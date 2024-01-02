@@ -33,8 +33,8 @@
             <span class="timestamp">{{ formatTimestamp(reply.timestamp) }}</span>
           </div>
           <div class="reply-actions">
-            <button v-if="reply.like" @click="disLikeReply">已点赞</button>
-            <button v-if="reply.like==false" @click="likeReply">点赞</button>
+            <button v-if="reply.like" @click="disLikeReply(reply.id)">已点赞</button>
+            <button v-if="reply.like==false" @click="likeReply(reply.id)">点赞</button>
           </div>
         </div>
         <md-preview :text="reply.content" class="reply-content"></md-preview>
@@ -71,15 +71,18 @@ export default {
       post: {},
       replies: [],
       showReplyDialog: false,
-      newReplyContent: ''
+      newReplyContent: '',
+      postId:'',
     };
   },
   created() {
+    
+    const route = useRoute(); // 获取当前路由实例
+    this.postId = route.params.id; // 假设路由参数名postId
+    console.log("created", this.postId);
     this.loadPosts();
   },
-  mounted() {
-    this.loadPosts();
-  },
+
   methods: {
     formatTimestamp(timestamp) {
       const date = new Date(timestamp);
@@ -89,16 +92,14 @@ export default {
       const hours = date.getHours().toString().padStart(2, '0');
       const minutes = date.getMinutes().toString().padStart(2, '0');
       const seconds = date.getSeconds().toString().padStart(2, '0');
-
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
     async loadPosts() {
-      const route = useRoute(); // 获取当前路由实例
-      const postId = route.params.id; // 假设路由参数名postId
-      console.log(route.params)
+      
+      console.log(this.postId)
       try {
-        console.log("load Post");
-        const response = await get_post_api(postId); // 使用 postId 调用 API
+        console.log("load Post",this.postId);
+        const response = await get_post_api(this.postId); // 使用 postId 调用 API
         this.post = response.data.result.post;
         this.replies = response.data.result.replies;
         console.log(this.post)
@@ -111,90 +112,97 @@ export default {
       try {
         console.log("sub Post");
         await subscribe_post_api(this.post.id)
+        this.post.subscribe = true;
       } catch (error) {
         console.error('sub Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
+      //location.reload();
     },
     async disSubscribePost() {
       try {
         console.log("dissub Post");
         await cancel_subscribe_post_api(this.post.id)
+        this.post.subscribe = false;
       } catch (error) {
         console.error('dissub Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
+      //location.reload();
     },
     async likePost() {
       try {
         console.log("like Post");
         await like_post_api(this.post.id)
+        this.post.like = true;
       } catch (error) {
         console.error('like Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
     },
     async disLikePost() {
       try {
         console.log("dislike Post");
         await dislike_post_api(this.post.id)
+        this.post.like = false;
       } catch (error) {
         console.error('disLike Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
+      //location.reload();
     },
 
     async highlightPost() {
       try {
         console.log("high Post");
         await elite_post_api(this.post.id)
+        this.post.elite = true;
       } catch (error) {
         console.error('high Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
+  
     },
     async disHighlightPost() {
       try {
         console.log("disHIgh Post");
         await cancel_elite_post_api(this.post.id)
+        this.post.elite = false;
       } catch (error) {
         console.error('dishigh Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
+    
     },
     async pinPost() {
       try {
         console.log("pin Post");
         await topping_post_api(this.post.id)
+        this.post.top = true;
       } catch (error) {
         console.error('pin Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
+      
     },
     async disPinPost() {
       try {
         console.log("disPin Post");
         await cancel_topping_post_api(this.post.id)
+        this.post.top = false;
       } catch (error) {
         console.error('disPin Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
+      
     },
     async addReply() {
       await create_reply_api(this.post.id, this.newReplyContent)
@@ -202,29 +210,29 @@ export default {
       this.newReplyContent = '';
       this.showReplyDialog = false;
       this.loadPosts();
-      location.reload();
+      //location.reload();
     },
-    async likeReply() {
+    async likeReply(id) {
       try {
-        console.log("like Reply");
-        await like_reply_api(this.post.id)
+        console.log("like Reply", id);
+        await like_reply_api(id)
       } catch (error) {
         console.error('like Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
+      //location.reload();
     },
-    async disLikeReply() {
+    async disLikeReply(id) {
       try {
-        console.log("dislike Reply");
-        await dislike_reply_api(this.post.id)
+        console.log("dislike Reply",id);
+        await dislike_reply_api(id)
       } catch (error) {
         console.error('disLike Post:', error);
         //students.value = []; // 在错误情况下重置学生数组
       }
       this.loadPosts();
-      location.reload();
+      //location.reload();
     },
   }
 };
