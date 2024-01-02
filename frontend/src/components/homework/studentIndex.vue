@@ -36,17 +36,19 @@
           >{{selectedData.file.name}}</el-link>
         </div>
         <p class="work-title">我的提交：</p>
-        <md-editor v-if="selectedData.status == 1" v-model="selectedData.submitContext"/>
-        <md-preview v-else :text="selectedData.submitContext" :navigation-visible="false"/>
-        <h3>已提交的文件：</h3>
-        <el-link
-          v-if="selectedData.submitFile != null"
-          type="primary"
-          @click="download(selectedData.submitFile.url, selectedData.submitFile.name)"
-        >{{selectedData.submitFile.name}}</el-link>
-        <upload-file v-if="selectedData.status == 1" v-model:submitFile="submitFile" :file-size="10"/>
+        <div>
+          <md-editor v-if="selectedData.status == 0" v-model="selectedData.submitContext"/>
+          <md-preview v-else :text="selectedData.submitContext" :navigation-visible="false"/>
+          <h3>已提交的文件：</h3>
+          <el-link
+            v-if="selectedData.submitFile != null"
+            type="primary"
+            @click="download(selectedData.submitFile.url, selectedData.submitFile.name)"
+          >{{selectedData.submitFile.name}}</el-link>
+          <upload-file v-if="selectedData.status == 0" v-model:submitFile="submitFile" :file-size="10"/>
+        </div>
+        <el-button v-if="selectedData.status == 0" type="primary" @click="submit"> 提交作业 </el-button>
       </div>
-      <el-button v-if="selectedData.status == 1" type="primary" @click="submit"> 提交作业 </el-button>
     </el-collapse-item>
   </el-collapse>
 </template>
@@ -69,36 +71,8 @@ export default {
   data() {
     return {
       activeID: '',
-      workData: [{ // 学生
-        id: 1,
-        title: '第一次作业',
-        status: 1,
-        upStatus: null,
-        totalScore: 100,
-        deadline: new Date(),
-        score: 80,
-      }],
-      selectedData: {
-        id: 1,
-        title: '第一次作业',
-        totalScore: 100,
-        deadline: new Date(),
-        score: 80,
-        status: 0,
-        description: 'asfdh',
-        file: {
-          id: 1,
-          name: 'efgrw',
-          url: 'ewqfgr',
-        },
-        submitTime: new Date(),
-        submitContext: 'asfdh',
-        submitFile: {
-          id: 1,
-          name: 'efgrw',
-          url: 'ewqfgr',
-        }
-      },
+      workData: [],
+      selectedData: {},
       submitFile: [],
       timer: null,
     }
@@ -163,6 +137,7 @@ export default {
       if (val !== '') {
         await student_get_work_detail_api(val).then((res) => {
           this.selectedData = res.data.result
+          this.selectedData.deadline = new Date(this.selectedData.deadline)
         })
       }
     }
@@ -171,7 +146,7 @@ export default {
     this.getWorksData()
     this.timer = setInterval(() => {
       this.updateStatus()
-      if (this.activeID !== '')
+      if (this.selectedData.status != undefined && this.activeID != '')
         this.updateSelectedStatus()
     }, 1000)
   },

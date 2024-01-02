@@ -111,16 +111,10 @@ def works_info(request):
         )
 
         if not flag:
-            if timezone.now() < homework.end_time:
-                if not NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).exists():
-                    result[count]['status'] = 0
-                else:
-                    result[count]['status'] = 1
+            if not NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).exists():
+                result[count]['status'] = 0
             else:
-                if not NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).exists():
-                    result[count]['status'] = 2
-                else:
-                    result[count]['status'] = 3
+                result[count]['status'] = 1
 
             if NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).exists():
                 score = NormalHomeworkSubmit.objects.filter(user=request.user, homework=homework).first().score
