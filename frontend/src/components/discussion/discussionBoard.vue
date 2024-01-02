@@ -15,7 +15,7 @@
     </el-header>
       <!-- <el-button link type="primary" @click="showCreatePostDialog = true" class="create-post-btn">新建帖子</el-button> -->
     <el-main>
-      <el-image :src="wordCloudMap"/>
+      <el-image :src="wordCloudMap" style="text-align: center"/>
       <el-row :gutter="35">
         <el-col :span="8" v-for="post in posts" :key="post['id']">
           <el-card style="padding: 10px; height: 320px; margin-bottom: 40px" @click="goToPost(post['id'])">
@@ -217,7 +217,6 @@
       async submitSearch(string) {
         await search_posts_api(string).then(res => {
           this.posts = res.data.result;
-          console.log(res.data.result);
         })
 
       }
