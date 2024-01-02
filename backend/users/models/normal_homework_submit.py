@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 from users.models import User
 from users.models.normal_homework import NormalHomework
@@ -18,3 +20,9 @@ class NormalHomeworkSubmit(models.Model):
 
     def get_file_url(self):
         return MEDIA_ADDRESS + str(self.file)
+
+
+@receiver(pre_save, sender=NormalHomeworkSubmit)
+def check_and_adjust_score(sender, instance, **kwargs):
+    if instance.score and int(instance.score) > 100:
+        instance.score = instance.homework.totalScorse

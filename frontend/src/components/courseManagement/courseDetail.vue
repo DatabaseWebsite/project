@@ -9,7 +9,7 @@
       />
       <el-select style="width: 100px;" v-model="searchUser.identity" placeholder="请选择身份">
         <el-option label="学生" value="STUDENT" />
-        <el-option label="助教" value="ASSITANT" />
+        <el-option label="助教" value="ASSISTANT" />
         <el-option label="老师" value="TEACHER" />
       </el-select>
       <el-button style="margin-left: 20px" type="primary" @click="submitCreate">添加学生</el-button>
@@ -28,7 +28,7 @@
               </template>
               <el-select v-model="changeInfo.identity" placeholder="请选择身份">
                 <el-option label="学生" value="STUDENT" />
-                <el-option label="助教" value="ASSITANT" />
+                <el-option label="助教" value="ASSISTANT" />
                 <el-option label="老师" value="TEACHER" />
               </el-select>
               <el-button type="primary" @click="submitChange(scope.row)"> 提交 </el-button>
@@ -40,7 +40,7 @@
               @confirm="deleteStudent(scope.row)"
             >
               <template #reference>
-                <el-button link type="danger"><icon-people-delete size="20" @click="deleteStudent(scope.row)"/></el-button>
+                <el-button link type="danger"><icon-people-delete size="20"/></el-button>
               </template>
             </el-popconfirm>
           </template>
@@ -59,7 +59,7 @@
 
 <script lang="ts">
 import {ref, defineProps, watch, onMounted} from 'vue';
-import {all_participants_api, add_course_user_api, modify_identity_api} from "@/api/api.ts";
+import {all_participants_api, add_course_user_api, modify_identity_api,del_course_user_api} from "@/api/api.ts";
 import {useRoute} from "vue-router";
 import { EditName as IconEditName, PeopleDelete as IconPeopleDelete } from "@icon-park/vue-next";
 import useAuthStore from "@/store/user.ts";
@@ -85,14 +85,24 @@ export default {
     const visible = ref(false);
 // 导入学生
     const submitCreate = async () => {
-      // 将学号返回给后端，若不存在，报错等操作
+      console.log("submitCreate",searchUser.value.personId,id.value, searchUser.value.identity);
+      await add_course_user_api(searchUser.value.personId,id.value, searchUser.value.identity);
     };
 
 // 删除学生
-    const deleteStudent = (row) => {
-      // 根据row.personId移除学生
+    const deleteStudent = async (row) => {
+      console.log("delete",row,id.value);
+      await del_course_user_api(row['personId'],id.value);
+      await fetchStudents(id.value, currentPage.value);
     };
-
+    const submitChange = async (row) => {
+      // 调用接口修改学生身份
+      console.log("modify",row['id'], id.value,changeInfo.value['identity']);
+      await modify_identity_api(row['id'],id.value, changeInfo.value['identity']).then(res => {
+        row['identity'] = changeInfo.value['identity'] === 'STUDENT' ? '学生' : changeInfo.value['identity'] === 'ASSISTANT' ? '助教' : changeInfo.value['identity'] === 'ADMIN' ? '系统管理员' : '老师';
+      })
+      row['popoverVisible'] = false;
+    };
 // 显示删除学生确认对话框
     const showDeleteConfirm = (student) => {
       deleteVisible.value = true;
@@ -106,13 +116,7 @@ export default {
     };
 
 // 提交身份修改
-    const submitChange = async (row) => {
-      // 调用接口修改学生身份
-      await modify_identity_api(row['id'], useAuthStore().getUser['course_id'], changeInfo.value['identity']).then(res => {
-        row['identity'] = changeInfo.value['identity'] === 'STUDENT' ? '学生' : changeInfo.value['identity'] === 'ASSISTANT' ? '助教' : changeInfo.value['identity'] === 'ADMIN' ? '系统管理员' : '老师';
-      })
-      row['popoverVisible'] = false;
-    };
+    
 
 // 取消对话框
     const cancelDialog = () => {
@@ -137,7 +141,7 @@ export default {
         totPage.value = Number(response.data['total_pages'])
         students.value.forEach((student) => {
           student.popoverVisible = false;
-          student.identity = student.identity === 'STUDENT' ? '学生' : student.identity === 'ASSISTANT' ? '助教' : student.identity === 'ADMIN' ? '系统管理员' : '老师';
+          student.identity = student.identity === 'STUDENT' ? '学生' : (student.identity === 'ASSISTANT' ? '助教' : student.identity === 'ADMIN' ? '系统管理员' : '老师');
         });
       })
     };

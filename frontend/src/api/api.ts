@@ -270,14 +270,27 @@ export const all_participants_api = (course_id:string, page:string) => {
   data.append('page',page);
   return axios.post('api/course/all-participants/',data)
 }
-export const add_course_user_api = (personId: string, username: string, identity: string,email:string,course_id: string) => {
+export const add_course_user_api = (personId: string,  course_id:string, identity: string) => {
   let data = new URLSearchParams();
   data.append('person_id', personId)
-  data.append('username', username) // 密码默认为personId
-  data.append('email', email)
   data.append('course_id', course_id)
   data.append('identity', identity)
-  return axios.post('api/userManage/create-single-user/', data)
+  return axios.post('api/userManage/add-user-to-course/', data)
+}
+
+export const del_course_user_api = (personId: string, course_id:string) => {
+  let data = new URLSearchParams();
+  data.append('person_id', personId)
+  data.append('course_id', course_id)
+  return axios.post('api/userManage/del-user-from-course/', data)
+}
+
+export const modify_identity_api = (personId: string, course_id:string, identity: string) => {
+  let data = new URLSearchParams();
+  data.append('person_id', personId)
+  data.append('course_id', course_id)
+  data.append('identity', identity)
+  return axios.post('api/courseManage/modify-identity/', data)
 }
 /*
  * title: string
@@ -494,11 +507,5 @@ export const read_message_by_id = (id: number) => {
   return axios.post('api/message/read-message/', data)
 }
 
-export const modify_identity_api = (user_id: number, course_id:number, identity: string) => {
-  let data = new URLSearchParams()
-  data.append('user_id', user_id.toString())
-  data.append('course_id', course_id.toString())
-  data.append('identity', identity)
-  return axios.post('api/courseManage/modify-identity/', data)
-}
+
 

@@ -21,7 +21,6 @@ def create_course(request):
     start_time = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M:%S.%fZ')
     start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
     end_time_str = request.POST.get('end_time')
-    print(end_time_str)
     end_time = datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M:%S.%fZ')
     end_time = end_time.strftime("%Y-%m-%d %H:%M:%S")
     description = request.POST.get('course_description')
@@ -43,8 +42,13 @@ def create_course(request):
 @require_GET
 def all_course_info(request):
     courses = Course.objects.all()
-    data = [{'course_id': course.id, 'name': course.name} for course in courses]
-    return JsonResponse({"result": data}, status=status.HTTP_200_OK)
+    data = [
+        {
+            'course_id': course.id,
+            'name': course.name
+        } for course in courses]
+    return JsonResponse({"result": data}, status=200)
+
 
 @jwt_auth()
 def course_list(request):
@@ -85,7 +89,7 @@ def all_participants(request):
         }
         for record in courseSelectionRecords
     ]
-
+    print(result_)
     paginator = Paginator(result_, ITEMS_PER_PAGE)
 
     try:

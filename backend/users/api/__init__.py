@@ -9,3 +9,4 @@ from .user import *
 from .message import *
 from .auth import *
 from .forum import *
+from .commands import *

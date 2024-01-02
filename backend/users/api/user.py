@@ -119,12 +119,14 @@ def create_single_user(request):
 @require_POST
 def add_user_to_course(request):
     username = request.POST.get('person_id')
+    course_id = request.POST.get('course_id')
+    course = Course.objects.get(pk=course_id)
     category = request.POST.get('identity')
 
     if User.objects.filter(username=username).exists():
         user = User.objects.filter(username=username).first()
-        if not CourseSelectionRecord.objects.filter(user=user, selected_course=request.user.current_course).exists():
-            record = CourseSelectionRecord(user=user, selected_course=request.user.current_course, type=category)
+        if not CourseSelectionRecord.objects.filter(user=user, selected_course=course).exists():
+            record = CourseSelectionRecord(user=user, selected_course=course, type=category)
             record.save()
             return JsonResponse({"massage": "成功加入本课程"}, status=200)
         else:
@@ -137,15 +139,17 @@ def add_user_to_course(request):
 @require_POST
 def del_user_from_course(request):
     username = request.POST.get('person_id')
-
+    course_id = request.POST.get('course_id')
+    course = Course.objects.get(pk=course_id)
+    print(username)
     if User.objects.filter(username=username).exists():
         user = User.objects.filter(username=username).first()
-        if CourseSelectionRecord.objects.filter(user=user, selected_course=request.user.current_course).exists():
-            record = CourseSelectionRecord.objects.filter(user=user, selected_course=request.user.current_course).first()
+        if CourseSelectionRecord.objects.filter(user=user, selected_course=course).exists():
+            record = CourseSelectionRecord.objects.filter(user=user, selected_course=course).first()
             record.delete()
 
             if CourseSelectionRecord.objects.filter(user=user).count() == 0:
-                if user.avatar.name != 'avatar/default.jpg':
+                if user.avatar.name != 'avatar/default.png':
                     user.avatar.delete()
 
                 user.delete()
@@ -167,7 +171,7 @@ def delete_user(request):
     deleted_user_id = request.POST.get('id')
     deleted_user = User.objects.get(pk=deleted_user_id)
 
-    if deleted_user.avatar.name != 'avatar/default.jpg':
+    if deleted_user.avatar.name != 'avatar/default.png':
         deleted_user.avatar.delete()
 
     deleted_user.delete()
@@ -189,7 +193,7 @@ def delete_users(request):
 
         deleted_user = User.objects.get(pk=deleted_id)
 
-        if deleted_user.avatar.name != 'avatar/default.jpg':
+        if deleted_user.avatar.name != 'avatar/default.png':
             deleted_user.avatar.delete()
 
         deleted_user.delete()
@@ -304,7 +308,8 @@ def get_user_info(request):
         "is_admin": user.is_admin,
         "grade": user.grade,
         "college": user.college,
-        "major": user.major
+        "major": user.major,
+        "course_id": user.current_course.id
     }, status=200)
 
 
@@ -506,13 +511,16 @@ def reset_user_password(request):
 @jwt_auth()
 @require_POST
 def modify_identity(request):
-    user_id = request.POST.get('user_id')
+    user_id = request.POST.get('person_id')
+    print(user_id)
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     user = User.objects.get(pk=user_id)
-    new_identity = request.POST.get('new_identity')
+    new_identity = request.POST.get('identity')
+    print(new_identity)
+    course_id = request.POST.get('course_id')
+    course = Course.objects.get(pk=course_id)
 
-    course = request.user.current_course
-
-    courseSelectionRecord = CourseSelectionRecord.objects.filter(user=user, course=course).first()
+    courseSelectionRecord = CourseSelectionRecord.objects.filter(user=user, selected_course=course).first()
     courseSelectionRecord.type = new_identity
     courseSelectionRecord.save()
 

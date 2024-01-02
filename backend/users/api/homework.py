@@ -1,6 +1,7 @@
 import io
 import json
 import os
+import threading
 import time
 from datetime import datetime
 import pytz
@@ -323,6 +324,24 @@ def upload_image(request):
     return JsonResponse({"url": picture.get_pic_url()}, status=200)
 
 
+def generate_pie_chart(num, labels, image_path):
+    plt.rcParams['font.sans-serif'] = ['SimSun']
+
+    t = []
+    for i in range(5):
+        if num[i] != 0:
+            t.append(i)
+
+    nums_ = [num[x] for x in t]
+    labels_ = [labels[x] for x in t]
+    plt.pie(nums_, labels=labels_, autopct='%1.1f%%', startangle=90)
+    plt.title('学生得分饼状图')
+
+    plt.savefig(image_path)
+
+    plt.close()
+
+
 @jwt_auth()
 @require_POST
 def get_pie(request):
@@ -332,6 +351,9 @@ def get_pie(request):
     scores = [x for x in scores_ if scores_ is not None]
     num = [0, 0, 0, 0, 0]
     for s in scores:
+        if s is None:
+            continue
+
         if s < 60:
             num[0] = num[0] + 1
         elif 60 <= s <= 69:
@@ -344,33 +366,23 @@ def get_pie(request):
             num[4] = num[4] + 1
     labels = ['<60', '60-69', '70-79', '80-89', '>=90']
 
-    plt.pie(num, labels=labels, autopct='%1.1f%%', startangle=90)
-    plt.title('学生得分饼状图')
+    if os.path.exists('media/pie_0.png'):
+        image_path = 'media/pie_1.png'
+        os.remove('media/pie_0.png')
+    elif os.path.exists('media/pie_1.png'):
+        image_path = 'media/pie_0.png'
+        os.remove('media/pie_1.png')
+    else:
+        image_path = 'media/pie_0.png'
 
-    image_stream = io.BytesIO()
-    plt.savefig(image_stream, format='png')
-    plt.close()
-    image_stream.seek(0)
+    pie_thread = threading.Thread(target=generate_pie_chart, args=(num, labels, image_path))
+    pie_thread.start()
+    time.sleep(1)
 
-    image_file = InMemoryUploadedFile(
-        image_stream,
-        None,
-        'chart.png',
-        'image/png',
-        image_stream.tell(),
-        None
-    )
-
-    pic = Picture(picture=image_file)
-    pic.save()
-
-    return JsonResponse({"url": pic.get_pic_url()}, status=200)
+    return JsonResponse({"url": "http://127.0.0.1:8000/" + image_path}, status=200)
 
 
-@jwt_auth()
-@require_GET
-def get_avg(request):
-    course = request.user.current_course
+def generate_avg_chart(course, image_path):
     homeworks = NormalHomework.objects.filter(belong_to_course=course)
     values = list()
     titles = list()
@@ -390,27 +402,35 @@ def get_avg(request):
             values.append(total/count)
         titles.append(work.title)
 
-    plt.bar(titles, values)
+    plt.figure(figsize=(15, 6))
+    plt.rcParams['font.sans-serif'] = ['SimSun']
+    plt.barh(titles, values)
 
     plt.title('作业平均分柱状图')
-    plt.xlabel('作业')
-    plt.ylabel('平均分')
+    plt.xlabel('平均分')
+    plt.ylabel('作业')
 
-    image_stream = io.BytesIO()
-    plt.savefig(image_stream, format='png')
+    plt.savefig(image_path)
+
     plt.close()
-    image_stream.seek(0)
 
-    image_file = InMemoryUploadedFile(
-        image_stream,
-        None,
-        'chart.png',
-        'image/png',
-        image_stream.tell(),
-        None
-    )
 
-    pic = Picture(picture=image_file)
-    pic.save()
+@jwt_auth()
+@require_GET
+def get_avg(request):
+    course = request.user.current_course
 
-    return JsonResponse({"url": pic.get_pic_url()}, status=200)
+    if os.path.exists('media/avg_1.png'):
+        image_path = 'media/avg_0.png'
+        os.remove('media/avg_1.png')
+    elif os.path.exists('media/avg_0.png'):
+        image_path = 'media/avg_1.png'
+        os.remove('media/avg_0.png')
+    else:
+        image_path = 'media/avg_0.png'
+
+    avg_thread = threading.Thread(target=generate_avg_chart, args=(course, image_path))
+    avg_thread.start()
+    time.sleep(1)
+
+    return JsonResponse({"url": "http://127.0.0.1:8000/" + image_path}, status=200)

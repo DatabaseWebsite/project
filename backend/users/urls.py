@@ -23,7 +23,7 @@ urlpatterns = [
     path('userManage/user-list/', api.user_list),
     path('userManage/all-course-info/', api.all_course_info),
     path('userManage/add-user-to-course/', api.add_user_to_course),
-    path('userMange/del-user-from-course/', api.del_user_from_course),
+    path('userManage/del-user-from-course/', api.del_user_from_course),
 
     path('course/create-course/', api.create_course),
     path('course/course-list/', api.course_list),
@@ -88,4 +88,5 @@ urlpatterns = [
 
     path('courseManage/modify-identity/', api.modify_identity),
 
+    path('config/reset-avatar/', api.reset_avatar),
 ]

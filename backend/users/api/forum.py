@@ -58,8 +58,8 @@ def post_list(request):
     result = [
         {
             "id": post.id,
-            "authorAvatar": post.poster.get_avatar_url(),
-            "author": post.poster.name,
+            "authorAvatar": "http://127.0.0.1:8000/media/avatars/default.png" if not post.poster else post.poster.get_avatar_url(),
+            "author": "用户已被注销" if not post.poster else post.poster.name,
             "title": post.title,
             "content": post.content,
             "timestamp": post.post_time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -79,6 +79,7 @@ def post_list(request):
 @require_GET
 def gen_word_cloud_map(request):
     return JsonResponse({"img_url": "http://127.0.0.1:8000/media/word_cloud_map.png"}, status=200)
+
 
 @jwt_auth()
 @require_POST
@@ -133,8 +134,8 @@ def get_post(request):
     result = {
         "post": {
             "id": _post.id,
-            "authorAvatar": _post.poster.get_avatar_url(),
-            "author": _post.poster.name,
+            "authorAvatar": "http://127.0.0.1:8000/media/avatars/default.png" if not _post.poster else _post.poster.get_avatar_url(),
+            "author": "用户已被注销" if not _post.poster else _post.poster.name,
             "title": _post.title,
             "content": _post.content,
             "timestamp": _post.post_time,
@@ -152,8 +153,8 @@ def get_post(request):
         result["replies"].append(
             {
                 "id": reply.id,
-                "authorAvatar": reply.replier.get_avatar_url(),
-                "author": reply.replier.name,
+                "authorAvatar": "http://127.0.0.1:8000/media/default.png" if not reply.replier else reply.replier.get_avatar_url(),
+                "author": "用户已被注销" if not reply.replier else reply.replier.name,
                 "content": reply.content,
                 "timestamp": reply.reply_time,
                 "likes": reply.likes,
@@ -161,9 +162,9 @@ def get_post(request):
             }
         )
         if reply.reply_to is not None:
-            result["replies"][count]["reply_to"] = reply.reply_to.replier.id
+            result["replies"][count]["reply_to"] = "用户已被注销" if not reply.reply_to.replier else reply.reply_to.replier.id
         else:
-            result["replies"][count]["reply_to"] = reply.post.poster.id
+            result["replies"][count]["reply_to"] = "用户已被注销" if not reply.post.poster else reply.post.poster.id
         count = count + 1
 
     return JsonResponse({"result": result}, status=200)
@@ -327,7 +328,8 @@ def search_posts(request):
 
     result = [
         {
-            "author": post.poster.id,
+            "author": "用户已被注销" if not post.poster else post.poster.name,
+            "authorAvatar": "http://127.0.0.1:8000/media/avatars/default.png" if not post.poster else post.poster.get_avatar_url(),
             "title": post.title,
             "content": post.content,
             "timestamp": post.post_time,
